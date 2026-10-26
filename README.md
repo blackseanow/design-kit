@@ -153,9 +153,9 @@ def shell():
 cd design-kit
 pip install Flask==3.1.2
 python demo/app.py                                    # http://127.0.0.1:5058/
-python -m unittest discover -s tests                  # 14 项：CSS 规则、Blueprint、宏
+python -m unittest discover -s tests                  # 16 项：CSS 规则、Blueprint、宏、验证码
 node --test tests/js/kit.test.js                      # 14 项：进度条、菜单定位、焦点、主题
-PYTHON=python3 node tests/browser_check.js            # 19 项浏览器交互，需要 playwright
+PYTHON=python3 node tests/browser_check.js            # 20 项浏览器交互，需要 playwright
 ```
 
 本仓库目前没有配置 CI，以上命令需要手动运行。
@@ -163,8 +163,8 @@ PYTHON=python3 node tests/browser_check.js            # 19 项浏览器交互，
 ## 验证情况
 
 **已验证（本次实际运行）：**
-- Python 测试 14 项、Node 测试 14 项全部通过（Python 3.13、Flask 3.1.2、Node 22）。
-- 浏览器检查 19 项全部通过（Playwright + Chromium）：下拉的键盘操作和 Esc、日期和时间选择、同一时间只开一个菜单、帮助气泡、选项卡、行操作菜单、弹窗焦点圈定和焦点返回、弹窗内的下拉菜单、危险确认、按钮加载态、主题保存、服务端 flash 提示、进度条结束、手机侧栏抽屉、320px 无横向滚动、无控制台错误。
+- Python 测试 16 项、Node 测试 14 项全部通过（Python 3.13.17、Flask 3.1.2、Node 22.22.0；2026-10-26 在提交 8986841 上重新运行）。
+- 浏览器检查 20 项全部通过（Playwright + Chromium；2026-10-26 在提交 8986841 上重新运行）：下拉的键盘操作和 Esc、日期和时间选择、同一时间只开一个菜单、帮助气泡、选项卡、行操作菜单、弹窗焦点圈定和焦点返回、弹窗内的下拉菜单、危险确认、按钮加载态、主题保存、服务端 flash 提示、进度条结束、手机侧栏抽屉、320px 无横向滚动、验证码刷新（换图、清空并聚焦输入框）、无控制台错误。
 - 截图人工查看：1440px 和 390px，日间和夜间，5 个页面。
 - `pip install` 后静态文件、图标、许可证和模板都在包里。
 
