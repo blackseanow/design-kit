@@ -1,0 +1,104 @@
+/* Button contract. A bare <button> is the primary action (base.css).
+   primary/secondary/danger keep the source project's :where() size rules, so the
+   bare button size (40px) applies except where layouts set 32px (page and panel
+   actions, toolbars). Kit fix: ghost colours and link/segment/menu use
+   button.btn-x specificity; with :where() the bare button's brand background won (the source
+   project patched .btn-segment with page-level ID selectors instead).
+
+   .btn-primary         main action
+   .btn-secondary       neutral outline action
+   .btn-ghost           quiet branded text action with tint on hover
+   .btn-auxiliary       in-form branded outline action (e.g. "测试连接")
+   .btn-link            inline link-style action
+   .btn-danger          destructive action
+   .btn-danger-outline  destructive but secondary
+   .btn-danger-text     destructive text action
+   .btn-icon            32px icon-only button (needs aria-label)
+   .btn-segment         tab-like segment button
+   .btn-menu            menu trigger (same height as form fields)
+   .btn-delete-icon     neutral trash icon, danger tint on hover
+   .btn-small           compact modifier
+   .is-loading / aria-busy="true"   loading state */
+:where(button.btn-primary) {
+  min-height: var(--compact-height);
+  padding: 0 14px;
+  border: 1px solid var(--brand);
+  border-radius: var(--radius);
+  background: var(--brand);
+  color: var(--on-brand);
+  font-weight: 650;
+}
+:where(button.btn-primary):hover:not(:disabled) { background: var(--brand-hover); border-color: var(--brand-hover); }
+:where(button.btn-primary):active:not(:disabled) { background: var(--brand-hover); filter: none; }
+
+:where(button.btn-secondary,.btn-danger-outline) {
+  min-height: var(--compact-height);
+  padding: 5px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 500;
+}
+:where(button.btn-secondary):hover:not(:disabled) { background: var(--hover); border-color: var(--line-strong); }
+:where(button.btn-secondary):active:not(:disabled) { background: var(--hover); filter: none; }
+
+:where(button.btn-ghost) { min-height: var(--compact-height); padding: 5px 8px; border-radius: var(--radius); font-weight: 500; }
+button.btn-ghost { border: 1px solid transparent; background: transparent; color: var(--brand); }
+button.btn-ghost:hover:not(:disabled) { background: var(--brand-tint); color: var(--brand-hover); }
+button.btn-ghost:active:not(:disabled) { background: var(--brand-tint); filter: none; }
+
+/* In-form actions follow the quiet branded outline used by dialogs. */
+button.btn-auxiliary { min-height:32px; padding:5px 12px; border:1px solid var(--line); border-radius:var(--radius); background:transparent; color:var(--brand); font-weight:500; line-height:20px; align-self:flex-start; justify-self:start; }
+button.btn-auxiliary:hover:not(:disabled) { background:var(--brand-tint); border-color:var(--line-strong); color:var(--brand-hover); }
+button.btn-danger-text { min-height:32px; padding:5px 8px; border:1px solid transparent; border-radius:var(--radius); background:transparent; color:var(--danger-text); font-weight:500; }
+button.btn-danger-text:hover:not(:disabled) { background:var(--danger-tint); color:var(--danger-text); }
+@media(max-width:768px) { button.btn-auxiliary,button.btn-danger-text {min-height:40px;} }
+
+/* Input-adjacent actions follow form height, not standalone auxiliary sizing. */
+button.btn-auxiliary.btn-input-action { min-height:var(--control-height); align-self:stretch; }
+@media(max-width:768px) { button.btn-auxiliary.btn-input-action { min-height:var(--touch-height); } }
+
+button.btn-link,:where(.text-link) { min-height: unset; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--brand); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
+button.btn-link:hover:not(:disabled),:where(.text-link):hover { background: transparent; color: var(--brand-hover); }
+
+:where(button.btn-danger) { min-height: var(--compact-height); padding: 5px 12px; border: 1px solid var(--danger); border-radius: var(--radius); background: var(--danger); color: var(--on-danger); font-weight: 650; }
+:where(button.btn-danger):hover:not(:disabled) { background: var(--danger-hover); border-color: var(--danger-hover); filter: none; }
+:where(button.btn-danger-outline) { color: var(--danger); border-color: color-mix(in srgb,var(--danger) 36%,var(--line)); background: var(--surface); }
+:where(button.btn-danger-outline):hover:not(:disabled) { background: var(--danger-tint); border-color: color-mix(in srgb,var(--danger) 48%,var(--line)); }
+
+button.btn-icon,:where(.header-icon-button) { display: inline-grid; place-items: center; width: 32px; height: 32px; min-height: 32px; flex: 0 0 32px; padding: 0; border: 1px solid transparent; border-radius: var(--radius); background: transparent; color: var(--muted); }
+button.btn-icon:hover:not(:disabled),:where(.header-icon-button):hover:not(:disabled) { background: var(--hover); color: var(--ink); }
+button.btn-icon[aria-expanded="true"],:where(.header-icon-button)[aria-expanded="true"] { background: var(--brand-tint); color: var(--brand); }
+
+button.btn-segment { position: relative; min-height: 41px; padding: 8px 16px; border: 0; border-radius: 0; background: transparent; color: var(--muted); font-weight: 500; white-space: nowrap; }
+button.btn-segment:hover:not(:disabled) { background: var(--hover); color: var(--ink); }
+button.btn-segment:is([aria-selected="true"],[aria-pressed="true"]) { color: var(--brand); box-shadow: inset 0 -2px var(--brand); }
+
+button.btn-menu,:where(.enhanced-select-button,.custom-date-button,.custom-time-button) { min-height: var(--control-height); padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink); font-weight: 450; text-align: left; }
+button.btn-menu:hover:not(:disabled),:where(.enhanced-select-button,.custom-date-button,.custom-time-button):hover:not(:disabled) { background: var(--hover); border-color: var(--line-strong); }
+:is(button.btn-menu,.enhanced-select-button,.custom-date-button,.custom-time-button):focus-visible { outline: none; border-color: var(--focus-border); box-shadow: 0 0 0 3px var(--focus-shadow); }
+
+:where(button.btn-toggle,[role="switch"]) { transition: background-color var(--motion),border-color var(--motion),color var(--motion),box-shadow var(--motion); }
+:where(button.btn-toggle,[role="switch"]):focus-visible { outline: 2px solid var(--focus-border); outline-offset: 2px; }
+
+:where(button.btn-primary,.btn-secondary,.btn-ghost,.text-button,.btn-danger,.btn-danger-outline,.btn-icon,.header-icon-button,.btn-segment,.btn-menu,.enhanced-select-button,.custom-date-button,.custom-time-button):disabled,
+:where(button.btn-primary,.btn-secondary,.btn-ghost,.text-button,.btn-danger,.btn-danger-outline,.btn-icon,.header-icon-button,.btn-segment,.btn-menu,.enhanced-select-button,.custom-date-button,.custom-time-button)[aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
+
+button[aria-busy="true"],button.is-loading { pointer-events: none; }
+button[aria-busy="true"] > :not(.loading-inline-spinner),button.is-loading > :not(.loading-inline-spinner) { opacity: .72; }
+
+@media(max-width:768px) {
+  :where(button.btn-primary,button.btn-secondary,button.btn-ghost,.text-button,button.btn-danger,button.btn-danger-outline,.btn-menu,.enhanced-select-button,.custom-date-button,.custom-time-button) { min-height: var(--touch-height); }
+  button.btn-menu { min-height: var(--touch-height); }
+  button.btn-icon,:where(.header-icon-button) { width: var(--touch-height); height: var(--touch-height); min-height: var(--touch-height); flex-basis: var(--touch-height); }
+  button.btn-segment { min-height: var(--touch-height); padding-inline: 12px; }
+}
+
+/* Inline removal: neutral trash icon, danger treatment only on interaction. */
+button.btn-delete-icon {display:inline-flex;align-items:center;justify-content:center;width:32px;min-width:32px;min-height:32px;padding:0;border:0;border-radius:var(--radius);background:transparent;color:var(--muted);}
+button.btn-delete-icon::before {content:"";width:16px;height:16px;background:currentColor;mask:url("icons/trash-2.svg") center / contain no-repeat;}
+button.btn-delete-icon:hover:not(:disabled) {background:var(--danger-tint);color:var(--danger-text);}
+@media(max-width:768px) {button.btn-delete-icon {width:40px;min-width:40px;min-height:40px;}}
+button.btn-delete-icon.is-loading::before {display:none;}
+button.btn-delete-icon .button-loading-label {position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);}

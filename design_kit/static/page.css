@@ -1,0 +1,36 @@
+/* Page composition: a title/action row, then bordered result surfaces.
+   Extracted from the generic part of the source project's pages.css. */
+.content-page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; width: 100%; }
+.content-page-title { min-width: 0; display: grid; gap: 4px; }
+.content-page-title h1 { font-size: 22px; font-weight: 650; line-height: 30px; letter-spacing: -.02em; }
+.content-page-title h1 .title-help-button { margin-left: 8px; }
+.content-page-title p { color: var(--muted); font-size: 14px; line-height: 23px; }
+.content-page-count { justify-self: start; padding: 0; border: 0; background: transparent; color: var(--muted); font-size: 12px; line-height: 20px; }
+.content-page-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+/* A 32px ghost refresh/tool action, including on narrow screens. */
+.content-page-actions .page-refresh-button,.content-page-actions .content-tool-button { display: inline-grid; place-items: center; flex: 0 0 32px; width: 32px; min-width: 32px; height: 32px; min-height: 32px; padding: 0; border: 0; background: transparent; color: var(--muted); }
+.content-page-actions .page-refresh-button:hover:not(:disabled),.content-page-actions .content-tool-button:hover:not(:disabled) { background: var(--hover); color: var(--ink); }
+.page-refresh-button.is-loading svg { animation: ui-spin 1s linear infinite; }
+.page-refresh-button.is-loading::after { display: none; }
+.content-section-title { margin-bottom: 16px; font-size: 16px; }
+.page-content .panel-head:has(h2[hidden]):not(:has(button)):not(:has(.status-chip)) { display: none; }
+
+/* Settings rows: label column + control column on wide screens. */
+@media(min-width:768px) {
+  .settings-rows { grid-template-columns: minmax(0,1fr); gap: 20px; }
+  .settings-rows > label { display: grid; grid-template-columns: minmax(200px,2fr) minmax(240px,3fr); align-items: center; gap: 24px; }
+}
+
+@media(max-width:768px) {
+  .content-page-header { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 4px 12px; align-items: start; }
+  .content-page-title { display: contents; }
+  .content-page-title h1 { grid-column: 1; grid-row: 1; min-height: 32px; font-size: 20px; line-height: 28px; }
+  .content-page-title p { grid-column: 1 / -1; grid-row: 2; }
+  .content-page-title .content-page-count { grid-column: 1 / -1; grid-row: 3; }
+  .content-page-actions { grid-column: 2; grid-row: 1; align-self: start; margin-left: auto; flex-wrap: wrap; }
+  /* Multiple page actions get their own row instead of squeezing a Chinese title. */
+  .content-page-header:has(.content-page-actions > :nth-child(2)) { grid-template-columns: minmax(0,1fr); }
+  .content-page-header:has(.content-page-actions > :nth-child(2)) > .content-page-actions { grid-column: 1; grid-row: 4; justify-self: start; margin-left: 0; margin-top: 8px; max-width: 100%; }
+  /* Text actions use the 40px mobile button height; refresh and icon tools stay 32px. */
+  .content-page-actions > :is(button,a[class*="btn-"]):not(.content-tool-button):not(.page-refresh-button) { min-height: 40px; height: 40px; }
+}

@@ -1,0 +1,122 @@
+/* ModalShell, global notification, top progress bar and loading lifecycle. */
+:root {
+  --overlay-space-top:max(var(--overlay-gutter),env(safe-area-inset-top));
+  --overlay-space-bottom:max(var(--overlay-gutter),env(safe-area-inset-bottom));
+  --overlay-available-height:max(0px,calc(var(--ui-viewport-height,100dvh) - var(--overlay-space-top) - var(--overlay-space-bottom)));
+  --dialog-available-height:min(var(--dialog-max-height),var(--overlay-available-height));
+}
+
+/* Modal: .modal-backdrop > .modal-panel > (.modal-head, .modal-body, .modal-actions).
+   An optional <form> may wrap body and actions. */
+.modal-backdrop { position: fixed; inset: 0; top:var(--ui-viewport-top,0px); bottom:auto; height:var(--ui-viewport-height,100dvh); z-index: 1000; display: flex; align-items: center; justify-content: center; padding:var(--overlay-space-top) var(--overlay-gutter) var(--overlay-space-bottom); background: var(--modal-scrim); overscroll-behavior: contain; }
+.modal-panel { position: relative; display: flex; flex-direction: column; min-width: 0; width: min(512px,100%); max-height:var(--dialog-available-height); background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: var(--dialog-radius); box-shadow: var(--dialog-shadow); overflow: hidden; }
+.modal-size-sm { width: min(512px,100%); }
+.modal-size-md { width: min(512px,100%); }
+.modal-size-lg { width: min(640px,100%); }
+.modal-size-xl { width: min(880px,100%); }
+.modal-panel > form { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
+/* Async editors/details reserve their final shell before data arrives. */
+.modal-panel.modal-layout-long { height:var(--dialog-available-height); }
+.modal-panel.modal-layout-long > form { flex: 1; overflow: hidden; }
+.modal-layout-long .modal-body { scrollbar-gutter: stable; }
+
+.modal-head { position: relative; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-shrink: 0; padding: 24px 24px 0; }
+.modal-head > div { min-width: 0; }
+.modal-head h2 { padding-right: 30px; font-size: 18px; line-height: 24px; font-weight: 600; letter-spacing: -.01em; }
+.modal-head p { color: var(--muted); margin-top: 8px; font-size: 14px; }
+.modal-body > .modal-form-section { padding-block: 0; }
+.modal-body > .modal-form-section + .modal-form-section { margin-top: 24px; }
+.modal-body .modal-section-head { margin-bottom: 12px; }
+.modal-body .modal-section-head > strong { font-size: 14px; font-weight: 600; }
+.modal-body .field-helper-text { display: block; margin-top: 2px; }
+/* One shared close icon in the top-right corner; no duplicate footer close button. */
+.modal-close-button { position: absolute; top: 16px; right: 16px; display: grid; place-items: center; flex: 0 0 32px; width: 32px; height: 32px; min-height: 32px; padding: 0; border: 0; border-radius: var(--radius); background: transparent; color: var(--muted); font-size: 0; line-height: 0; }
+.modal-close-button::before { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); content: ""; width: 16px; height: 16px; background: currentColor; mask: url("icons/x.svg") center / contain no-repeat; }
+.modal-close-button:hover:not(:disabled),.modal-close-button:active:not(:disabled) { background: var(--hover); color: var(--ink); filter: none; }
+.modal-close-button:focus-visible { outline: 2px solid var(--focus-border); outline-offset: 2px; }
+.modal-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 24px; scroll-padding-block: 16px; }
+.modal-body > label + label,.modal-body > label + .form-grid,.modal-body > .form-grid + label { margin-top: 16px; }
+.modal-actions { flex-shrink: 0; display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 8px; padding: 16px 24px; border-top: 1px solid var(--line); background: var(--surface); }
+.modal-actions button:not(.btn-icon):not(.title-help-button):not(:where(.list-pagination button)) { min-width:0; min-height:40px; padding:9px 16px; border-radius:var(--radius); font-size:14px; line-height:20px; font-weight:500; }
+.modal-actions .modal-action-group { display:flex; align-items:center; flex-wrap:wrap; justify-content:flex-end; gap:8px; }
+.modal-actions button.btn-danger-text { padding-inline:8px; }
+.modal-actions .btn-icon { padding:0; display:inline-grid; place-items:center; }
+.modal-body button.text-button { min-height:32px; line-height:20px; }
+@media(max-width:768px) { .modal-body button.text-button { min-height:40px; } }
+.modal-actions .btn-secondary { background: var(--surface); }
+.modal-actions .btn-secondary:hover:not(:disabled) { background: var(--hover); }
+/* Feedback shares the action row; pagination toolbars keep their own wrapping. */
+.modal-actions:not(:has(> .list-pagination)):has(> :is(.inline-status,[role="status"])) { flex-wrap: nowrap; }
+.modal-actions > :is(.inline-status,[role="status"]) { flex: 1 1 0; min-width: 0; width: auto; max-width: none; margin-right: auto; overflow-wrap: anywhere; }
+.modal-actions:not(:has(> .list-pagination)):has(> :is(.inline-status,[role="status"])) > button { flex: 0 0 auto; }
+.modal-actions:not(:has(> .list-pagination)):has(> :is(.inline-status,[role="status"])) > .modal-action-group { flex: 0 1 auto; min-width: 0; }
+.modal-action-spacer { flex: 1; }
+.modal-backdrop:not(.hidden) > .modal-panel { animation: modal-enter 160ms ease-out; }
+@keyframes modal-enter { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media(prefers-reduced-motion:reduce) { .modal-backdrop:not(.hidden) > .modal-panel { animation: none; } }
+
+/* Scroll lock: modal.js and shell.js toggle these classes. The disappearing
+   scrollbar track is replaced by padding so the page does not shift. */
+body.modal-open { overflow: hidden; }
+html.overlay-scroll-locked { overflow: hidden; scrollbar-gutter: auto; padding-right: var(--overlay-scrollbar-width,0px); }
+body.overlay-scroll-locked .workspace-header { width: calc(100% - var(--overlay-scrollbar-width,0px)); }
+
+/* Global notification (feedback.js) */
+.global-feedback { position:fixed; bottom:max(24px,env(safe-area-inset-bottom)); right:max(24px,env(safe-area-inset-right)); z-index:21000; display:grid; grid-template-columns:20px minmax(0,1fr) 32px; align-items:start; gap:10px; padding:14px 12px 14px 16px; width:min(400px,calc(100vw - 32px)); max-height:min(360px,calc(var(--ui-viewport-height,100dvh) - 48px)); color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow); font-size:13px; opacity:0; transform:translateY(6px); pointer-events:none; transition:opacity 160ms ease,transform 160ms ease; }
+.global-feedback.visible { opacity:1; transform:translateY(0); pointer-events:auto; animation:global-feedback-in 160ms ease; }
+.global-feedback.hidden { display:none; }
+.global-feedback-copy { min-width:0; min-height:0; }
+.global-feedback strong { display:block; margin:0 0 4px; color:var(--ink); font-size:13px; font-weight:600; line-height:20px; overflow-wrap:anywhere; }
+.global-feedback-message { max-height:min(260px,calc(var(--ui-viewport-height,100dvh) - 132px)); overflow:auto; overscroll-behavior:contain; color:var(--muted); font-size:13px; line-height:1.6; white-space:pre-wrap; overflow-wrap:anywhere; }
+.global-feedback-message:focus-visible { outline:2px solid var(--brand); outline-offset:3px; border-radius:2px; }
+.global-feedback-icon { display:block; width:20px; height:20px; color:var(--muted); }
+.global-feedback-icon > svg { display:block; width:20px; height:20px; }
+.global-feedback.error .global-feedback-icon { color:var(--danger-text); }
+.global-feedback.warning .global-feedback-icon { color:var(--warning); }
+.global-feedback.success .global-feedback-icon { color:var(--success); }
+.global-feedback.loading .global-feedback-icon { color:var(--brand); animation:ui-spin 1s linear infinite; }
+.global-feedback .global-feedback-close { display:grid; place-items:center; width:32px; min-width:32px; height:32px; min-height:32px; padding:0; margin:-6px 0 0; color:var(--muted); background:transparent; border:0; border-radius:6px; box-shadow:none; }
+.global-feedback .global-feedback-close svg { width:16px; height:16px; }
+.global-feedback .global-feedback-close:hover { color:var(--ink); background:var(--hover); }
+.global-feedback .global-feedback-close:focus-visible { outline:2px solid var(--brand); outline-offset:2px; }
+@keyframes global-feedback-in { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+@media(prefers-reduced-motion:reduce) { .global-feedback,.global-feedback.visible,.global-feedback.loading .global-feedback-icon { animation:none; transition:none; transform:none; } }
+
+/* Top progress bar (route-progress.js): 2px, 200ms linear, then fade */
+.route-progress { position: fixed; inset: 0 0 auto; z-index: 30000; height: var(--progress-height); pointer-events: none; opacity: 1; transition: opacity var(--progress-motion) linear; }
+.route-progress-bar { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--progress-brand); transform: translate3d(-100%,0,0); transition: transform var(--progress-motion) linear; will-change: transform; }
+.route-progress[data-progress-bootstrap] .route-progress-bar { transform: translate3d(-92%,0,0); }
+.route-progress-peg { position: absolute; right: 0; width: 100px; height: 100%; box-shadow: var(--progress-glow); transform: rotate(3deg) translate(0,-4px); }
+.route-progress[data-phase="fading"] { opacity: 0; }
+@media(prefers-reduced-motion:reduce) { .route-progress,.route-progress-bar { transition: none; } .route-progress-peg { display: none; } }
+
+/* Loading states (ui.js LoadingState, button.is-loading) */
+.is-refresh-loading { position: relative; min-height: 120px; }
+.page-list-loading { overflow: clip; position: absolute; inset: 0; z-index: 8; display: flex; align-items: center; justify-content: center; gap: 10px; background: var(--surface); border-radius: inherit; color: var(--muted); padding: 24px; min-height: 110px; }
+.page-list-loading-text { min-width: 0; overflow-wrap: anywhere; }
+.page-list-loading.role-inline-loading { position: relative; inset: auto; width: 100%; }
+.page-list-loading.is-leaving { opacity: 0; transition: opacity 200ms linear; }
+.page-list-loading-spinner,.loading-inline-spinner { display: inline-block; flex: 0 0 18px; width: 18px; height: 18px; background: currentColor; mask: url("icons/loader-circle.svg") center / contain no-repeat; animation: ui-spin 1s linear infinite; }
+.page-list-loading-spinner { color: var(--brand); }
+button.is-loading { position: relative; pointer-events: none; }
+button.is-loading::after { content: ""; display: inline-block; width: 16px; height: 16px; background: currentColor; mask: url("icons/loader-circle.svg") center / contain no-repeat; animation: ui-spin 1s linear infinite; }
+button.is-loading:has(.loading-inline-spinner)::after { display: none; }
+@keyframes ui-spin { to { transform: rotate(360deg); } }
+
+@media(max-width:768px) {
+  .modal-panel { width:100%; }
+  .modal-head { padding: 24px 24px 0; }
+  .modal-head h2 { font-size: 16px; }
+  .modal-close-button { top: 12px; right: 12px; flex-basis: 40px; width: 40px; height: 40px; min-height: 40px; }
+  .modal-body { padding: 24px; }
+  .modal-actions { padding: 16px 24px max(16px,env(safe-area-inset-bottom)); gap: 8px; }
+  .modal-actions button { flex: 0 1 auto; min-height: 44px; }
+  .modal-action-group { margin-left: auto; }
+  .global-feedback { top:calc(var(--ui-viewport-top,0px) + max(68px,env(safe-area-inset-top))); right:max(12px,env(safe-area-inset-right)); left:max(12px,env(safe-area-inset-left)); bottom:auto; width:auto; grid-template-columns:20px minmax(0,1fr) 44px; padding:12px 8px 12px 14px; max-height:calc(var(--ui-viewport-height,100dvh) - 84px); gap:8px; }
+  .global-feedback .global-feedback-close { width:44px; min-width:44px; height:44px; min-height:44px; margin-top:-8px; }
+  .global-feedback-message { max-height:min(220px,calc(var(--ui-viewport-height,100dvh) - 150px)); }
+}
+/* Phone editing: fields never drop below 16px inside dialogs. */
+@media(max-width:768px), (pointer:coarse) {
+  .modal-panel :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),textarea,select) { font-size:max(16px,1rem)!important; }
+}

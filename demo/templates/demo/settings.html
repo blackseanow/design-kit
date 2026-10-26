@@ -1,0 +1,35 @@
+{% extends "design_kit/layout.html" %}
+{% from "design_kit/macros.html" import page_header, panel_head, switch, help_button, link_tabs %}
+{% block title %}设置 · {{ kit.brand_name }}{% endblock %}
+{% block content %}
+{{ page_header("设置", "设置页使用分组的整行布局：左侧标签，右侧控件。提交后只显示提示，不保存。") }}
+{{ link_tabs([{"label": "基本信息", "href": url_for('settings'), "active": true}, {"label": "通知", "href": url_for('settings') ~ "#notify"}]) }}
+<form class="panel" method="post" action="{{ url_for('settings') }}">
+  <div class="settings-form-section">
+    {{ panel_head("基本信息", "清空项目名称再保存，可以看到服务端错误提示。") }}
+    <div class="form-grid settings-rows">
+      <label><span>项目名称</span><input name="project_name" value="示例项目" maxlength="40"></label>
+      <label><span class="field-label">时区{{ help_button("只影响显示，不改变已保存记录的时间。", "时区说明") }}</span>
+        <select name="timezone"><option>Asia/Shanghai</option><option>UTC</option></select>
+      </label>
+      <label><span>数据保留</span>
+        <select name="retention"><option>30 天</option><option selected>90 天</option><option>180 天</option></select>
+      </label>
+    </div>
+  </div>
+  <div class="settings-form-section" id="notify">
+    {{ panel_head("通知") }}
+    <div style="display:grid;gap:12px;max-width:520px">
+      {{ switch("notify_failed", "任务失败时通知", checked=true) }}
+      {{ switch("notify_daily", "每日摘要") }}
+      {{ switch("notify_locked", "安全提醒（不可关闭）", checked=true, disabled=true) }}
+    </div>
+  </div>
+  <div class="settings-form-section">
+    <div class="button-group">
+      <button class="btn-primary" type="submit">保存设置</button>
+      <a class="btn-secondary" href="{{ url_for('settings') }}">放弃修改</a>
+    </div>
+  </div>
+</form>
+{% endblock %}

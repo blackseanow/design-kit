@@ -1,0 +1,45 @@
+/* Sign-in / registration / set-password surface. Brand artwork from the
+   source project is not included; add your own inside .login-brand. */
+.login-shell { display: grid; place-items: center; min-height: 100dvh; padding: 40px 24px; }
+.login-layout { width: min(400px,100%); }
+.login-panel { border: 1px solid var(--line); border-radius: 12px; padding: 32px; background: var(--surface); }
+.login-brand { margin-bottom: 32px; }
+.login-brand .brand-mark { width: 42px; height: 42px; flex-basis: 42px; }
+.login-brand > div:last-child { min-width: 0; }
+.login-brand strong { white-space: normal; }
+/* Tagline only; the source rule (.login-brand span) also hit the kit's letter mark. */
+.login-brand > div > span { display: block; font-size: 12px; margin-top: 2px; color: var(--muted); }
+.login-panel h2 { font-size: 22px; line-height: 32px; margin-bottom: 24px; }
+.login-form { display: grid; gap: 20px; }
+.login-form > button[type="submit"] { width: 100%; }
+.login-secondary-link { color: var(--muted); font-size: 13px; text-align: center; }
+.login-theme { display: flex; justify-content: center; margin-top: 16px; }
+
+/* Password field with a visibility toggle (ui.js) */
+.password-field { position: relative; display: block; }
+.password-field input { padding-right: 46px!important; }
+.password-visibility-toggle {
+  position: absolute;
+  inset: 0 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  min-height: 40px;
+  width: 40px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background-color var(--motion), color var(--motion), border-color var(--motion), box-shadow var(--motion);
+}
+.password-visibility-toggle:hover:not(:disabled) { background: var(--brand-tint); color: var(--brand); border-color: transparent; }
+.password-visibility-toggle:active:not(:disabled) { background: var(--brand-tint); color: var(--brand-hover); filter: none; }
+.password-visibility-toggle:focus-visible { z-index: 1; outline: 2px solid var(--focus-border); outline-offset: -2px; color: var(--brand); background: var(--brand-tint); }
+.password-visibility-toggle[aria-pressed="true"] { color: var(--brand); }
+.password-visibility-toggle::before { content: ""; width: 18px; height: 18px; background: currentColor; mask: url("icons/eye.svg") center / contain no-repeat; }
+.password-visibility-toggle[aria-pressed="true"]::before { mask-image: url("icons/eye-off.svg"); }
+
+@media(max-width:480px) { .login-shell { padding: 24px 16px; } .login-panel { padding: 24px; } .login-brand { margin-bottom: 24px; } }
+/* Kit addition: keep the toggle at the shared touch height when fields grow to 44px. */
+@media(max-width:768px) { .password-visibility-toggle { min-height: var(--touch-height); width: var(--touch-height); } }

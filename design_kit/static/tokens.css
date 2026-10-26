@@ -1,0 +1,81 @@
+/* Design tokens. The only file in the kit that may contain literal colours.
+   Extracted from the source project's static/ui/tokens.css; values are unchanged
+   except where noted. Override brand tokens in your own stylesheet loaded after
+   the kit (see README "改品牌色"), not by editing component files. */
+:root {
+  color-scheme: light;
+  --search-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2303080a' stroke-opacity='.69' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
+
+  /* Surfaces and text */
+  --canvas: #fcfcfe; --surface: #fff; --surface-subtle: #f7f7fa;
+  --sidebar-surface: rgba(3,8,10,.01085); --input-surface: var(--surface);
+  --ink: #03080a; --muted: rgba(3,8,10,.69);
+  --line: rgba(3,8,10,.08); --line-subtle: rgba(3,8,10,.0312); --line-strong: rgba(3,8,10,.22);
+  --hover: rgba(3,8,10,.035);
+
+  /* Brand: change these first for a new product */
+  --brand: #7624f4; --brand-hover: #651bd5; --brand-tint: rgba(118,36,244,.08);
+  --on-brand: #fff;
+  --progress-brand: #7624f4; --progress-glow: 0 0 10px #7624f4,0 0 5px #7624f4;
+
+  /* Status */
+  --success: #16803c; --success-tint: #eef9f0;
+  --warning: #916000; --warning-tint: #fff8e7;
+  --danger: #c9362b; --danger-text: #c9362b; --danger-tint: #fff0ee; --on-danger: #fff;
+  --danger-hover: color-mix(in srgb,var(--danger) 88%,#000);
+
+  /* Overlays and focus */
+  --scrim: rgba(3,8,10,.32); --drawer-scrim: rgba(3,8,10,.32); --modal-scrim: rgba(252,252,254,.8);
+  --focus-border: rgba(3,8,10,.3); --focus-shadow: rgba(3,8,10,.06);
+
+  /* Typography: system UI fonts only, Chinese fallbacks, no webfont download */
+  --font: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+
+  /* Shape and elevation */
+  --radius: 6px; --panel-radius: 8px; --dialog-radius: 8px;
+  --shadow: 0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1);
+  --dialog-shadow: 0 20px 25px -5px rgba(0,0,0,.1),0 8px 10px -6px rgba(0,0,0,.1);
+  /* Added in the kit: these were inline literals in the source component files. */
+  --popover-shadow: 0 6px 22px rgba(0,0,0,.133); /* was #0002 */
+  --segment-shadow: 0 1px 3px rgba(0,0,0,.082); /* was #00000015 */
+  --switch-thumb-shadow: 0 2px 6px rgba(0,0,0,.18);
+
+  /* Spacing scale */
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-6: 24px; --space-8: 32px;
+
+  /* Sizes */
+  --control-height: 40px; --compact-height: 32px; --touch-height: 44px;
+  --sidebar-width: 224px; --header-height: 56px; --content-max-width: 1232px;
+  --dialog-max-height: 760px; --overlay-gutter: 24px;
+  --switch-width: 44px; --switch-height: 24px; --switch-thumb: 20px; --switch-off: rgba(3,8,10,.30);
+
+  /* Motion */
+  --motion: 150ms ease; --drawer-duration: 350ms; --progress-height: 2px; --progress-motion: 200ms;
+
+  /* Scrollbars */
+  --scrollbar-width: thin; --scrollbar-thumb: var(--line-strong); --scrollbar-track: transparent;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --search-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fcfcfe' stroke-opacity='.627' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
+  --canvas: #03080a; --surface: #080d0f; --surface-subtle: rgba(252,252,254,.031);
+  --sidebar-surface: rgba(252,252,254,.00372); --input-surface: #fcfcfe0a;
+  --ink: #fcfcfe; --muted: rgba(252,252,254,.627);
+  --line: rgba(252,252,254,.078); --line-subtle: rgba(252,252,254,.0312); --line-strong: rgba(252,252,254,.18);
+  --hover: rgba(252,252,254,.031);
+  --brand: #c8ff00; --brand-hover: #c8ff00e0; --brand-tint: rgba(200,255,0,.08);
+  --on-brand: #03080a;
+  --progress-brand: #c8ff00; --progress-glow: 0 0 10px #c8ff00,0 0 5px #c8ff00;
+  --success: #7ee787; --success-tint: rgba(126,231,135,.12);
+  --warning: #f2cc60; --warning-tint: rgba(242,204,96,.12);
+  --danger: #e11d48; --danger-text: #fb7185; --danger-tint: rgba(225,29,72,.14); --on-danger: #fff;
+  --scrim: rgba(0,0,0,.55); --drawer-scrim: rgba(3,8,10,.6); --modal-scrim: rgba(3,8,10,.8);
+  --focus-border: rgba(252,252,254,.3); --focus-shadow: rgba(252,252,254,.06);
+  --switch-off: rgba(252,252,254,.30);
+}
+
+@media(prefers-reduced-motion:reduce) { :root { --drawer-duration: 0ms; } }
+
+/* One spacing contract for all touch/narrow overlays, including landscape. */
+@media(max-width:768px), (pointer:coarse) { :root { --overlay-gutter: 12px; } }

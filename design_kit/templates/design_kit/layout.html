@@ -1,0 +1,89 @@
+{#- Application page layout: fixed header, sidebar navigation, content column.
+    Context (all optional):
+      nav_groups  [{title, items: [{label, href, icon, endpoint | active}]}]
+      user_menu   {name, subtitle, items: [{label, href, icon}], logout_url, csrf_token}
+    Blocks: title, head, page_id, header_actions, sidebar, content, modals, scripts -#}
+{% from "design_kit/macros.html" import icon, brand_mark, nav_menu, flash_messages, theme_options %}
+<!doctype html>
+<html lang="{{ kit.lang }}" data-theme-key="{{ kit.theme_key }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{{ kit.brand_name }}{% endblock %}</title>
+    {% include "design_kit/head.html" %}
+    {% block head %}{% endblock %}
+  </head>
+  <body data-page="{% block page_id %}{{ request.endpoint or '' }}{% endblock %}">
+    <div class="route-progress" data-route-progress data-progress-bootstrap data-phase="loading" aria-hidden="true"><div class="route-progress-bar"><span class="route-progress-peg"></span></div></div>
+    <div class="app-shell" data-app-shell>
+      <header class="workspace-header">
+        <a class="brand desktop-shell-brand" href="{{ kit.home_url }}">
+          {{ brand_mark() }}
+          <span class="brand-copy"><strong>{{ kit.brand_name }}</strong></span>
+        </a>
+        <button id="mobileMenuToggle" class="mobile-menu-toggle header-icon-button" type="button" aria-controls="appSidebar" aria-expanded="false" aria-label="打开菜单">
+          <span class="nav-icon" aria-hidden="true"><svg><use href="{{ kit.icon_href('menu') }}"></use></svg></span>
+        </button>
+        <a class="mobile-shell-brand" href="{{ kit.home_url }}" aria-label="{{ kit.brand_name }}，返回首页">
+          {{ brand_mark() }}<strong>{{ kit.brand_name }}</strong>
+        </a>
+        <div class="header-spacer"></div>
+        <div class="header-actions">
+          {% block header_actions %}{% endblock %}
+          {% if not user_menu %}
+          <button class="header-icon-button theme-cycle-button" type="button" data-theme-cycle aria-label="切换外观">
+            {{ icon('sun', 'theme-icon-sun') }}{{ icon('moon', 'theme-icon-moon') }}
+          </button>
+          {% endif %}
+        </div>
+        {% if user_menu %}
+        <div class="header-user-area">
+          <div class="user-menu" data-user-menu>
+            <button id="userMenuTrigger" class="user-menu-trigger" type="button" aria-label="个人菜单，{{ user_menu.name }}" aria-expanded="false" aria-controls="userMenuPopover">
+              <span class="user-avatar" aria-hidden="true">{{ user_menu.name[:1]|upper }}</span>
+              <span class="user-menu-name">{{ user_menu.name }}</span>
+              <svg class="user-menu-chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div id="userMenuPopover" class="user-menu-popover" hidden>
+              <div class="user-menu-identity">
+                <span class="user-avatar" aria-hidden="true">{{ user_menu.name[:1]|upper }}</span>
+                <strong>{{ user_menu.name }}</strong>
+                {% if user_menu.subtitle %}<span>{{ user_menu.subtitle }}</span>{% endif %}
+              </div>
+              {% if user_menu['items'] %}
+              <div class="user-menu-actions">
+                {% for item in user_menu['items'] %}
+                <a href="{{ item.href }}">{% if item.icon %}{{ icon(item.icon) }}{% endif %}<span>{{ item.label }}</span></a>
+                {% endfor %}
+              </div>
+              {% endif %}
+              {% if user_menu.logout_url %}
+              <form method="post" action="{{ user_menu.logout_url }}">
+                {% if user_menu.csrf_token %}<input name="csrf_token" type="hidden" value="{{ user_menu.csrf_token }}">{% endif %}
+                <button class="user-menu-logout" type="submit">{{ icon('log-out') }}<span>退出登录</span></button>
+              </form>
+              {% endif %}
+              <div class="theme-footer">{{ theme_options() }}</div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </header>
+      <aside id="appSidebar" class="sidebar">
+        <nav class="nav-menu" aria-label="主菜单">
+          {% block sidebar %}{{ nav_menu(nav_groups or [], request.endpoint) }}{% endblock %}
+        </nav>
+      </aside>
+      <button tabindex="-1" class="sidebar-backdrop" type="button" aria-label="关闭菜单" hidden></button>
+      <main class="main" id="main">
+        <div class="page-content">
+          {% block content %}{% endblock %}
+        </div>
+      </main>
+    </div>
+    {% block modals %}{% endblock %}
+    {{ flash_messages() }}
+    {% include "design_kit/scripts.html" %}
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

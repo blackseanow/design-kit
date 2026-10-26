@@ -1,0 +1,195 @@
+{#- Design kit macros. Import what you need:
+    {% from "design_kit/macros.html" import page_header, empty_state, modal %}
+    Markup and class names match the CSS contract; see docs/components.md. -#}
+
+{% macro icon(name, class_name='') -%}
+<svg{% if class_name %} class="{{ class_name }}"{% endif %} aria-hidden="true"><use href="{{ kit.icon_href(name) }}"></use></svg>
+{%- endmacro %}
+
+{% macro brand_mark() -%}
+{% if kit.logo_light -%}
+<span class="brand-mark"><img class="brand-logo-light" src="{{ kit.logo_light }}" alt=""><img class="brand-logo-dark" src="{{ kit.logo_dark }}" alt=""></span>
+{%- else -%}
+<span class="brand-mark brand-mark-text" aria-hidden="true">{{ kit.brand_mark }}</span>
+{%- endif %}
+{%- endmacro %}
+
+{#- Page title row. Optional call block = right-hand actions. -#}
+{% macro page_header(title, description='', help='', count='') -%}
+<div class="content-page-header" data-ui-component="PageHeader">
+  <div class="content-page-title">
+    <h1>{{ title }}{% if help %}{{ help_button(help, title ~ '说明') }}{% endif %}</h1>
+    {% if description %}<p>{{ description }}</p>{% endif %}
+    {% if count %}<span class="content-page-count">{{ count }}</span>{% endif %}
+  </div>
+  {% if caller is defined %}<div class="content-page-actions">{{ caller() }}</div>{% endif %}
+</div>
+{%- endmacro %}
+
+{#- Panel heading inside <section class="panel">. Optional call block = actions. -#}
+{% macro panel_head(title, description='', level=2) -%}
+<div class="panel-head">
+  <div>
+    <h{{ level }}>{{ title }}</h{{ level }}>
+    {% if description %}<p>{{ description }}</p>{% endif %}
+  </div>
+  {% if caller is defined %}<div class="button-group">{{ caller() }}</div>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro help_button(text, label='说明') -%}
+<button class="title-help-button" type="button" aria-label="{{ label }}" data-help="{{ text }}"></button>
+{%- endmacro %}
+
+{#- Empty result. Optional call block = one action (link or button). -#}
+{% macro empty_state(title, description='', compact=false, borderless=false) -%}
+<div class="ui-state{% if compact %} ui-state-compact{% endif %}{% if borderless %} ui-state-borderless{% endif %}" data-ui-component="EmptyState" role="status">
+  <strong class="ui-state-title">{{ title }}</strong>
+  {% if description %}<p class="ui-state-description">{{ description }}</p>{% endif %}
+  {% if caller is defined %}<div class="ui-state-action">{{ caller() }}</div>{% endif %}
+</div>
+{%- endmacro %}
+
+{#- Failed read. Show the reason and a retry; never a fake success. -#}
+{% macro error_state(title, description='', retry_href='', compact=false) -%}
+<div class="ui-state ui-state-error{% if compact %} ui-state-compact{% endif %}" data-ui-component="ErrorState" role="alert">
+  <strong class="ui-state-title">{{ title }}</strong>
+  {% if description %}<p class="ui-state-description">{{ description }}</p>{% endif %}
+  {% if retry_href %}<a class="btn-secondary btn-small" href="{{ retry_href }}">重试</a>{% endif %}
+  {% if caller is defined %}{{ caller() }}{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro loading_state(label='正在加载数据') -%}
+<div class="page-list-loading role-inline-loading" data-ui-component="LoadingState" role="status" aria-live="polite" aria-busy="true">
+  <span class="page-list-loading-spinner" aria-hidden="true"></span><span class="page-list-loading-text">{{ label }}</span>
+</div>
+{%- endmacro %}
+
+{#- tone: '' | success | warning | error | info -#}
+{% macro status_chip(text, tone='') -%}
+<span class="status-chip{% if tone %} {{ tone }}{% endif %}">{{ text }}</span>
+{%- endmacro %}
+
+{% macro inline_status(text='', tone='', id='') -%}
+<p class="inline-status{% if tone %} {{ tone }}{% endif %}"{% if id %} id="{{ id }}"{% endif %} role="status">{{ text }}</p>
+{%- endmacro %}
+
+{% macro metric_card(label, value, hint='', href='', attention=false) -%}
+{% set classes = 'metric-card' ~ (' has-attention' if attention else '') %}
+{% if href %}<a class="{{ classes }}" href="{{ href }}">{% else %}<div class="{{ classes }}">{% endif %}
+  <span>{{ label }}</span>
+  <strong>{{ value }}</strong>
+  {% if hint %}<small>{{ hint }}</small>{% endif %}
+{% if href %}</a>{% else %}</div>{% endif %}
+{%- endmacro %}
+
+{#- Checkbox switch. The label text sits left, the switch right. -#}
+{% macro switch(name, label, checked=false, id='', disabled=false, value='1') -%}
+{% set field_id = id or name %}
+<label class="switch-label" for="{{ field_id }}">
+  <span>{{ label }}</span>
+  <input id="{{ field_id }}" class="toggle-switch-input" type="checkbox" name="{{ name }}" value="{{ value }}"{% if checked %} checked{% endif %}{% if disabled %} disabled{% endif %}>
+</label>
+{%- endmacro %}
+
+{% macro password_field(name, label, id='', autocomplete='current-password', required=true) -%}
+{% set field_id = id or name %}
+<label for="{{ field_id }}">
+  <span>{{ label }}</span>
+  <span class="password-field">
+    <input id="{{ field_id }}" type="password" name="{{ name }}" autocomplete="{{ autocomplete }}"{% if required %} required{% endif %}>
+    <button class="password-visibility-toggle" type="button" aria-controls="{{ field_id }}" aria-pressed="false" aria-label="显示密码"></button>
+  </span>
+</label>
+{%- endmacro %}
+
+{#- Link tabs for server-rendered sub-pages: items = [{label, href, active}] -#}
+{% macro link_tabs(items, label='页面切换') -%}
+<nav class="tabs" aria-label="{{ label }}">
+  {% for item in items %}<a href="{{ item.href }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.label }}</a>{% endfor %}
+</nav>
+{%- endmacro %}
+
+{#- Active filter chips: filters = [{name, value, remove_url}] -#}
+{% macro active_filters(filters, clear_url) -%}
+<div class="active-filter-list"{% if not filters %} hidden{% endif %} aria-label="已应用的筛选">
+  {% for item in filters %}
+  <span class="active-filter-chip">
+    <span class="active-filter-name">{{ item.name }}</span><span class="active-filter-relation">是</span><span class="active-filter-value">{{ item.value }}</span>
+    <a class="active-filter-remove" href="{{ item.remove_url }}" aria-label="移除筛选：{{ item.name }}">{{ icon('x') }}</a>
+  </span>
+  {% endfor %}
+  {% if filters %}<a class="active-filter-clear" href="{{ clear_url }}">清除全部</a>{% endif %}
+</div>
+{%- endmacro %}
+
+{#- Server-side pagination. Builds links with url_for(endpoint, page=n, **args). -#}
+{% macro pagination(page, pages, total, endpoint, args={}, start=0, end=0) -%}
+<nav class="list-pagination"{% if not total %} data-empty="true"{% endif %} aria-label="分页">
+  <span class="list-pagination-summary">{% if total %}第 {{ start }}-{{ end }} 条，共 {{ total }} 条{% else %}共 0 条{% endif %}</span>
+  <div class="list-pagination-controls">
+    <div class="list-pagination-navigation">
+      <a data-page-prev href="{{ url_for(endpoint, page=page - 1, **args) if page > 1 else '#' }}" aria-label="上一页"{% if page <= 1 %} aria-disabled="true" tabindex="-1"{% endif %}>{{ icon('chevron-left') }}</a>
+      <span class="list-pagination-page">{{ page }} / {{ pages }}</span>
+      <a data-page-next href="{{ url_for(endpoint, page=page + 1, **args) if page < pages else '#' }}" aria-label="下一页"{% if page >= pages %} aria-disabled="true" tabindex="-1"{% endif %}>{{ icon('chevron-right') }}</a>
+    </div>
+  </div>
+</nav>
+{%- endmacro %}
+
+{#- Modal. Use a slot call block:
+    {% call(slot) modal("editItem", "编辑") %}
+      {% if slot == "body" %}...fields...{% else %}...buttons...{% endif %}
+    {% endcall %}
+    form_action wraps body and actions in a <form>. Open with data-modal-open="editItem". -#}
+{% macro modal(id, title, description='', size='md', dismissible=true, form_action='', method='post', long=false) -%}
+<div id="{{ id }}" class="modal-backdrop hidden" data-modal-dismissible="{{ 'true' if dismissible else 'false' }}">
+  <div class="modal-panel modal-size-{{ size }}{% if long %} modal-layout-long{% endif %}">
+    <div class="modal-head">
+      <div>
+        <h2>{{ title }}</h2>
+        {% if description %}<p>{{ description }}</p>{% endif %}
+      </div>
+    </div>
+    {% if form_action %}<form action="{{ form_action }}" method="{{ method }}">{% endif %}
+    <div class="modal-body">{{ caller('body') }}</div>
+    <div class="modal-actions">{{ caller('actions') }}</div>
+    {% if form_action %}</form>{% endif %}
+  </div>
+</div>
+{%- endmacro %}
+
+{#- Flask flashes become one global notification (feedback.js).
+    Categories: success | error | warning | info ("message" and "danger" map too). -#}
+{% macro flash_messages() -%}
+{% set tones = {'message': 'info', 'info': 'info', 'success': 'success', 'warning': 'warning', 'error': 'error', 'danger': 'error'} %}
+{% for category, message in get_flashed_messages(with_categories=true) %}
+<span hidden data-kit-flash="{{ tones.get(category, 'info') }}">{{ message }}</span>
+{% endfor %}
+{%- endmacro %}
+
+{#- Sidebar navigation: groups = [{title, items: [{label, href, icon, endpoint|active}]}] -#}
+{% macro nav_menu(groups, current_endpoint='') -%}
+{% for group in groups %}
+<div class="nav-group">
+  {% if group.title %}<span class="nav-group-title">{{ group.title }}</span>{% endif %}
+  {% for item in group['items'] %}
+  {% set active = item.active if item.active is defined else (item.endpoint and item.endpoint == current_endpoint) %}
+  <a class="nav-item{% if active %} active{% endif %}" href="{{ item.href }}"{% if active %} aria-current="page"{% endif %}>
+    {% if item.icon %}<span class="nav-icon" aria-hidden="true"><svg><use href="{{ kit.icon_href(item.icon) }}"></use></svg></span>{% endif %}
+    <span class="nav-label">{{ item.label }}</span>
+  </a>
+  {% endfor %}
+</div>
+{% endfor %}
+{%- endmacro %}
+
+{#- Three-way appearance control (light / dark / follow system). -#}
+{% macro theme_options() -%}
+<div class="theme-options" role="radiogroup" aria-label="外观">
+  <button type="button" role="radio" data-theme-choice="light" aria-label="日间" title="日间" aria-checked="false" tabindex="-1">{{ icon('sun') }}</button>
+  <button type="button" role="radio" data-theme-choice="dark" aria-label="夜间" title="夜间" aria-checked="false" tabindex="-1">{{ icon('moon') }}</button>
+  <button type="button" role="radio" data-theme-choice="system" aria-label="跟随系统" title="跟随系统" aria-checked="false" tabindex="-1">{{ icon('monitor') }}</button>
+</div>
+{%- endmacro %}

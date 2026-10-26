@@ -1,0 +1,4 @@
+{# Include before </body>. Order matters: core.js defines window.Kit. #}
+{% for script in kit.scripts %}
+<script src="{{ kit.asset(script) }}" defer{% if csp_nonce is defined %} nonce="{{ csp_nonce }}"{% endif %}></script>
+{% endfor %}

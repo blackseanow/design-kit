@@ -1,0 +1,14 @@
+/* Example brand override for a second product. Load it after the kit with
+   DESIGN_KIT_EXTRA_CSS = ["brand-example.css"]. Only brand tokens change;
+   components keep using the same semantic names. Colours are an arbitrary
+   example (teal); check contrast for your own palette. */
+:root {
+  --brand: #0f766e; --brand-hover: #0b5f59; --brand-tint: rgba(15,118,110,.08);
+  --on-brand: #fff;
+  --progress-brand: #0f766e; --progress-glow: 0 0 10px #0f766e,0 0 5px #0f766e;
+}
+:root[data-theme="dark"] {
+  --brand: #5eead4; --brand-hover: #5eead4e0; --brand-tint: rgba(94,234,212,.08);
+  --on-brand: #03080a;
+  --progress-brand: #5eead4; --progress-glow: 0 0 10px #5eead4,0 0 5px #5eead4;
+}

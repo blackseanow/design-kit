@@ -1,0 +1,174 @@
+{% extends "design_kit/layout.html" %}
+{% from "design_kit/macros.html" import page_header, panel_head, status_chip, inline_status, empty_state, error_state, loading_state, help_button, switch, password_field, modal, icon %}
+{% block title %}组件 · {{ kit.brand_name }}{% endblock %}
+{% block content %}
+{{ page_header("组件", "设计规范中的共享组件和状态。切换日间/夜间请用右上角个人菜单。") }}
+
+<section class="panel" id="buttons">
+  {{ panel_head("按钮", "默认 40px，页面和面板标题区的操作 32px，手机 44px。") }}
+  <div class="button-group">
+    <button class="btn-primary" type="button">主操作</button>
+    <button class="btn-secondary" type="button">次操作</button>
+    <button class="btn-ghost" type="button">文字操作</button>
+    <button class="btn-auxiliary" type="button">测试连接</button>
+    <button class="btn-danger" type="button">删除</button>
+    <button class="btn-danger-outline" type="button">停用</button>
+    <button class="btn-danger-text" type="button">移除</button>
+    <button class="btn-link" type="button">链接样式</button>
+    <button class="btn-icon" type="button" aria-label="复制">{{ icon('copy') }}</button>
+    <button class="btn-delete-icon" type="button" aria-label="删除这一行"></button>
+  </div>
+  <div class="button-group" style="margin-top:16px">
+    <button type="button">默认 button</button>
+    <button class="btn-secondary btn-small" type="button">小号</button>
+    <button class="btn-primary" type="button" disabled>禁用</button>
+    <button class="btn-secondary" type="button" id="loadingDemo">点击看加载态</button>
+    <a class="btn-secondary" href="{{ url_for('records') }}">链接按钮</a>
+  </div>
+</section>
+
+<section class="panel" id="forms">
+  {{ panel_head("表单", "原生字段保留 name、value 和 change 事件；下拉和日期时间由 JS 增强。") }}
+  <div class="form-grid">
+    <label><span>文本输入</span><input placeholder="请输入" required></label>
+    <label><span class="field-label">带说明的字段{{ help_button("说明文字放在帮助图标里，不挤占标签。", "字段说明") }}</span><input placeholder="悬停或点击 ! 图标"></label>
+    <label><span>下拉选择</span>
+      <select name="plain"><option>选项一</option><option selected>选项二</option><option disabled>不可选</option></select>
+    </label>
+    <label><span>可搜索下拉</span>
+      <select name="search" data-searchable="true" data-search-placeholder="搜索城市">
+        <option value="">请选择</option>
+        {% for city in ["示例城市 A", "示例城市 B", "示例城市 C", "示例城市 D", "示例城市 E", "示例城市 F", "示例城市 G", "示例城市 H"] %}<option>{{ city }}</option>{% endfor %}
+      </select>
+    </label>
+    <label><span>日期</span><input type="date" name="date" value="2026-10-26"></label>
+    <label><span>时间（菜单）</span><input type="time" name="time" value="14:00"></label>
+    <label><span>时间（可输入）</span><input name="exact" data-time-editable="true" value="08:45" aria-label="精确时间"></label>
+    <label><span>搜索框</span><input type="search" placeholder="搜索"></label>
+    <label><span>错误状态</span><input aria-invalid="true" value="格式不正确"><span class="field-error">请输入完整的 http:// 或 https:// 地址</span></label>
+    <label><span>禁用</span><input disabled value="不可编辑"></label>
+    {{ password_field("demo_password", "密码", autocomplete="new-password", required=false) }}
+    <label><span>原生下拉（data-native）</span><select data-native><option>不增强</option></select></label>
+    <label class="wide-label"><span>多行文本</span><textarea placeholder="可拖动调整高度"></textarea></label>
+  </div>
+  <div class="settings-form-section">
+    {{ switch("auto_run", "自动执行", checked=true) }}
+    <label style="margin-top:12px"><input type="checkbox" checked> 复选框</label>
+    <label><input type="radio" name="r" checked> 单选一</label>
+    <label><input type="radio" name="r"> 单选二</label>
+  </div>
+</section>
+
+<section class="panel" id="status">
+  {{ panel_head("状态标签与行内提示") }}
+  <div class="button-group">
+    {{ status_chip("默认") }}{{ status_chip("运行中", "success") }}{{ status_chip("需要处理", "warning") }}{{ status_chip("失败", "error") }}{{ status_chip("信息", "info") }}
+  </div>
+  <div style="display:grid;gap:8px;margin-top:16px">
+    {{ inline_status("普通提示：已读取 12 条记录。") }}
+    {{ inline_status("保存成功。", "success") }}
+    {{ inline_status("有 2 项需要确认。", "warning") }}
+    {{ inline_status("请求失败：网络超时，请重试。", "error") }}
+  </div>
+</section>
+
+<section class="panel" id="tabs">
+  {{ panel_head("选项卡", "方向键、Home、End 切换；窄屏只让选项卡区域横向滚动。") }}
+  <div class="tabs" role="tablist" aria-label="示例选项卡">
+    <button type="button" role="tab" aria-selected="true" aria-controls="tabPanelA" id="tabA">全部记录</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="tabPanelB" id="tabB">已完成</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="tabPanelC" id="tabC">待核对</button>
+  </div>
+  <div id="tabPanelA" role="tabpanel" aria-labelledby="tabA"><p>全部记录的内容。</p></div>
+  <div id="tabPanelB" role="tabpanel" aria-labelledby="tabB" hidden>{{ empty_state("暂无已完成记录", compact=true) }}</div>
+  <div id="tabPanelC" role="tabpanel" aria-labelledby="tabC" hidden><p>待核对的内容。</p></div>
+</section>
+
+<section class="panel" id="table">
+  {{ panel_head("表格与行操作", "宽表在容器内横向滚动；行操作收进“更多操作”菜单。") }}
+  <div class="table-wrap">
+    <table class="console-data-table">
+      <thead><tr><th>名称</th><th>负责人</th><th>状态</th><th>更新时间</th><th class="table-actions-heading" aria-label="更多操作"></th></tr></thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td><strong>{{ row.name }}</strong></td><td>{{ row.owner }}</td>
+          <td>{{ status_chip(statuses[row.status][0], statuses[row.status][1]) }}</td><td>{{ row.updated }}</td>
+          <td><div class="list-row-actions">
+            <button type="button">查看详情</button><button type="button">编辑</button>
+            <label><span class="sr-only">启用</span><input class="toggle-switch-input" type="checkbox"{% if loop.index is odd %} checked{% endif %}></label>
+            <button type="button" class="danger-text">删除</button>
+          </div></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel" id="states">
+  {{ panel_head("空、错误、加载") }}
+  <div class="form-grid">
+    {% call empty_state("暂无数据", "有数据后会显示在这里。") %}<button class="btn-secondary btn-small" type="button">新建</button>{% endcall %}
+    {{ error_state("读取失败", "示例错误：请求超时。", retry_href=url_for('components')) }}
+    <div class="panel is-refresh-loading" style="padding:0">{{ loading_state() }}</div>
+    <div class="panel">
+      <div class="summary-list">
+        <div><strong>名称</strong><span>示例任务 01</span></div>
+        <div><strong>负责人</strong><span>示例成员 B</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="overlays">
+  {{ panel_head("弹窗与通知") }}
+  <div class="button-group">
+    <button class="btn-secondary" type="button" data-modal-open="formModal">表单弹窗</button>
+    <button class="btn-secondary" type="button" data-modal-open="longModal">长内容弹窗</button>
+    <button class="btn-secondary" type="button" id="confirmDemo">危险确认</button>
+    <button class="btn-secondary" type="button" data-toast="success">成功提示</button>
+    <button class="btn-secondary" type="button" data-toast="warning">警告提示</button>
+    <button class="btn-secondary" type="button" data-toast="error">错误提示</button>
+    <button class="btn-secondary" type="button" data-toast="loading">处理中提示</button>
+  </div>
+</section>
+{% endblock %}
+
+{% block modals %}
+{% call(slot) modal("formModal", "编辑示例", "弹窗内的下拉、日期菜单留在弹窗焦点范围内。") %}
+  {% if slot == "body" %}
+  <div class="form-grid">
+    <label class="wide-label"><span>名称</span><input value="示例任务 01"></label>
+    <label><span>状态</span><select><option>运行中</option><option>已暂停</option></select></label>
+    <label><span>日期</span><input type="date" value="2026-11-02"></label>
+  </div>
+  <div class="danger-zone" style="margin-top:16px"><p>危险区：删除后无法恢复（演示）。</p></div>
+  {% else %}
+  <button class="btn-secondary" type="button" data-modal-close>取消</button>
+  <button class="btn-primary" type="button" data-modal-close>保存</button>
+  {% endif %}
+{% endcall %}
+{% call(slot) modal("longModal", "长内容", "头尾固定，正文独立滚动。", size="lg") %}
+  {% if slot == "body" %}
+  {% for i in range(1, 31) %}<p>第 {{ i }} 段示例文字。用于检查正文滚动和固定的底部操作栏。</p>{% endfor %}
+  {% else %}
+  <button class="btn-primary" type="button" data-modal-close>知道了</button>
+  {% endif %}
+{% endcall %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const loading = document.getElementById("loadingDemo");
+    loading.addEventListener("click", () => Kit.ui.runButtonAction(loading, "处理中", () => new Promise((r) => setTimeout(r, 1500))));
+    document.getElementById("confirmDemo").addEventListener("click", async () => {
+      const ok = await Kit.modal.confirm({ title: "删除示例", message: "删除后无法恢复。演示环境不会删除任何数据。", confirmLabel: "删除", danger: true });
+      Kit.feedback.show(ok ? "已确认（演示）" : "已取消", ok ? "success" : "info", { timeout: 2500 });
+    });
+    const messages = { success: "保存成功。", warning: "有 2 项需要确认。", error: "请求失败：网络超时。", loading: "正在处理，请稍候…" };
+    document.querySelectorAll("[data-toast]").forEach((button) => button.addEventListener("click", () => Kit.feedback.show(messages[button.dataset.toast], button.dataset.toast, button.dataset.toast === "loading" ? { timeout: 3000 } : {})));
+  });
+</script>
+{% endblock %}

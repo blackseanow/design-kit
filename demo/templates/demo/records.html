@@ -1,0 +1,102 @@
+{% extends "design_kit/layout.html" %}
+{% from "design_kit/macros.html" import page_header, status_chip, empty_state, error_state, active_filters, pagination, icon, modal %}
+{% block title %}任务列表 · {{ kit.brand_name }}{% endblock %}
+{% block content %}
+{% call page_header("任务列表", "筛选、查看和操作示例任务。所有操作只在页面内演示，不写入数据。", count="共 " ~ total ~ " 条") %}
+  <button class="btn-primary" type="button" data-modal-open="createModal">新建任务</button>
+{% endcall %}
+
+<section class="panel">
+  <form class="list-filter-toolbar" method="get" action="{{ url_for('records') }}" role="search">
+    <label class="list-filter-search"><span>搜索</span><input type="search" name="q" value="{{ query }}" placeholder="搜索名称或负责人"></label>
+    <label><span>状态</span>
+      <select name="status" aria-label="按状态筛选" onchange="this.form.requestSubmit()">
+        <option value="">全部状态</option>
+        {% for key, item in statuses.items() %}<option value="{{ key }}"{% if key == status %} selected{% endif %}>{{ item[0] }}</option>{% endfor %}
+      </select>
+    </label>
+    <button class="btn-secondary" type="submit">筛选</button>
+  </form>
+  {{ active_filters(filters, url_for('records')) }}
+
+  {% if failed %}
+    {{ error_state("读取失败", "示例错误：服务暂时不可用。显示原因和重试，不展示假数据。", retry_href=url_for('records')) }}
+  {% elif not rows %}
+    {% call empty_state("没有匹配的任务", "换个关键词或清除筛选后再试。") %}
+      <a class="btn-secondary btn-small" href="{{ url_for('records') }}">清除筛选</a>
+    {% endcall %}
+  {% else %}
+  <div class="table-wrap">
+    <table class="console-data-table">
+      <thead><tr><th>名称</th><th>负责人</th><th>状态</th><th>执行次数</th><th>更新时间</th><th class="table-actions-heading" aria-label="更多操作"></th></tr></thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td><strong>{{ row.name }}</strong><small>ID {{ row.id }}</small></td>
+          <td>{{ row.owner }}</td>
+          <td>{{ status_chip(statuses[row.status][0], statuses[row.status][1]) }}</td>
+          <td>{{ row.runs }}</td>
+          <td>{{ row.updated }}</td>
+          <td>
+            <div class="list-row-actions">
+              <button type="button" data-demo-action="查看" data-name="{{ row.name }}">查看详情</button>
+              <button type="button" data-demo-action="编辑" data-name="{{ row.name }}">编辑</button>
+              <button type="button" data-demo-action="复制" data-name="{{ row.name }}">复制</button>
+              <button type="button" class="danger-text" data-demo-delete data-name="{{ row.name }}">删除</button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+  {{ pagination(page, pages, total, 'records', args, start, end) }}
+  <p class="field-helper-text">想看错误状态：<a href="{{ url_for('records', error=1) }}">打开示例错误</a>。</p>
+</section>
+{% endblock %}
+
+{% block modals %}
+{% call(slot) modal("createModal", "新建任务", "演示表单：提交后只显示提示，不保存。", form_action="#", dismissible=true) %}
+  {% if slot == "body" %}
+  <div class="form-grid">
+    <label class="wide-label"><span>任务名称</span><input name="name" required placeholder="例如：示例任务 99"></label>
+    <label><span>负责人</span><select name="owner"><option>示例成员 A</option><option>示例成员 B</option><option>示例成员 C</option></select></label>
+    <label><span>开始日期</span><input type="date" name="start" value="2026-10-26"></label>
+    <label><span>执行时间</span><input type="time" name="time" value="09:30"></label>
+    <label class="wide-label"><span>备注</span><textarea name="note" placeholder="可选"></textarea></label>
+  </div>
+  {% else %}
+  <p class="inline-status" id="createStatus" role="status"></p>
+  <div class="modal-action-group">
+    <button class="btn-secondary" type="button" data-modal-close>取消</button>
+    <button class="btn-primary" type="submit" id="createSubmit">创建</button>
+  </div>
+  {% endif %}
+{% endcall %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.querySelector("#createModal form");
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const button = document.getElementById("createSubmit");
+      // Demo: show the loading contract, then a success notification.
+      await Kit.ui.runButtonAction(button, "创建中", () => new Promise((resolve) => setTimeout(resolve, 700)));
+      Kit.modal.hide("createModal");
+      Kit.feedback.success(`已创建「${form.elements.name.value}」（演示，未保存）`);
+      form.reset();
+    });
+    document.addEventListener("click", async (event) => {
+      const action = event.target.closest("[data-demo-action]");
+      if (action) Kit.feedback.show(`${action.dataset.demoAction}：${action.dataset.name}（演示）`, "info", { timeout: 2500 });
+      const remove = event.target.closest("[data-demo-delete]");
+      if (!remove) return;
+      const ok = await Kit.modal.confirm({ title: "删除任务", message: `确定删除「${remove.dataset.name}」吗？演示环境不会真的删除。`, confirmLabel: "删除", danger: true });
+      if (ok) Kit.feedback.success(`已删除「${remove.dataset.name}」（演示）`);
+    });
+  });
+</script>
+{% endblock %}

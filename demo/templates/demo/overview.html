@@ -1,0 +1,60 @@
+{% extends "design_kit/layout.html" %}
+{% from "design_kit/macros.html" import page_header, panel_head, metric_card, status_chip, empty_state, icon %}
+{% block title %}总览 · {{ kit.brand_name }}{% endblock %}
+{% block header_actions %}
+<span class="header-badge-host">
+  <button class="header-icon-button" type="button" aria-label="通知（3 条未读）" data-modal-open="noticeModal">{{ icon('bell') }}</button>
+  <span class="header-badge" aria-hidden="true">3</span>
+</span>
+{% endblock %}
+{% block content %}
+{% call page_header("总览", "查看任务进度和需要处理的事项。数据为虚构示例。", help="页面标题旁的说明图标：悬停或聚焦显示，点击固定。") %}
+  <a class="page-refresh-button" href="{{ request.path }}" aria-label="刷新当前页面数据" title="刷新当前页面数据">{{ icon('refresh-cw') }}</a>
+  <a class="btn-primary" href="{{ url_for('records') }}">查看全部任务</a>
+{% endcall %}
+
+<div class="metrics-grid">
+  {{ metric_card("任务总数", total, "全部示例任务") }}
+  {{ metric_card("运行中", counts.running, "正常执行") }}
+  {{ metric_card("需要处理", counts.warning, "点击查看", href=url_for('records', status='warning')) }}
+  {{ metric_card("执行失败", counts.failed, "最近 7 天", attention=counts.failed > 0) }}
+</div>
+
+<section class="panel">
+  {% call panel_head("最近更新", "最新的 5 条示例任务") %}
+    <a class="btn-secondary btn-small" href="{{ url_for('records') }}">全部</a>
+  {% endcall %}
+  <div class="table-wrap">
+    <table class="console-data-table">
+      <thead><tr><th>名称</th><th>负责人</th><th>状态</th><th>更新时间</th></tr></thead>
+      <tbody>
+        {% for row in recent %}
+        <tr><td><strong>{{ row.name }}</strong></td><td>{{ row.owner }}</td><td>{{ status_chip(statuses[row.status][0], statuses[row.status][1]) }}</td><td>{{ row.updated }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel">
+  {{ panel_head("待办提醒", "没有数据时使用 EmptyState，不填入虚构数量。") }}
+  {% call empty_state("暂无待办", "新的提醒会显示在这里。", compact=true, borderless=true) %}
+    <a class="btn-secondary btn-small" href="{{ url_for('components') }}">查看组件</a>
+  {% endcall %}
+</section>
+{% endblock %}
+
+{% block modals %}
+{% from "design_kit/macros.html" import modal %}
+{% call(slot) modal("noticeModal", "通知", "示例通知列表，可按 Esc 或点击遮罩关闭。") %}
+  {% if slot == "body" %}
+  <ul class="confirm-target-list">
+    <li>示例任务 03 执行失败，请检查配置。</li>
+    <li>示例任务 07 已暂停。</li>
+    <li>示例任务 12 需要处理。</li>
+  </ul>
+  {% else %}
+  <a class="btn-primary" href="{{ url_for('records', status='warning') }}">查看需要处理的任务</a>
+  {% endif %}
+{% endcall %}
+{% endblock %}
