@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import math
 import os
+import random
 import sys
 from pathlib import Path
 
@@ -136,6 +137,22 @@ def create_app(config: dict | None = None) -> Flask:
             flash("演示登录成功（未校验任何凭证）", "success")
             return redirect(url_for("overview"))
         return render_template("demo/login.html")
+
+    @app.get("/demo-captcha.svg")
+    def demo_captcha():
+        """Fictional captcha image for the login demo: random characters, never checked or stored."""
+        text = "".join(random.choice("ABCDEFGHJKMNPQRSTUVWXYZ23456789") for _ in range(4))
+        glyphs = "".join(
+            f'<text x="{14 + i * 25}" y="{28 + random.randint(-3, 3)}" transform="rotate({random.randint(-12, 12)} {20 + i * 25} 22)">{ch}</text>'
+            for i, ch in enumerate(text))
+        lines = "".join(
+            f'<line x1="{random.randint(0, 40)}" y1="{random.randint(4, 36)}" x2="{random.randint(80, 120)}" y2="{random.randint(4, 36)}"/>'
+            for _ in range(3))
+        svg = ('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="40" viewBox="0 0 120 40">'
+               '<rect width="120" height="40" fill="#f2f2f5"/>'
+               f'<g stroke="#9a9aa6" stroke-width="1">{lines}</g>'
+               f'<g font-family="monospace" font-size="22" font-weight="700" fill="#3c3c46">{glyphs}</g></svg>')
+        return svg, 200, {"Content-Type": "image/svg+xml", "Cache-Control": "no-store"}
 
     @app.post("/logout")
     def logout():

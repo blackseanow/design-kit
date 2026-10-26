@@ -455,6 +455,25 @@
     });
   }
 
+  /* Image captcha: button[data-captcha-refresh=inputId] reloads img[data-captcha-image=inputId]
+     with a cache-busting query, clears the input and focuses it. Emits kit:captcha-refresh. */
+  function captchaUrl(src, stamp) {
+    const base = String(src || "").replace(/([?&])_cb=\d+(&|$)/, (match, lead, tail) => (tail ? lead : ""));
+    return `${base}${base.includes("?") ? "&" : "?"}_cb=${stamp}`;
+  }
+  function bindCaptchaRefresh() {
+    document.addEventListener("click", (event) => {
+      const button = event.target.closest?.("[data-captcha-refresh]");
+      if (!button || button.disabled) return;
+      const id = button.getAttribute("data-captcha-refresh");
+      const input = document.getElementById(id);
+      const image = [...document.querySelectorAll("img[data-captcha-image]")].find((node) => node.getAttribute("data-captcha-image") === id);
+      if (image) image.src = captchaUrl(image.getAttribute("src"), Date.now());
+      if (input) { input.value = ""; input.focus(); }
+      button.dispatchEvent(new CustomEvent("kit:captcha-refresh", { bubbles: true, detail: { input, image } }));
+    });
+  }
+
   const selectors = {
     Panel: ".panel", Toolbar: ".toolbar", FilterBar: ".filter-bar", MetricCard: ".metric-card",
     DataTable: ".table-wrap", Tabs: '[role="tablist"]',
@@ -487,6 +506,7 @@
     enhance(document);
     initHelp();
     bindPasswordToggles();
+    bindCaptchaRefresh();
     const inside = (event, node) => Boolean(node && (node.contains(event.target) || event.composedPath?.().includes(node)));
     document.addEventListener("pointerdown", (event) => {
       if (openRowMenu && !inside(event, openRowMenu.popup) && !inside(event, openRowMenu.trigger)) closeRowMenu();

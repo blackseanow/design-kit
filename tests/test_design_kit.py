@@ -197,6 +197,28 @@ class BlueprintTests(unittest.TestCase):
         self.assertIn('data-kit-flash="success">已保存', html)
         self.assertIn('data-kit-flash="error">出错了', html)
 
+    def test_captcha_field_macro(self):
+        app = self.make_app()
+        source = """{% from "design_kit/macros.html" import captcha_field %}
+{{ captcha_field("captcha", "验证码", "/captcha.svg?k=1") }}
+{{ captcha_field("code", "校验码", "/c.svg", id="signupCode", refresh_label="看不清", maxlength=6, required=false) }}"""
+        with app.test_request_context("/"):
+            html = render_template_string(source)
+        self.assertIn('<label for="captcha">', html)
+        self.assertIn('<input id="captcha" name="captcha" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="8" required>', html)
+        self.assertIn('<img class="captcha-image" src="/captcha.svg?k=1" alt="图形验证码" width="120" height="40" data-captcha-image="captcha">', html)
+        self.assertIn('<button class="btn-link captcha-refresh" type="button" data-captcha-refresh="captcha">换一张</button>', html)
+        self.assertIn('<input id="signupCode" name="code" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="6">', html)
+        self.assertIn('data-captcha-refresh="signupCode">看不清</button>', html)
+
+    def test_demo_captcha_image_is_not_cached(self):
+        from app import create_app
+        response = create_app({"TESTING": True}).test_client().get("/demo-captcha.svg")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["Content-Type"], "image/svg+xml")
+        self.assertEqual(response.headers["Cache-Control"], "no-store")
+        self.assertTrue(response.get_data(as_text=True).startswith("<svg"))
+
     def test_empty_pagination_is_hidden(self):
         app = self.make_app()
 

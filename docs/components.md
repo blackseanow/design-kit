@@ -106,6 +106,18 @@ await Kit.ui.runButtonAction(button, "保存中", () => fetch(...));
 {{ password_field("password", "密码", autocomplete="current-password") }}
 ```
 
+### 图形验证码
+
+```jinja
+{{ captcha_field("captcha", "验证码", url_for("captcha_image")) }}
+```
+
+- 输入框在左，验证码图片（120×40，移动端随输入框变为 44px 高）和"换一张"在右。
+- `image_url` 每次请求都要返回新图片，并带 `Cache-Control: no-store`。点"换一张"时，ui.js 在地址后加 `_cb=时间戳` 重新加载，清空输入框并聚焦。
+- 换图后在按钮上触发 `kit:captcha-refresh`（冒泡，`detail` 含 `input`、`image`），需要同时刷新其他状态时监听它。
+- 可选参数：`id`、`refresh_label`、`image_alt`（默认"图形验证码"）、`maxlength`（默认 8）、`required`。
+- 验证失败时和其他字段一样：输入框加 `aria-invalid="true"`，下面放 `<span class="field-error">原因</span>`，同时换一张新图。
+
 ## 状态标签和行内提示
 
 ```jinja

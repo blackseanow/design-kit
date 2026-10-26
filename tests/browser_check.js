@@ -170,6 +170,29 @@ async function waitForServer() {
       await desktop.evaluate(() => localStorage.removeItem("design-kit-demo-theme"));
     });
 
+    await check("captcha refresh reloads the image, clears and focuses the input", async () => {
+      await desktop.goto(BASE + "/login");
+      const image = desktop.locator("img[data-captcha-image='captcha']");
+      await desktop.waitForFunction(() => document.querySelector("img[data-captcha-image]").complete);
+      const first = await image.getAttribute("src");
+      await desktop.fill("#captcha", "ABCD");
+      await desktop.evaluate(() => { window.__captchaEvents = 0; document.addEventListener("kit:captcha-refresh", () => { window.__captchaEvents += 1; }); });
+      await desktop.click("[data-captcha-refresh='captcha']");
+      const second = await image.getAttribute("src");
+      assert.notEqual(second, first);
+      assert.match(second, /\?_cb=\d+$/);
+      assert.equal(await desktop.inputValue("#captcha"), "");
+      assert.equal(await desktop.evaluate(() => document.activeElement.id), "captcha");
+      assert.equal(await desktop.evaluate(() => window.__captchaEvents), 1);
+      await desktop.waitForTimeout(5);
+      await desktop.click("[data-captcha-refresh='captcha']");
+      const third = await image.getAttribute("src");
+      assert.equal((third.match(/_cb=/g) || []).length, 1, "the cache-busting query is replaced, not appended");
+      const box = await image.boundingBox();
+      assert.equal(Math.round(box.width), 120);
+      assert.equal(Math.round(box.height), 40);
+    });
+
     await check("server flash becomes a global notification", async () => {
       await desktop.goto(BASE + "/settings");
       await desktop.locator('input[name="project_name"]').fill("");

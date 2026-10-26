@@ -104,6 +104,21 @@
 </label>
 {%- endmacro %}
 
+{#- Image captcha: text input, the challenge image, and a "load another" link button.
+    image_url must return a fresh image on every request; ui.js appends a cache-busting
+    query and clears the input when the button is pressed. -#}
+{% macro captcha_field(name, label, image_url, id='', refresh_label='换一张', image_alt='图形验证码', maxlength=8, required=true) -%}
+{% set field_id = id or name %}
+<label for="{{ field_id }}">
+  <span>{{ label }}</span>
+  <span class="captcha-field">
+    <input id="{{ field_id }}" name="{{ name }}" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="{{ maxlength }}"{% if required %} required{% endif %}>
+    <img class="captcha-image" src="{{ image_url }}" alt="{{ image_alt }}" width="120" height="40" data-captcha-image="{{ field_id }}">
+    <button class="btn-link captcha-refresh" type="button" data-captcha-refresh="{{ field_id }}">{{ refresh_label }}</button>
+  </span>
+</label>
+{%- endmacro %}
+
 {#- Link tabs for server-rendered sub-pages: items = [{label, href, active}] -#}
 {% macro link_tabs(items, label='页面切换') -%}
 <nav class="tabs" aria-label="{{ label }}">
