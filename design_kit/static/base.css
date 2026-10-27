@@ -31,7 +31,9 @@ input[type="checkbox"], input[type="radio"] { width: 16px; height: 16px; flex: 0
 label { display: grid; gap: 6px; min-width: 0; align-content: start; }
 label > span:first-child, label > strong:first-child { color: var(--muted); font-size: 14px; line-height: 22.75px; }
 /* Required fields use a quiet marker; the help icon carries longer explanations. */
-label:not([data-form-required]):has(> input:required, > select:required, > textarea:required) > :is(span:first-child,strong:first-child)::after { content: " *"; color: var(--muted); font-weight: 600; }
+/* The field may sit one level down in a wrapper (.password-field, .captcha-field, the date and
+   time pickers, where the original input becomes type=hidden); the attribute still marks it. */
+label:not([data-form-required]):has(> [required], > * > [required]) > :is(span:first-child,strong:first-child)::after { content: " *"; color: var(--muted); font-weight: 600; }
 .form-required-marker { color: var(--muted); font-weight: 600; white-space: pre; }
 .form-required-marker[hidden] { display: none; }
 label:has(> input[type="checkbox"]), label:has(> input[type="radio"]) { display: flex; align-items: center; gap: 8px; }

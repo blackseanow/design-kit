@@ -249,6 +249,12 @@ async function waitForServer() {
       await desktop.evaluate(() => localStorage.removeItem("design-kit-demo-theme"));
     });
 
+    await check("required marker shows on wrapped fields too (password, captcha)", async () => {
+      await desktop.goto(BASE + "/login");
+      const marks = await desktop.evaluate(() => [...document.querySelectorAll(".login-form label")].map((label) => [label.querySelector(":scope > span").textContent.trim(), getComputedStyle(label.querySelector(":scope > span"), "::after").content]));
+      assert.deepEqual(marks, [["用户名", '" *"'], ["密码", '" *"'], ["验证码", '" *"']]);
+    });
+
     await check("captcha refresh reloads the image, clears and focuses the input", async () => {
       await desktop.goto(BASE + "/login");
       const image = desktop.locator("img[data-captcha-image='captcha']");

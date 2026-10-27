@@ -112,7 +112,7 @@ await Kit.ui.runButtonAction(button, "保存中", () => fetch(...));
 </div>
 ```
 
-- `label > span:first-child` 是字段名；必填字段自动加灰色 `*`。
+- `label > span:first-child` 是字段名；必填字段自动加灰色 `*`（字段包在一层容器里也算，比如密码、验证码、日期）。
 - `.wide-label` 占满两列。
 - 错误：给字段加 `aria-invalid="true"`，在下面放 `<span class="field-error">原因</span>`。
 - 设置页的“左标签、右控件”整行布局：给 `.form-grid` 再加 `.settings-rows`。
