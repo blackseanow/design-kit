@@ -168,12 +168,32 @@
     menu.style.top = `${Math.max(bounds.topEdge, Math.min(top, bounds.bottomEdge - renderedHeight))}px`;
   }
 
+  // Anchored panels (popover, dropdown menu). From the source project's filter and
+  // table-settings popups: align to the anchor's end edge, keep a 12px viewport edge,
+  // open below unless the panel fits better above.
+  function popoverBounds(anchor, view, { width = 360, height = 240, align = "end", gap = 6, edge = 12 } = {}) {
+    const maxWidth = Math.max(0, view.width - edge * 2);
+    const w = Math.min(width, maxWidth);
+    const maxHeight = Math.max(80, view.height - edge * 2);
+    const h = Math.min(height, maxHeight);
+    const preferredLeft = align === "start" ? anchor.left : anchor.right - w;
+    const left = Math.max(view.left + edge, Math.min(preferredLeft, view.left + view.width - w - edge));
+    const below = anchor.bottom + gap;
+    const spaceBelow = view.top + view.height - edge - below;
+    const spaceAbove = anchor.top - gap - (view.top + edge);
+    const upwards = spaceBelow < h && spaceAbove > spaceBelow;
+    const top = upwards
+      ? Math.max(view.top + edge, anchor.top - gap - h)
+      : Math.max(view.top + edge, Math.min(below, view.top + view.height - h - edge));
+    return { left, top, width: w, maxHeight, upwards };
+  }
+
   // Floating menus are portaled into the open modal (siblings are inert) or body.
   const portalHost = (node) => node.closest?.(".modal-backdrop") || root.document.body;
 
   return {
     a11y: { FOCUSABLE_SELECTOR, elementIsFocusable, focusableElements, focusElement, trapTabKey, menuNavigationTarget, syncManagedInert },
     escapeHtml, iconUrl, iconMarkup, isTouchLayout, isDrawerLayout,
-    popups, viewport, selectMenuBounds, positionMenu, portalHost,
+    popups, viewport, selectMenuBounds, positionMenu, popoverBounds, portalHost,
   };
 });

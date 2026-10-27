@@ -24,7 +24,7 @@
   const top = () => openModals().pop() || null;
 
   function describe(modal) {
-    modal.dataset.uiComponent = "ModalShell";
+    modal.dataset.uiComponent = modal.classList.contains("drawer-backdrop") ? "DrawerShell" : "ModalShell";
     modal.setAttribute("role", "dialog");
     modal.setAttribute("aria-modal", "true");
     const heading = modal.querySelector(".modal-head h2");

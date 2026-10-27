@@ -135,10 +135,43 @@
     });
   }
 
-  /* Tabs: roving tabindex, arrow/Home/End keys, optional panel switching. */
+  /* Tabs: roving tabindex, arrow/Home/End keys, optional panel switching.
+     .tabs hosts also get the sliding underline from the source project's
+     page-structure.js (motion-tabs) and a 160ms panel fade. */
   const tabBindings = new WeakSet();
+  const reducedMotion = () => Boolean(root.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+  function TabMotion(host) {
+    if (!host.matches?.(".tabs") || host.dataset.motionBound) return;
+    host.dataset.motionBound = "true";
+    host.classList.add("motion-tabs");
+    const indicator = document.createElement("span");
+    indicator.className = "tab-selection-indicator";
+    indicator.setAttribute("aria-hidden", "true");
+    indicator.style.transition = "none";
+    host.append(indicator);
+    let selected = null;
+    // The observer also sees the host's own class attribute; only write it when it changes.
+    const setIndicator = (shown) => { if (host.classList.contains("has-indicator") !== shown) host.classList.toggle("has-indicator", shown); };
+    const update = () => {
+      const active = host.querySelector(':scope > [aria-selected="true"], :scope > [aria-current="page"], :scope > .active');
+      if (!active || !host.getClientRects().length) { setIndicator(false); return; }
+      indicator.style.width = `${active.offsetWidth}px`;
+      indicator.style.transform = `translateX(${active.offsetLeft}px)`;
+      setIndicator(true);
+      if (selected && selected !== active) {
+        const panel = active.getAttribute("aria-controls") && document.getElementById(active.getAttribute("aria-controls"));
+        if (panel?.animate && !reducedMotion()) panel.animate([{ opacity: 0.65 }, { opacity: 1 }], { duration: 160, easing: "ease-out" });
+      }
+      selected = active;
+      if (indicator.style.transition) requestAnimationFrame(() => { indicator.style.transition = ""; });
+    };
+    new MutationObserver(update).observe(host, { subtree: true, attributes: true, attributeFilter: ["aria-selected", "aria-current", "class"] });
+    if (typeof ResizeObserver === "function") new ResizeObserver(update).observe(host);
+    update();
+  }
   function Tabs(host) {
     identify(host, "Tabs");
+    TabMotion(host);
     const tabs = () => [...host.querySelectorAll('[role="tab"]')];
     const sync = () => tabs().forEach((tab) => {
       const selected = tab.getAttribute("aria-selected") === "true";
@@ -441,6 +474,60 @@
     root.visualViewport?.addEventListener("scroll", updateHelpPosition);
   }
 
+  /* Selection bar: [data-selection-bar="barId"] on a list; checkboxes with
+     data-select-row count, data-select-all toggles them. The bar shows while
+     something is selected and its [data-selection-count] holds the number. */
+  const selectionBound = new WeakSet();
+  function Selection(container) {
+    if (selectionBound.has(container)) return;
+    selectionBound.add(container);
+    const bar = document.getElementById(container.dataset.selectionBar || "");
+    const rows = () => [...container.querySelectorAll("input[type='checkbox'][data-select-row]")].filter((input) => !input.disabled);
+    const all = () => container.querySelector("input[type='checkbox'][data-select-all]");
+    const sync = () => {
+      const selected = rows().filter((input) => input.checked);
+      rows().forEach((input) => input.closest("tr")?.classList.toggle("selected-table-row", input.checked));
+      const master = all();
+      if (master) { master.checked = Boolean(rows().length) && selected.length === rows().length; master.indeterminate = selected.length > 0 && selected.length < rows().length; }
+      if (bar) {
+        bar.hidden = selected.length === 0;
+        bar.querySelectorAll("[data-selection-count]").forEach((node) => { node.textContent = String(selected.length); });
+      }
+      container.dispatchEvent(new CustomEvent("kit:selection-change", { bubbles: true, detail: { selected: selected.map((input) => input.value) } }));
+    };
+    container.addEventListener("change", (event) => {
+      const input = event.target;
+      if (input.matches("input[type='checkbox'][data-select-all]")) rows().forEach((row) => { row.checked = input.checked; });
+      if (input.matches("input[type='checkbox'][data-select-row], input[type='checkbox'][data-select-all]")) sync();
+    });
+    bar?.querySelector("[data-selection-clear]")?.addEventListener("click", () => { rows().forEach((row) => { row.checked = false; }); sync(); });
+    sync();
+  }
+  function bindSmallControls() {
+    document.addEventListener("click", (event) => {
+      // Segmented buttons: one pressed at a time.
+      const segment = event.target.closest?.(".segmented > button[aria-pressed]");
+      if (segment && !segment.disabled && segment.dataset.manual === undefined) {
+        segment.parentElement.querySelectorAll(":scope > button[aria-pressed]").forEach((button) => button.setAttribute("aria-pressed", String(button === segment)));
+      }
+      // Notice banner dismiss.
+      const close = event.target.closest?.("[data-notice-close]");
+      if (close) {
+        const notice = close.closest(".notice");
+        notice?.dispatchEvent(new CustomEvent("kit:notice-close", { bubbles: true }));
+        notice?.remove();
+      }
+    });
+    // Pagination page-size select: option values are page URLs.
+    document.addEventListener("change", (event) => {
+      const select = event.target.closest?.("select[data-page-size-nav]");
+      if (select && select.value) {
+        Kit.pageProgress?.begin?.();
+        root.location.assign(select.value);
+      }
+    });
+  }
+
   /* Password visibility: button.password-visibility-toggle[aria-controls=inputId] */
   function bindPasswordToggles() {
     document.addEventListener("click", (event) => {
@@ -476,12 +563,12 @@
 
   const selectors = {
     Panel: ".panel", Toolbar: ".toolbar", FilterBar: ".filter-bar", MetricCard: ".metric-card",
-    DataTable: ".table-wrap", Tabs: '[role="tablist"]',
+    DataTable: ".table-wrap", Tabs: '[role="tablist"]', TabMotion: ".tabs", Selection: "[data-selection-bar]",
   };
   const components = {
     Panel: (node) => identify(node, "Panel"), Toolbar: (node) => identify(node, "Toolbar"),
     FilterBar: (node) => identify(node, "FilterBar"), MetricCard: (node) => identify(node, "MetricCard"),
-    DataTable, Tabs,
+    DataTable, Tabs, TabMotion, Selection,
   };
   function enhance(scope = document) {
     if (!scope?.querySelectorAll) return;
@@ -507,6 +594,7 @@
     initHelp();
     bindPasswordToggles();
     bindCaptchaRefresh();
+    bindSmallControls();
     const inside = (event, node) => Boolean(node && (node.contains(event.target) || event.composedPath?.().includes(node)));
     document.addEventListener("pointerdown", (event) => {
       if (openRowMenu && !inside(event, openRowMenu.popup) && !inside(event, openRowMenu.trigger)) closeRowMenu();
@@ -534,7 +622,7 @@
 
   Kit.ui = {
     EmptyState, ErrorState, LoadingState, emptyMarkup, renderEmpty, renderError,
-    DataTable, Tabs, RowActions, enhance, setButtonLoading, runButtonAction,
+    DataTable, Tabs, TabMotion, RowActions, Selection, enhance, setButtonLoading, runButtonAction,
     showHelp, hideHelp,
   };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });

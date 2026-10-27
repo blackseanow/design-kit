@@ -1,0 +1,256 @@
+{% extends "design_kit/layout.html" %}
+{% from "design_kit/macros.html" import page_header, panel_head, status_chip, icon, notification_bell, drawer, popover, popover_button, dropdown_menu, menu_button, breadcrumb, steps, segmented, notice, progress_bar, status_dot, tag, count_badge, avatar, timeline, selection_bar, disclosure, notification_item, empty_state, help_button %}
+{% block title %}弹层与导航 · {{ kit.brand_name }}{% endblock %}
+{% block header_actions %}
+{{ notification_bell(count=unread, popover="notificationPopover") }}
+{% call popover("notificationPopover", "消息中心", width=400) %}
+  <div class="notification-toolbar">
+    <div class="tabs" role="tablist" aria-label="消息筛选">
+      <button type="button" role="tab" id="noticeTabAll" aria-selected="true" aria-controls="noticeListAll">全部</button>
+      <button type="button" role="tab" id="noticeTabUnread" aria-selected="false" aria-controls="noticeListUnread">未读{{ count_badge(unread, id="noticeUnreadCount") }}</button>
+    </div>
+    <div class="notification-bulk-actions"><button class="text-button" type="button" id="noticeReadAll">全部已读</button></div>
+  </div>
+  <div class="notification-list" id="noticeListAll" role="tabpanel" aria-labelledby="noticeTabAll">
+    {% for item in notices %}
+    {% call notification_item(item.title, item.message, item.meta, read=item.read, id=item.id, active_label=item.active) %}
+      <a class="text-button" href="{{ url_for('records') }}">查看任务</a>
+      <button class="text-button" type="button" data-notice-toggle="{{ item.id }}">{{ '标为未读' if item.read else '标为已读' }}</button>
+    {% endcall %}
+    {% endfor %}
+  </div>
+  <div class="notification-list" id="noticeListUnread" role="tabpanel" aria-labelledby="noticeTabUnread" hidden>
+    {% for item in notices if not item.read %}
+    {{ notification_item(item.title, item.message, item.meta, read=false, id=item.id ~ '-u', active_label=item.active) }}
+    {% else %}
+    {{ empty_state("没有未读消息", "新的未读消息会显示在这里。", compact=true, borderless=true) }}
+    {% endfor %}
+  </div>
+  <p class="field-helper-text">演示数据。右上角的角标由 <code>Kit.badge.set()</code> 更新。</p>
+{% endcall %}
+{% endblock %}
+{% block content %}
+{{ breadcrumb([{"label": "设计规范", "href": url_for('components')}, {"label": "组件", "href": url_for('components')}, {"label": "弹层与导航"}]) }}
+{% call page_header("弹层与导航", "第一次抽取时没有带上的组件：抽屉、弹出层、下拉菜单、提醒角标、多级菜单、面包屑、步骤条等。左侧“组件”分组就是两级菜单。") %}
+  {{ menu_button("pageMenu", "更多", icon_name="ellipsis", chevron=false, label="页面操作") }}
+  {% call dropdown_menu("pageMenu", "页面操作") %}
+    <div class="dropdown-menu-label">导出</div>
+    <button type="button" role="menuitem" data-demo-action="导出 CSV">{{ icon('copy') }}导出 CSV</button>
+    <button type="button" role="menuitem" data-demo-action="打印">{{ icon('eye') }}打印预览</button>
+    <div class="dropdown-menu-separator"></div>
+    <div class="dropdown-menu-label">刷新频率</div>
+    <button type="button" role="menuitemradio" aria-checked="true" data-value="30">每 30 秒</button>
+    <button type="button" role="menuitemradio" aria-checked="false" data-value="60">每分钟</button>
+    <button type="button" role="menuitemradio" aria-checked="false" data-value="0">不刷新</button>
+    <div class="dropdown-menu-separator"></div>
+    <button type="button" role="menuitem" class="danger-text" data-demo-action="清空记录">{{ icon('trash-2') }}清空记录</button>
+  {% endcall %}
+  <button class="btn-primary" type="button" data-modal-open="detailDrawer">{{ icon('panel-right') }}打开抽屉</button>
+{% endcall %}
+
+{{ notice("示例横幅：有 2 项需要处理。", "横幅用于页面级状态；短提示用行内提示，操作结果用全局提示。", "warning", dismissible=true) }}
+
+<section class="panel" id="drawers">
+  {{ panel_head("抽屉", "从右侧滑入的侧边面板，复用弹窗的焦点圈定、Esc、滚动锁定。桌面最宽 1040px，手机铺满。") }}
+  <div class="button-group">
+    <button class="btn-secondary" type="button" data-modal-open="detailDrawer">{{ icon('panel-right') }}右侧抽屉（md）</button>
+    <button class="btn-secondary" type="button" data-modal-open="wideDrawer">宽抽屉（xl）</button>
+    <button class="btn-secondary" type="button" data-modal-open="leftDrawer">左侧抽屉（sm）</button>
+  </div>
+</section>
+
+<section class="panel" id="popovers">
+  {{ panel_head("弹出层与下拉菜单", "弹出层是锚定在按钮旁的小对话框，字段留在原表单里；下拉菜单是一组操作。") }}
+  <div class="button-group">
+    {{ popover_button("settingsPopover", "显示设置", icon_name="settings") }}
+    {% call popover("settingsPopover", "显示设置") %}
+      <label><span>时区</span><select name="tz"><option>Asia/Shanghai</option><option>UTC</option></select></label>
+      <label><span>每页条数</span><select name="per"><option>20</option><option>50</option></select></label>
+      <label class="switch-label"><span>紧凑模式</span><input class="toggle-switch-input" type="checkbox"></label>
+      <div class="popover-actions"><button class="btn-secondary btn-small" type="button" data-popover-close>取消</button><button class="btn-primary btn-small" type="button" data-popover-close>应用</button></div>
+    {% endcall %}
+    {{ menu_button("sortMenu", "排序：更新时间") }}
+    {% call dropdown_menu("sortMenu", "排序") %}
+      <button type="button" role="menuitemradio" aria-checked="true" data-value="updated">更新时间</button>
+      <button type="button" role="menuitemradio" aria-checked="false" data-value="name">名称</button>
+      <button type="button" role="menuitemradio" aria-checked="false" data-value="runs">执行次数</button>
+    {% endcall %}
+    {{ menu_button("switchMenu", "示例空间 A", icon_name="layout-dashboard") }}
+    {% call dropdown_menu("switchMenu", "切换空间") %}
+      <div class="dropdown-menu-search"><label><span class="sr-only">搜索空间</span><input type="search" placeholder="搜索空间" aria-label="搜索空间"></label></div>
+      <button type="button" role="menuitemradio" aria-checked="true">示例空间 A</button>
+      <button type="button" role="menuitemradio" aria-checked="false">示例空间 B</button>
+      <button type="button" role="menuitemradio" aria-checked="false">示例空间 C</button>
+      <div class="dropdown-menu-footer"><a role="menuitem" href="{{ url_for('settings') }}">{{ icon('plus') }}新建空间</a></div>
+    {% endcall %}
+  </div>
+  <p class="field-helper-text" style="margin-top:12px">键盘：↓ 打开并聚焦第一项，↑↓ Home End 移动，Esc 关闭并回到按钮。弹出层里的下拉菜单先关闭，第二次 Esc 才关闭弹出层。</p>
+</section>
+
+<section class="panel" id="navigation">
+  {{ panel_head("面包屑、步骤条、分段控件") }}
+  {{ breadcrumb([{"label": "任务列表", "href": url_for('records')}, {"label": "示例任务 01", "href": url_for('records')}, {"label": "编辑"}], back=true) }}
+  <div style="margin-top:20px">
+    {{ steps(["填写信息", {"label": "验证", "hint": "等待确认"}, "完成"], current=2) }}
+  </div>
+  <form class="form-grid" style="margin-top:20px" onsubmit="return false">
+    <label><span>视图</span>{{ segmented("view", [("list", "列表"), ("board", "看板"), ("calendar", "日历")], value="list", label="视图") }}</label>
+    <label><span>按钮版本（aria-pressed）</span>
+      <div class="segmented" role="group" aria-label="周期">
+        <button type="button" aria-pressed="true">日</button><button type="button" aria-pressed="false">周</button><button type="button" aria-pressed="false">月</button>
+      </div>
+    </label>
+  </form>
+</section>
+
+<section class="panel" id="indicators">
+  {{ panel_head("横幅、进度、标签、角标") }}
+  <div style="display:grid;gap:12px">
+    {{ notice("已连接", "最近同步：2026-10-26 09:12。", "success") }}
+    {% call notice("读取失败", "服务暂时不可用，请稍后重试。", "error") %}<a class="btn-secondary btn-small" href="{{ request.path }}">重试</a>{% endcall %}
+    {{ notice("数据可能已过期", "上次刷新在 15 分钟前。", "warning") }}
+    {{ notice("说明", "没有语气的中性横幅。") }}
+  </div>
+  <div class="form-grid" style="margin-top:20px">
+    {{ progress_bar(42, label="导入进度") }}
+    {{ progress_bar(100, label="已完成", tone="success") }}
+    {{ progress_bar(8, 10, label="配额", tone="warning") }}
+    {{ progress_bar(3, 4, label="失败重试", tone="error", thick=true) }}
+  </div>
+  <div class="button-group" style="margin-top:20px">
+    {{ status_dot("已启用", "is-on") }}{{ status_dot("已停用") }}{{ status_dot("需要处理", "warning") }}{{ status_dot("失败", "error") }}
+  </div>
+  <div class="tag-list" style="margin-top:16px">
+    {{ tag("自动化") }}{{ tag("每日") }}{{ tag("品牌色", "brand") }}{{ tag("可移除", remove_url=request.path) }}
+  </div>
+  <div class="button-group" style="margin-top:16px">
+    <span>未读 {{ count_badge(3) }}</span><span>品牌 {{ count_badge(12, "brand") }}</span><span>中性 {{ count_badge(128, "neutral") }}</span>
+    {{ avatar("示例") }}{{ avatar("B", size="sm") }}{{ avatar("C", size="lg") }}
+  </div>
+</section>
+
+<section class="panel" id="lists">
+  {{ panel_head("时间线、批量选择、折叠面板") }}
+  {{ timeline([
+    {"time": "09:12", "title": "任务开始", "status": "运行中", "tone": "success"},
+    {"time": "09:14", "title": "第 1 次重试", "text": "连接超时，30 秒后重试。", "status": "需要处理", "tone": "warning"},
+    {"time": "09:20", "title": "任务完成", "text": "共处理 128 条。"},
+  ]) }}
+  <div style="margin-top:24px">
+    {% call selection_bar("rowSelection") %}
+      <button class="btn-secondary" type="button" data-demo-action="批量暂停">批量暂停</button>
+      <button class="btn-danger-outline" type="button" data-demo-action="批量删除">批量删除</button>
+    {% endcall %}
+    <div class="table-wrap" id="selectableTable" data-selection-bar="rowSelection" data-table-settings style="margin-top:12px">
+      <table class="console-data-table">
+        <thead><tr><th><input type="checkbox" data-select-all aria-label="全选"></th><th>名称</th><th>负责人</th><th>状态</th><th>执行次数</th><th>更新时间</th></tr></thead>
+        <tbody>
+          {% for row in rows %}
+          <tr>
+            <td><input type="checkbox" data-select-row value="{{ row.id }}" aria-label="选择 {{ row.name }}"></td>
+            <td><strong>{{ row.name }}</strong></td><td>{{ row.owner }}</td>
+            <td>{{ status_chip(statuses[row.status][0], statuses[row.status][1]) }}</td><td>{{ row.runs }}</td><td>{{ row.updated }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="field-helper-text" style="margin-top:8px">表头最右侧的齿轮是表格设置：显示列和行密度保存在浏览器里。</p>
+  </div>
+  <div style="margin-top:24px">
+    {% call disclosure("高级选项", meta="3 项") %}
+      <div class="form-grid">
+        <label><span>超时（秒）</span><input value="30"></label>
+        <label><span>重试次数</span><input value="3"></label>
+      </div>
+    {% endcall %}
+    {% call disclosure("危险操作", danger=true) %}
+      <p class="field-helper-text">删除后无法恢复。</p>
+      <button class="btn-danger-outline btn-small" type="button" style="margin-top:12px">删除此任务</button>
+    {% endcall %}
+  </div>
+</section>
+{% endblock %}
+
+{% block modals %}
+{% call(slot) drawer("detailDrawer", "示例任务 01", "抽屉里的下拉、日期菜单也留在抽屉的焦点范围内。") %}
+  {% if slot == "body" %}
+  <div class="summary-list">
+    <div><strong>负责人</strong><span>示例成员 B</span></div>
+    <div><strong>状态</strong><span>{{ status_chip("运行中", "success") }}</span></div>
+    <div><strong>执行次数</strong><span>37</span></div>
+    <div><strong>更新时间</strong><span>2026-10-26 09:12</span></div>
+  </div>
+  <div class="form-grid" style="margin-top:24px">
+    <label class="wide-label"><span>名称</span><input value="示例任务 01"></label>
+    <label><span>状态</span><select><option>运行中</option><option>已暂停</option></select></label>
+    <label><span>日期</span><input type="date" value="2026-11-02"></label>
+  </div>
+  {% else %}
+  <button class="btn-secondary" type="button" data-modal-close>关闭</button>
+  <button class="btn-primary" type="button" data-modal-close>保存</button>
+  {% endif %}
+{% endcall %}
+{% call(slot) drawer("wideDrawer", "运行记录", "宽抽屉适合表格或日志。", size="xl") %}
+  {% if slot == "body" %}
+  <div class="table-wrap">
+    <table class="console-data-table">
+      <thead><tr><th>名称</th><th>负责人</th><th>状态</th><th>更新时间</th></tr></thead>
+      <tbody>{% for row in rows %}<tr><td>{{ row.name }}</td><td>{{ row.owner }}</td><td>{{ status_chip(statuses[row.status][0], statuses[row.status][1]) }}</td><td>{{ row.updated }}</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+  {% else %}
+  <button class="btn-primary" type="button" data-modal-close>知道了</button>
+  {% endif %}
+{% endcall %}
+{% call(slot) drawer("leftDrawer", "筛选", side="left", size="sm") %}
+  {% if slot == "body" %}
+  <div class="form-grid one-column">
+    <label><span>状态</span><select><option>全部</option><option>运行中</option></select></label>
+    <label><span>负责人</span><select><option>全部</option><option>示例成员 A</option></select></label>
+  </div>
+  {% else %}
+  <button class="btn-secondary" type="button" data-modal-close>取消</button>
+  <button class="btn-primary" type="button" data-modal-close>应用</button>
+  {% endif %}
+{% endcall %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("click", (event) => {
+      const action = event.target.closest("[data-demo-action]");
+      if (action) Kit.feedback.show(`${action.dataset.demoAction}（演示）`, "info", { timeout: 2500 });
+    });
+    document.getElementById("sortMenu").addEventListener("kit:menu-select", (event) => {
+      document.querySelector('[data-menu-open="sortMenu"] > span').textContent = `排序：${event.detail.item.textContent.trim()}`;
+    });
+    document.getElementById("switchMenu").addEventListener("kit:menu-select", (event) => {
+      if (event.detail.item.getAttribute("role") === "menuitemradio") document.querySelector('[data-menu-open="switchMenu"] > span').textContent = event.detail.item.textContent.trim();
+    });
+    // Notification demo: mark items read and keep the bell badge in step.
+    const syncUnread = () => {
+      const unread = document.querySelectorAll('#noticeListAll .notification-item[data-read="false"]').length;
+      Kit.badge.set("notificationBell", unread);
+      const count = document.getElementById("noticeUnreadCount");
+      count.textContent = unread > 99 ? "99+" : String(unread);
+      count.hidden = unread === 0;
+    };
+    document.getElementById("noticeReadAll").addEventListener("click", () => {
+      document.querySelectorAll('#noticeListAll .notification-item').forEach((item) => { item.dataset.read = "true"; });
+      syncUnread();
+      Kit.feedback.show("已全部标为已读（演示）", "success", { timeout: 2000 });
+    });
+    document.addEventListener("click", (event) => {
+      const toggle = event.target.closest("[data-notice-toggle]");
+      if (!toggle) return;
+      const item = toggle.closest(".notification-item");
+      const read = item.dataset.read !== "true";
+      item.dataset.read = String(read);
+      toggle.textContent = read ? "标为未读" : "标为已读";
+      syncUnread();
+    });
+  });
+</script>
+{% endblock %}

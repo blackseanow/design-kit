@@ -1,0 +1,113 @@
+{#- First-paint splash, enabled with DESIGN_KIT_STARTUP_SPLASH = True.
+    Source: the source project's templates/startup_loading.html. The brand artwork and
+    the "coming from the login page" shortcut were not taken; the mechanism is the same:
+    - critical CSS is inline, so the splash paints before any stylesheet arrives;
+    - <html data-startup-pending> hides everything but the splash;
+    - head.html loads the kit stylesheets with media="print" and switches them to
+      "all" as each one arrives (KitStartup.styleReady); the splash is released
+      when the DOM and every stylesheet are ready;
+    - a slow hint appears after 4s; a 15s timeout, a failed stylesheet and a
+      back-forward cache restore all release the screen so it can never stick.
+    KitStartup.whenReady(fn) runs fn once CSS is really ready (for layout readers).
+    Note: the onload handlers on <link> are inline event handlers; a nonce-based CSP
+    needs 'unsafe-hashes' or has to allow them another way. -#}
+{% macro startup_head(nonce='', slow_label='网络较慢，请稍候', slow_ms=4000, timeout_ms=15000) -%}
+<style{% if nonce %} nonce="{{ nonce }}"{% endif %}>
+  .startup-loading { display: none; }
+  html[data-startup-pending] { background: var(--canvas, #fcfcfe); overflow: hidden; scrollbar-gutter: auto; }
+  html[data-theme="dark"][data-startup-pending] { background: var(--canvas, #03080a); }
+  html[data-startup-pending] body > :not(.startup-loading):not(script):not(style) { display: none !important; }
+  html[data-startup-pending] .startup-loading { position: fixed; inset: 0; z-index: 30001; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 24px; box-sizing: border-box; background: var(--canvas, #fcfcfe); color: var(--ink, #03080a); font: 14px/1.6 system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+  html[data-theme="dark"][data-startup-pending] .startup-loading { background: var(--canvas, #03080a); color: var(--ink, #fcfcfe); }
+  .startup-loading-brand { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 600; }
+  .startup-loading-brand img { display: block; height: 32px; width: auto; max-width: min(240px, 70vw); }
+  .startup-loading-brand .startup-logo-dark, html[data-theme="dark"] .startup-loading-brand .startup-logo-light { display: none; }
+  html[data-theme="dark"] .startup-loading-brand .startup-logo-dark { display: block; }
+  .startup-loading-mark { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; background: var(--brand, #7624f4); color: var(--on-brand, #fff); font-size: 18px; font-weight: 700; line-height: 1; }
+  html[data-theme="dark"] .startup-loading-mark { background: var(--brand, #c8ff00); color: var(--on-brand, #03080a); }
+  .startup-loading-status { position: relative; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .startup-loading-dots { display: flex; align-items: center; gap: 8px; height: 20px; color: var(--brand, #7624f4); }
+  html[data-theme="dark"] .startup-loading-dots { color: var(--brand, #c8ff00); }
+  .startup-loading-dot { width: 10px; height: 10px; flex: none; border-radius: 50%; background: currentColor; opacity: .6; animation: startup-dot-bounce 1.2s ease-in-out infinite; }
+  .startup-loading-dot:nth-child(2) { animation-delay: .16s; }
+  .startup-loading-dot:nth-child(3) { animation-delay: .32s; }
+  .startup-loading-label { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; font-size: 12px; color: var(--muted, rgba(3,8,10,.69)); }
+  html[data-theme="dark"] .startup-loading-label { color: var(--muted, rgba(252,252,254,.627)); }
+  /* The slow hint must not recenter the brand and the dots. */
+  html[data-startup-slow] .startup-loading-label { top: calc(100% + 12px); left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 48px); height: auto; margin: 0; overflow: visible; clip-path: none; white-space: normal; text-align: center; }
+  .startup-loading-warning { margin: 16px; font: 13px/1.6 system-ui, sans-serif; color: var(--ink, #03080a); }
+  html[data-theme="dark"] .startup-loading-warning { color: var(--ink, #fcfcfe); }
+  .startup-loading-warning[hidden] { display: none; }
+  @keyframes startup-dot-bounce { 0%, 60%, 100% { transform: translateY(0); opacity: .6; } 30% { transform: translateY(-5px); opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .startup-loading-dot { animation: none; transform: none; opacity: 1; } }
+</style>
+<script{% if nonce %} nonce="{{ nonce }}"{% endif %}>
+  (() => {
+    const root = document.documentElement;
+    let released = false, domReady = false, failed = false;
+    const readyCallbacks = [];
+    let slowTimer, fallbackTimer;
+    const release = (fallback = false) => {
+      if (released) return;
+      released = true;
+      clearTimeout(slowTimer);
+      clearTimeout(fallbackTimer);
+      root.removeAttribute("data-startup-pending");
+      root.removeAttribute("data-startup-slow");
+      const autofocus = document.querySelector("[autofocus]");
+      if (!fallback && !failed && autofocus && document.activeElement === document.body) autofocus.focus({ preventScroll: true });
+      const warning = document.getElementById("startupLoadingWarning");
+      if (warning && (failed || fallback)) {
+        warning.textContent = "部分页面资源仍未就绪，可刷新页面重试。";
+        warning.hidden = false;
+      }
+    };
+    const settle = () => {
+      if (!domReady || [...document.querySelectorAll("[data-startup-style]")].some((link) => !link.dataset.startupReady)) return;
+      release();
+      if (!failed) {
+        const warning = document.getElementById("startupLoadingWarning");
+        if (warning) warning.hidden = true;
+      }
+      readyCallbacks.splice(0).forEach((callback) => callback());
+    };
+    window.KitStartup = {
+      styleReady: (link, error = false) => {
+        link.media = "all";
+        link.dataset.startupReady = "true";
+        failed ||= error;
+        settle();
+      },
+      // Layout readers wait for real CSS readiness, even after a timeout released the screen.
+      whenReady: (callback) => { readyCallbacks.push(callback); settle(); },
+      release,
+    };
+    root.setAttribute("data-startup-pending", "");
+    document.addEventListener("DOMContentLoaded", () => { domReady = true; settle(); }, { once: true });
+    window.addEventListener("pageshow", (event) => { if (event.persisted) release(); });
+    window.addEventListener("error", (event) => {
+      if ((!released || !domReady) && event.target?.tagName === "SCRIPT" && event.target.src) failed = true;
+    }, true);
+    slowTimer = setTimeout(() => {
+      const label = document.getElementById("startupLoadingLabel");
+      if (label) { label.textContent = {{ slow_label|tojson }}; root.setAttribute("data-startup-slow", ""); }
+    }, {{ slow_ms|int }});
+    // A lost stylesheet or script must never leave a permanent full-screen blocker.
+    fallbackTimer = setTimeout(() => release(true), {{ timeout_ms|int }});
+  })();
+</script>
+{%- endmacro %}
+
+{% macro startup_screen(label='正在加载页面…') -%}
+<div id="startupLoading" class="startup-loading" role="status" aria-live="polite" aria-atomic="true">
+  <div class="startup-loading-brand">
+    {% if kit.logo_light %}<img class="startup-logo-light" src="{{ kit.logo_light }}" alt="{{ kit.brand_name }}"><img class="startup-logo-dark" src="{{ kit.logo_dark }}" alt="{{ kit.brand_name }}">
+    {%- else %}<span class="startup-loading-mark" aria-hidden="true">{{ kit.brand_mark }}</span><span>{{ kit.brand_name }}</span>{% endif %}
+  </div>
+  <div class="startup-loading-status">
+    <span class="startup-loading-dots" aria-hidden="true"><span class="startup-loading-dot"></span><span class="startup-loading-dot"></span><span class="startup-loading-dot"></span></span>
+    <span id="startupLoadingLabel" class="startup-loading-label">{{ label }}</span>
+  </div>
+</div>
+<p id="startupLoadingWarning" class="startup-loading-warning" role="status" hidden></p>
+{%- endmacro %}

@@ -18,6 +18,8 @@ DESIGN_KIT_THEME_KEY       localStorage key for the appearance choice ("app-them
 DESIGN_KIT_LANG            <html lang>                              ("zh-CN")
 DESIGN_KIT_HOME_URL        target of the brand link                 ("/")
 DESIGN_KIT_EXTRA_CSS       app static paths loaded after the kit CSS, e.g. brand tokens ([])
+DESIGN_KIT_STARTUP_SPLASH  show the brand and three dots until every stylesheet
+                           has loaded (inline critical CSS; see docs/components.md)  (False)
 """
 from __future__ import annotations
 
@@ -28,7 +30,7 @@ from pathlib import Path
 from flask import Blueprint, Flask, url_for
 
 __all__ = ["DesignKit", "STYLESHEETS", "SCRIPTS"]
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 
@@ -53,6 +55,8 @@ SCRIPTS = (
     "select.js",
     "datetime.js",
     "ui.js",
+    "loading.js",
+    "popover.js",
     "shell.js",
 )
 
@@ -98,6 +102,7 @@ class DesignKit:
         config.setdefault("DESIGN_KIT_LANG", "zh-CN")
         config.setdefault("DESIGN_KIT_HOME_URL", "/")
         config.setdefault("DESIGN_KIT_EXTRA_CSS", [])
+        config.setdefault("DESIGN_KIT_STARTUP_SPLASH", False)
         app.register_blueprint(self.blueprint)
         # Debug reloads pick up edited assets; production hashes are cached.
         if app.debug:
@@ -151,3 +156,8 @@ class _KitContext:
     @property
     def extra_css(self):
         return [_app_url(path) for path in self._config.get("DESIGN_KIT_EXTRA_CSS") or []]
+
+    @property
+    def stylesheet_urls(self):
+        """Kit stylesheets in contract order, then the app's own."""
+        return [self.asset(sheet) for sheet in STYLESHEETS] + self.extra_css

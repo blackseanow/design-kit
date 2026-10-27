@@ -1,6 +1,8 @@
 {# Include inside <head>. Applies the saved appearance before CSS paints,
    then loads the kit stylesheets in contract order, then the app's own CSS
-   (DESIGN_KIT_EXTRA_CSS) so brand token overrides win.
+   (DESIGN_KIT_EXTRA_CSS) so brand token overrides win. With
+   DESIGN_KIT_STARTUP_SPLASH the splash paints first and each stylesheet is
+   switched on as it arrives (design_kit/startup.html).
    Pass csp_nonce in the template context if you use a nonce-based CSP. #}
 <meta name="design-kit-icons" content="{{ kit.icons }}">
 <script{% if csp_nonce is defined %} nonce="{{ csp_nonce }}"{% endif %}>
@@ -14,9 +16,12 @@
     root.dataset.theme = dark ? "dark" : "light";
   })();
 </script>
-{% for sheet in kit.stylesheets %}
-<link rel="stylesheet" href="{{ kit.asset(sheet) }}">
+{% if kit.startup_splash %}{% from "design_kit/startup.html" import startup_head %}{{ startup_head(csp_nonce if csp_nonce is defined else '') }}{% endif %}
+{% for href in kit.stylesheet_urls %}
+<link rel="stylesheet" href="{{ href }}"{% if kit.startup_splash %} media="print" data-startup-style onload="window.KitStartup.styleReady(this)" onerror="window.KitStartup.styleReady(this, true)"{% endif %}>
 {% endfor %}
-{% for href in kit.extra_css %}
-<link rel="stylesheet" href="{{ href }}">
-{% endfor %}
+{% if kit.startup_splash %}
+<noscript>
+{% for href in kit.stylesheet_urls %}<link rel="stylesheet" href="{{ href }}">{% endfor %}
+</noscript>
+{% endif %}
