@@ -80,6 +80,7 @@ def shell():
 | `DESIGN_KIT_BRAND_NAME` | 顶栏和标题里的产品名 | `"Console"` |
 | `DESIGN_KIT_BRAND_TAGLINE` | 登录页产品名下面的一行字 | `""` |
 | `DESIGN_KIT_BRAND_MARK` | 没有 Logo 时显示的字母 | 产品名第一个字 |
+| `DESIGN_KIT_LOGO_FULL_LIGHT` / `_DARK` | 可选完整横版品牌图；手机使用 LOGO_LIGHT/DARK 头像回退 | `None` |
 | `DESIGN_KIT_LOGO_LIGHT` / `_DARK` | Logo 图片：应用 static 下的路径或完整 URL | `None` |
 | `DESIGN_KIT_THEME_KEY` | 保存日间/夜间选择的 localStorage key | `"app-theme"` |
 | `DESIGN_KIT_LANG` | `<html lang>` | `"zh-CN"` |
