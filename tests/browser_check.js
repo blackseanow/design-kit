@@ -202,12 +202,17 @@ async function waitForServer() {
       await desktop.evaluate(() => window.scrollTo(0, 0));
       await desktop.waitForTimeout(150);
       assert.equal(await desktop.locator(".loading-viewport-fallback").count(), 0, "the loading panel below the fold adds no pill at the top");
-      await desktop.locator("#loadingRunDemo").click();
-      await desktop.locator("#loadingDemoTable .page-list-loading").waitFor();
+      // Start a 2.5s task on the demo table while it is centred in the viewport, so the mask
+      // is seen in every engine regardless of where a button click scrolled the page.
+      await desktop.evaluate(() => {
+        document.getElementById("loadingDemoTable").scrollIntoView({ block: "center" });
+        window.__pillTask = Kit.loading.run("loadingDemoTable", () => new Promise((resolve) => setTimeout(resolve, 2500)), { label: "滚出测试" });
+      });
+      await desktop.locator("#loadingDemoTable .page-list-loading .page-list-loading-content").waitFor({ state: "visible" });
       await desktop.evaluate(() => window.scrollTo(0, 0));
-      const pill = desktop.locator(".loading-viewport-fallback", { hasText: "正在刷新任务" });
-      await pill.waitFor({ timeout: 1500 });
-      await desktop.waitForFunction(() => ![...document.querySelectorAll(".loading-viewport-fallback")].some((node) => node.textContent.includes("正在刷新任务")), null, { timeout: 4000 });
+      await desktop.locator(".loading-viewport-fallback", { hasText: "滚出测试" }).waitFor({ timeout: 1500 });
+      await desktop.evaluate(() => window.__pillTask);
+      await desktop.waitForFunction(() => ![...document.querySelectorAll(".loading-viewport-fallback")].some((node) => node.textContent.includes("滚出测试")), null, { timeout: 4000 });
     });
 
     await check("loading run: a failed task shows an error overlay whose retry runs the task again", async () => {
