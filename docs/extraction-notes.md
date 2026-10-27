@@ -41,7 +41,7 @@
 | `Kit.tableSettings`、`.table-settings-*`、`.table-column-hidden` | `static/ui/tables.js`、`components.css` 的表格设置样式 | 逻辑原样移植（显示列、行密度、按表格 id 和列名存 localStorage、自动补操作列）；改为 `data-table-settings` 显式开启；弹层改用 `Kit.popover` 和 `Kit.ui.Tabs` |
 | `drawer` 宏、`.drawer-*` | 原项目已下线的回复调试抽屉：`a7d4997^` 之前的 `overlays.css` `.ai-reply-test-drawer`（宽 `min(1040px, 100vw - 48px)`、左边线、对话框阴影、`transform` 180ms ease、手机铺满）和 `ui-system.js` 的 `DrawerShell` | 不再单独实现：抽屉就是贴边的 `.modal-backdrop`，复用 modal.js 的焦点、Esc、滚动锁定和层叠；宽度分 sm/md/lg/xl，xl 取原值 1040 |
 | `notification_bell` / `header_icon_button` 宏、`Kit.badge` | `templates/dashboard.html` 的 `#notificationBell` + `.notification-unread-badge`，`static/ui/notification-center.js` 的角标更新（`99+`、`aria-label` 带未读数） | 角标 CSS 第一次已带来（`.header-badge`）；这次补宏和 JS；轮询和 `/api/notifications` 是业务，没有带 |
-| `notification_item` 宏、`.notification-*` | `templates/notification_center.html`、`pages.css` 309–325 行 | 结构和样式一致；未读用 `success` 芯片（原来是 `.on`）；“查看账号”等操作放在 call 块里 |
+| `notification_item` 宏、`.notification-*` | `templates/notification_center.html`、`pages.css` 309–325 行 | 结构和样式一致；未读芯片改用品牌色（`info`，原来是绿色的 `.on`，按使用方的要求改的）；“查看账号”等操作放在 call 块里 |
 | `breadcrumb` 宏、`.breadcrumb` | `account-detail.css` 的 `.account-detail-breadcrumb`（13px、10px 间距、返回箭头） | 改成 `<nav><ol>` 结构，最后一项 `aria-current="page"` |
 | `steps` 宏、`.steps` | `pages.css` 的 `.account-onboarding-steps`（文字步骤：完成为正文色、当前品牌色加粗）和 `.overview-onboarding-step` 的圆形标记（完成绿底、下一步品牌底） | 合成一个横向步骤条：28px 圆标 + 文字 + 连接线；竖排变体为 kit 新增 |
 | `segmented` 宏、`.segmented` | `pages.css` 的 `.policy-mode-segmented`（4px 内边距、浅底、选中项白底描边加阴影） | 改用单选框实现，随表单提交；`aria-pressed` 按钮版本保留 |
@@ -54,6 +54,12 @@
 | 选项卡滑动底线 | `static/ui/page-structure.js` 的 `bindTabMotion`、`components.css` 的 `.motion-tabs` | 并入 `Kit.ui.Tabs`；面板淡入 160ms；修了一个会让 MutationObserver 自触发的写法（见下文） |
 | `pagination` 的每页条数和跳页 | `static/ui/pagination.js` 的 `.list-pagination-size` / `.list-pagination-jump` | 改为服务端链接：下拉的选项值是 URL，跳页是原生 GET 表单 |
 | 两级侧栏菜单 | 无。原项目侧栏只有分组标题 + 一级条目（`dashboard.html` 131–173 行） | kit 新增：父项为 `aria-expanded` 按钮，样式沿用 `.nav-item` 的 Token |
+| `loading.js` 的控制器 | `static/loading_controller.js`（LoadingController：150 / 450 / 120 / 100ms，按 scope 去重，cancel / fail） | 逻辑原样移植成闭包；新增 `Kit.loading.run(host, task)` 把它接到 `Kit.ui.LoadingState` 遮罩上，失败变成带重试的错误遮罩（原项目由各业务 loader 自己处理） |
+| `loading.js` 的视口跟随、`.page-list-loading-content`、`.loading-viewport-fallback` | `static/ui/loading-viewport.js`、`overlays.css` 124 / 127 行 | 原样移植；作用域从 `.content-section.active` 改为 `.main` |
+| `page_header(loading=true)`、`.page-title-loading` | `pages.css` 1117–1118 行 | 同样的 20px 占位；`Kit.loading.title()` 切换 |
+| `loading_dots` 宏、`.loading-dots` | `startup_loading.html` 的三个跳动圆点 | 缩小到 8px 用于行内 |
+| `.header-icon-button[aria-busy]` | `shell.css` 的 `.mobile-site-refresh[aria-busy="true"]` | 推广到所有顶栏图标按钮 |
+| `startup.html`、`DESIGN_KIT_STARTUP_SPLASH` | `templates/startup_loading.html`（内联关键样式、`data-startup-pending`、样式表 `media="print"` 切换、4s 慢网提示、15s 超时、bfcache 释放、`whenReady`）；`ui_styles.html` 的链接写法 | 机制一致，改为配置开关、品牌标记用 kit 的 Logo 或文字方块；没带 Joker 插画和“登录后跳转不再显示”的 sessionStorage 逻辑 |
 | 图标 `filter`、`settings`、`panel-right` | `filters.js`、`tables.js` 里的内联 SVG 路径；`panel-right` 来自 Lucide | 加进 `icons.svg` |
 
 说明：
@@ -66,7 +72,7 @@
 ## 没有带走的内容
 
 - 业务页面样式：`pages.css` 的业务部分、`account-detail.css`、`business-lists.css`、`runtime-settings.css`。
-- 品牌：`brand.css`、`templates/brand_logo.html`、`static/brand/` 下的 Joker Logo 和 favicon、启动画面（`startup_loading.html`、`loading_controller.js`）。
+- 品牌：`brand.css`、`templates/brand_logo.html`、`static/brand/` 下的 Joker Logo 和 favicon、启动画面里的 Joker 插画（画面本身已作为可选项带走）。
 - 业务交互：账号切换、自动化总开关、通知中心的轮询和接口（`notification-center.js` 的 `load` / `update`）、加入群聊弹窗、未保存提醒（`unsaved-changes.js`）、表单字段规则（`form-feedback.js`、`form-contracts.js`）、可搜索实体选择器（`channel-target-picker.js`）。
 - 手机软键盘适配（`runtime.js`）。kit 只同步 `--ui-viewport-height` / `--ui-viewport-top` 两个变量，键盘弹出时的滚动补偿没有带走。
 
@@ -89,7 +95,7 @@
 - 链接按钮样式（`a.btn-primary` 等）、链接选项卡、链接分页、`.page-content` 容器、`.settings-rows`。
 - 多页面应用的进度条接线：站内链接和表单提交时开始，页面 `load` 后结束，从前进后退缓存恢复时清除。
 - `Kit.modal.confirm()`、`Kit.modal.onClose()`、选项卡按 `aria-controls` 切换面板、`data-primary-visible`、`data-icon`。
-- 第二批：两级侧栏菜单、`Kit.badge`、抽屉、`Kit.popover` / `Kit.menu` / `Kit.tableSettings`、`Kit.ui.Selection`、面包屑、步骤条、分段控件、横幅、进度条、状态点、标签、计数角标、头像、时间线、折叠面板、消息列表、分页的每页条数和跳页。
+- 第二批：两级侧栏菜单、`Kit.badge`、抽屉、`Kit.loading`（加载生命周期、视口跟随、标题加载位、三个点、可选启动画面）、`Kit.popover` / `Kit.menu` / `Kit.tableSettings`、`Kit.ui.Selection`、面包屑、步骤条、分段控件、横幅、进度条、状态点、标签、计数角标、头像、时间线、折叠面板、消息列表、分页的每页条数和跳页。
 - 没有 Logo 时的文字品牌方块。
 
 ## 原项目文档和代码不一致的地方

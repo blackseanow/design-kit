@@ -14,6 +14,7 @@
     {% block head %}{% endblock %}
   </head>
   <body data-page="{% block page_id %}{{ request.endpoint or '' }}{% endblock %}">
+    {% if kit.startup_splash %}{% from "design_kit/startup.html" import startup_screen %}{{ startup_screen() }}{% endif %}
     <div class="route-progress" data-route-progress data-progress-bootstrap data-phase="loading" aria-hidden="true"><div class="route-progress-bar"><span class="route-progress-peg"></span></div></div>
     <div class="app-shell" data-app-shell>
       <header class="workspace-header">

@@ -160,6 +160,48 @@ async function waitForServer() {
       assert.equal(await button.innerText(), "点击看加载态");
     });
 
+    await check("loading run: nothing for a fast task, a mask with aria-busy for a slow one, then removed", async () => {
+      await desktop.locator("#loadingFastDemo").click();
+      await desktop.waitForTimeout(120);
+      assert.equal(await desktop.locator("#loadingDemoTable .page-list-loading").count(), 0, "50ms tasks never show a mask");
+      await desktop.locator("#loadingRunDemo").click();
+      await desktop.locator("#loadingDemoTable .page-list-loading").waitFor();
+      assert.equal(await desktop.locator("#loadingDemoTable").getAttribute("aria-busy"), "true");
+      assert.equal(await desktop.locator("#loadingDemoTable tbody tr").count(), 4, "rows stay underneath the mask");
+      assert.equal(await desktop.locator("#loadingDemoTable .page-list-loading-content").count(), 1, "content is wrapped for viewport placement");
+      await desktop.waitForFunction(() => !document.querySelector("#loadingDemoTable .page-list-loading"), null, { timeout: 4000 });
+      assert.equal(await desktop.locator("#loadingDemoTable").getAttribute("aria-busy"), null);
+    });
+
+    await check("loading run: a failed task shows an error overlay whose retry runs the task again", async () => {
+      await desktop.locator("#loadingFailDemo").click();
+      const error = desktop.locator("#loadingDemoTable .page-list-loading.is-error");
+      await error.waitFor();
+      assert.equal(await error.getAttribute("role"), "alert");
+      assert.match(await error.locator(".page-list-loading-text").innerText(), /服务暂时不可用/);
+      await error.locator("button").click();
+      await desktop.waitForFunction(() => !document.querySelector("#loadingDemoTable .page-list-loading"), null, { timeout: 4000 });
+    });
+
+    await check("title loading slot keeps its width and the header refresh icon spins while busy", async () => {
+      const slot = desktop.locator("[data-page-title-loading]");
+      const before = await slot.boundingBox();
+      assert.equal(Math.round(before.width), 20, "the hidden slot still reserves 20px");
+      await desktop.locator("#titleLoadingDemo").click();
+      assert.equal(await desktop.evaluate(() => document.querySelector("[data-page-title-loading]").hidden), false);
+      await desktop.locator("#headerRefreshDemo").click();
+      assert.equal(await desktop.locator("#headerRefreshDemo").getAttribute("aria-busy"), "true");
+      await desktop.waitForFunction(() => document.querySelector("[data-page-title-loading]").hidden, null, { timeout: 4000 });
+    });
+
+    await check("startup splash is released once the stylesheets are in, and whenReady runs", async () => {
+      assert.equal(await desktop.evaluate(() => document.documentElement.hasAttribute("data-startup-pending")), false);
+      assert.equal(await desktop.evaluate(() => document.getElementById("startupLoading") && getComputedStyle(document.getElementById("startupLoading")).display), "none");
+      assert.equal(await desktop.evaluate(() => [...document.querySelectorAll("[data-startup-style]")].every((link) => link.media === "all")), true);
+      assert.equal(await desktop.evaluate(() => new Promise((resolve) => window.KitStartup.whenReady(() => resolve("ready")))), "ready");
+      assert.equal(await desktop.evaluate(() => document.getElementById("startupLoadingWarning").hidden), true);
+    });
+
     await check("theme choice in the user menu persists under the configured key", async () => {
       await desktop.locator(".user-menu-trigger").click();
       await desktop.locator('[data-theme-choice="dark"]').click();

@@ -3,7 +3,7 @@
 这是从原项目 [blackseanow/temp10](https://github.com/blackseanow/temp10) 的生产样式里抽出来的通用设计规范包，给第二个 Flask 项目直接复用。内容包括：
 
 - 1 个 Token 文件（颜色、字体、间距、圆角、尺寸、动效，含日间和夜间两套）
-- 8 个组件 CSS 文件，10 个 JS 模块（无框架、无构建步骤）
+- 8 个组件 CSS 文件，11 个 JS 模块（无框架、无构建步骤）
 - Jinja 布局（应用页、登录页）和宏
 - 一个用虚构数据运行的演示应用
 - Python、Node 和浏览器测试
@@ -16,8 +16,8 @@
 design-kit/
   design_kit/                Flask Blueprint 包（复制或 pip 安装这个目录）
     __init__.py              DesignKit(app)、配置项、资源加载顺序
-    static/                  tokens.css 等 8 个 CSS、10 个 JS、icons.svg、icons/（Lucide，ISC 许可）
-    templates/design_kit/    layout.html、auth_layout.html、macros.html、head.html、scripts.html
+    static/                  tokens.css 等 8 个 CSS、11 个 JS、icons.svg、icons/（Lucide，ISC 许可）
+    templates/design_kit/    layout.html、auth_layout.html、macros.html、head.html、scripts.html、startup.html
   demo/                      演示应用（虚构数据，只在本机运行）
   tests/                     test_design_kit.py、js/kit.test.js、browser_check.js
   docs/                      规范文档（见下方“文档”）
@@ -87,6 +87,7 @@ def shell():
 | `DESIGN_KIT_LANG` | `<html lang>` | `"zh-CN"` |
 | `DESIGN_KIT_HOME_URL` | 品牌链接地址 | `"/"` |
 | `DESIGN_KIT_EXTRA_CSS` | 在 kit 之后加载的应用 CSS（应用 static 下的路径） | `[]` |
+| `DESIGN_KIT_STARTUP_SPLASH` | 启动画面：先画品牌标记和三个点，样式表到齐后再显示页面 | `False` |
 
 ## 改品牌色
 
@@ -137,6 +138,9 @@ def shell():
 | `Kit.ui.runButtonAction(button, "保存中", asyncFn)` | 按钮加载态：禁用、转圈、结束后恢复原内容 |
 | `Kit.ui.renderEmpty(host, {title, description})` / `renderError(...)` | 用 JS 渲染空状态和错误状态 |
 | `Kit.ui.LoadingState({label})` | 生成加载占位 |
+| `Kit.loading.run(host, asyncFn, {label})` | 区块加载：150ms 内完成不显示，显示后至少 450ms，失败留下错误和重试 |
+| `Kit.loading.title(true \| false)` | 页面标题预留的转圈位（`page_header(loading=true)`） |
+| `Kit.loading.whenReady(fn)` | 启动画面释放、样式就绪后执行 |
 | `Kit.select.sync(select)` / `Kit.datetime.sync(input)` | 用代码改了 value 之后同步显示 |
 | `Kit.pageProgress.track(asyncFn)` | 让 fetch 请求驱动顶部进度条 |
 | `Kit.theme.setTheme("light" \| "dark" \| "system")` | 切换外观 |
@@ -168,9 +172,9 @@ def shell():
 cd design-kit
 pip install Flask==3.1.2
 python demo/app.py                                    # http://127.0.0.1:5058/
-python -m unittest discover -s tests                  # 21 项：CSS 规则、Blueprint、宏、验证码、新组件的宏
-node --test tests/js/kit.test.js                      # 17 项：进度条、菜单和弹出层定位、焦点、主题
-PYTHON=python3 node tests/browser_check.js            # 30 项浏览器交互，需要 playwright
+python -m unittest discover -s tests                  # 24 项：CSS 规则、Blueprint、宏、验证码、新组件的宏、启动画面
+node --test tests/js/kit.test.js                      # 22 项：进度条、菜单和弹出层定位、焦点、主题、加载生命周期
+PYTHON=python3 node tests/browser_check.js            # 34 项浏览器交互，需要 playwright
 ```
 
 本仓库目前没有配置 CI，以上命令需要手动运行。
@@ -178,9 +182,9 @@ PYTHON=python3 node tests/browser_check.js            # 30 项浏览器交互，
 ## 验证情况
 
 **已验证（本次实际运行）：**
-- Python 测试 21 项、Node 测试 17 项全部通过（Python 3.13.17、Flask 3.1.2、Node 22.22.0；2026-10-27 在加入第二批组件后运行）。
-- 浏览器检查 30 项全部通过（Playwright + Chromium；2026-10-27）：原有 20 项，加上两级菜单展开收起、角标 `99+` 和 `aria-label`、抽屉贴边 480px 和焦点返回、弹出层里的下拉先关再关弹出层、点击外部关闭、下拉菜单键盘操作和单选项、选项卡滑动底线、分段按钮、表格设置隐藏列并在刷新后保持、批量选择计数、筛选弹出层提交 GET 表单、每页条数跳转、手机上父项展开不关闭侧栏、手机抽屉铺满、`/overlays` 在 320px 无横向滚动。
-- 截图人工查看：1440px 和 390px、320px，日间和夜间，6 个页面（含抽屉、弹出层、下拉菜单、表格设置、消息中心弹出层打开的状态）。
+- Python 测试 24 项、Node 测试 22 项全部通过（Python 3.13.17、Flask 3.1.2、Node 22.22.0；2026-10-27 在加入第二批组件后运行）。
+- 浏览器检查 34 项全部通过（Playwright + Chromium；2026-10-27）：原有 20 项，加上区块加载（快任务不显示、慢任务遮罩和 `aria-busy`、失败后重试）、标题加载位占位、顶栏刷新图标转圈、启动画面释放和 `whenReady`、两级菜单展开收起、角标 `99+` 和 `aria-label`、抽屉贴边 480px 和焦点返回、弹出层里的下拉先关再关弹出层、点击外部关闭、下拉菜单键盘操作和单选项、选项卡滑动底线、分段按钮、表格设置隐藏列并在刷新后保持、批量选择计数、筛选弹出层提交 GET 表单、每页条数跳转、手机上父项展开不关闭侧栏、手机抽屉铺满、`/overlays` 在 320px 无横向滚动。
+- 截图人工查看：1440px 和 390px、320px，日间和夜间，6 个页面（含抽屉、弹出层、下拉菜单、表格设置、消息中心弹出层、加载遮罩、错误遮罩、启动画面）。
 - `pip install` 后静态文件、图标、许可证和模板都在包里。
 
 **未验证：**

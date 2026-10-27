@@ -1,8 +1,13 @@
 {% extends "design_kit/layout.html" %}
-{% from "design_kit/macros.html" import page_header, panel_head, status_chip, inline_status, empty_state, error_state, loading_state, help_button, switch, password_field, modal, icon %}
+{% from "design_kit/macros.html" import page_header, panel_head, status_chip, inline_status, empty_state, error_state, loading_state, loading_dots, help_button, switch, password_field, modal, icon, header_icon_button %}
 {% block title %}组件 · {{ kit.brand_name }}{% endblock %}
+{% block header_actions %}
+{{ header_icon_button("refresh-cw", "刷新数据", id="headerRefreshDemo") }}
+{% endblock %}
 {% block content %}
-{{ page_header("组件", "设计规范中的共享组件和状态。切换日间/夜间请用右上角个人菜单。") }}
+{% call page_header("组件", "设计规范中的共享组件和状态。切换日间/夜间请用右上角个人菜单。", loading=true) %}
+  <button class="btn-secondary" type="button" id="titleLoadingDemo">标题加载 2 秒</button>
+{% endcall %}
 
 <section class="panel" id="buttons">
   {{ panel_head("按钮", "默认 40px，页面和面板标题区的操作 32px，手机 44px。") }}
@@ -121,6 +126,25 @@
   </div>
 </section>
 
+<section class="panel" id="loading">
+  {% call panel_head("加载生命周期", "Kit.loading.run()：150ms 内完成不显示；显示后至少 450ms；结束淡出 100ms；失败时留下错误和重试。") %}
+    <button class="btn-secondary" type="button" id="loadingRunDemo">模拟加载 1.5 秒</button>
+    <button class="btn-secondary" type="button" id="loadingFastDemo">模拟 50ms 完成</button>
+    <button class="btn-danger-outline" type="button" id="loadingFailDemo">模拟失败</button>
+  {% endcall %}
+  <div class="table-wrap" id="loadingDemoTable">
+    <table class="console-data-table">
+      <thead><tr><th>名称</th><th>负责人</th><th>状态</th><th>更新时间</th></tr></thead>
+      <tbody>
+        {% for row in rows %}
+        <tr><td><strong>{{ row.name }}</strong></td><td>{{ row.owner }}</td><td>{{ status_chip(statuses[row.status][0], statuses[row.status][1]) }}</td><td>{{ row.updated }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="field-helper-text" style="margin-top:12px;display:flex;align-items:center;gap:8px">行内等待用三个点：{{ loading_dots("正在生成") }} 正在生成回复… 顶栏的刷新图标点击后转圈 1.5 秒。</p>
+</section>
+
 <section class="panel" id="overlays">
   {{ panel_head("弹窗与通知") }}
   <div class="button-group">
@@ -163,6 +187,18 @@
   document.addEventListener("DOMContentLoaded", () => {
     const loading = document.getElementById("loadingDemo");
     loading.addEventListener("click", () => Kit.ui.runButtonAction(loading, "处理中", () => new Promise((r) => setTimeout(r, 1500))));
+    // Loading lifecycle on a table: the rows stay underneath the mask.
+    const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    document.getElementById("loadingRunDemo").addEventListener("click", () => Kit.loading.run("loadingDemoTable", () => wait(1500), { label: "正在刷新任务" }));
+    document.getElementById("loadingFastDemo").addEventListener("click", async () => { await Kit.loading.run("loadingDemoTable", () => wait(50)); Kit.feedback.show("50ms 内完成，没有显示加载遮罩。", "info", { timeout: 2500 }); });
+    document.getElementById("loadingFailDemo").addEventListener("click", () => {
+      let attempts = 0;
+      // The first attempt fails; "重试" runs the same task again and succeeds.
+      Kit.loading.run("loadingDemoTable", () => wait(600).then(() => { if (++attempts === 1) throw new Error("示例错误：服务暂时不可用。"); }), { label: "正在刷新任务" }).catch(() => {});
+    });
+    document.getElementById("titleLoadingDemo").addEventListener("click", () => { Kit.loading.title(true); setTimeout(() => Kit.loading.title(false), 2000); });
+    const refresh = document.getElementById("headerRefreshDemo");
+    refresh.addEventListener("click", () => { refresh.setAttribute("aria-busy", "true"); setTimeout(() => refresh.removeAttribute("aria-busy"), 1500); });
     document.getElementById("confirmDemo").addEventListener("click", async () => {
       const ok = await Kit.modal.confirm({ title: "删除示例", message: "删除后无法恢复。演示环境不会删除任何数据。", confirmLabel: "删除", danger: true });
       Kit.feedback.show(ok ? "已确认（演示）" : "已取消", ok ? "success" : "info", { timeout: 2500 });

@@ -75,6 +75,7 @@ def create_app(config: dict | None = None) -> Flask:
         DESIGN_KIT_BRAND_NAME="示例控制台",
         DESIGN_KIT_BRAND_TAGLINE="Design kit demo",
         DESIGN_KIT_THEME_KEY="design-kit-demo-theme",
+        DESIGN_KIT_STARTUP_SPLASH=True,
     )
     if os.environ.get("DEMO_BRAND_CSS") == "1":
         app.config["DESIGN_KIT_EXTRA_CSS"] = ["brand-example.css"]

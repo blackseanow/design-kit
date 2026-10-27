@@ -239,6 +239,43 @@ await Kit.ui.runButtonAction(button, "保存中", () => fetch(...));
 
 JS 版本：`Kit.ui.renderEmpty(host, {...})`、`Kit.ui.renderError(host, {...})`、`Kit.ui.LoadingState({label})`。
 
+### 加载生命周期
+
+原项目的加载规则（`loading_controller.js`）：150ms 内完成的请求什么都不显示，避免闪烁；一旦显示至少停留 450ms；结束后先走满、再淡出 100ms；失败时显示原因和重试，不显示假数据。`Kit.loading.run()` 把这套规则接到一个容器上：
+
+```js
+await Kit.loading.run("recordsTable", () => fetch("/api/items").then(render), { label: "正在刷新任务" });
+```
+
+- 容器加 `.is-refresh-loading` 和 `aria-busy="true"`，遮罩盖在原内容上面，原内容不动。
+- 任务 reject 时遮罩变成错误（`role="alert"`）：标题、错误信息和“重试”按钮，重试会再次运行同一个任务；`run()` 返回的 Promise 也会 reject。选项：`errorTitle`、`errorDescription`、`retryLabel`、`retry: false`。
+- 同一个容器再次 `run()` 会取消上一次；`Kit.loading.clear(host)` 手动清掉。
+- 容器上触发 `kit:loading-start` / `kit:loading-end`（`detail.ok`）。
+- 遮罩里的转圈和文字始终停在容器可见的那一部分（长列表滚动时跟着走）；整个遮罩滚出视口时，在可见区域顶部显示一个固定的小提示条（原项目 `loading-viewport.js` 的行为）。
+- 底层控制器可以单独用：`Kit.loading.begin(scope, {onShow, onComplete, onFade, onHide, onError, immediate})` 返回 `{complete, fail, cancel}`。
+
+### 页面标题的加载位
+
+```jinja
+{% call page_header("任务列表", loading=true) %}…{% endcall %}
+```
+
+标题后面预留一个 20px 的转圈位，隐藏时也占位，副标题不会跳动。`Kit.loading.title(true)` 显示，`false` 隐藏。顶栏图标按钮加 `aria-busy="true"` 时图标转圈（刷新按钮用）。
+
+### 三个点
+
+`{{ loading_dots("正在生成") }}` 渲染三个跳动的圆点（原项目启动画面的样式），用于行内的短等待，例如“正在生成回复…”。`muted=true` 用辅助文字色。
+
+### 启动画面
+
+`DESIGN_KIT_STARTUP_SPLASH = True` 时，页面先用内联的关键样式画出品牌标记和三个点，再等所有样式表到齐后一次显示页面，避免慢网络下先看到无样式的内容：
+
+- 样式表以 `media="print"` 加载，每个到达时切换为 `all`；DOM 和全部样式表都就绪才释放。
+- 4 秒后显示“网络较慢，请稍候”；15 秒超时、某个样式表加载失败、从前进后退缓存恢复都会释放画面，失败时在页面顶部显示“部分页面资源仍未就绪”。
+- 需要在样式就绪后再测量布局的脚本用 `Kit.loading.whenReady(fn)`（没开启启动画面时立即执行）。
+- `<link onload>` 是内联事件处理器，用 nonce 型 CSP 时需要另外放行。
+- 原项目还有“从登录页跳转过来不再显示启动画面”的逻辑，kit 没有带。
+
 ## 指标卡
 
 ```jinja

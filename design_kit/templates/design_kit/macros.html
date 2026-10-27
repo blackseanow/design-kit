@@ -15,10 +15,10 @@
 {%- endmacro %}
 
 {#- Page title row. Optional call block = right-hand actions. -#}
-{% macro page_header(title, description='', help='', count='') -%}
+{% macro page_header(title, description='', help='', count='', loading=false) -%}
 <div class="content-page-header" data-ui-component="PageHeader">
   <div class="content-page-title">
-    <h1>{{ title }}{% if help %}{{ help_button(help, title ~ '说明') }}{% endif %}</h1>
+    <h1>{{ title }}{% if loading %}<span class="page-title-loading" data-page-title-loading hidden aria-hidden="true"><span class="page-list-loading-spinner"></span></span>{% endif %}{% if help %}{{ help_button(help, title ~ '说明') }}{% endif %}</h1>
     {% if description %}<p>{{ description }}</p>{% endif %}
     {% if count %}<span class="content-page-count">{{ count }}</span>{% endif %}
   </div>
@@ -64,6 +64,11 @@
 <div class="page-list-loading role-inline-loading" data-ui-component="LoadingState" role="status" aria-live="polite" aria-busy="true">
   <span class="page-list-loading-spinner" aria-hidden="true"></span><span class="page-list-loading-text">{{ label }}</span>
 </div>
+{%- endmacro %}
+
+{#- Three bouncing dots for short inline waits (source: the startup screen). -#}
+{% macro loading_dots(label='', muted=false) -%}
+<span class="loading-dots{% if muted %} muted{% endif %}" role="status"{% if label %} aria-label="{{ label }}"{% else %} aria-hidden="true"{% endif %}><span></span><span></span><span></span></span>
 {%- endmacro %}
 
 {#- tone: '' | success | warning | error | info -#}
@@ -444,7 +449,7 @@
 {#- One notification row (source: the notification centre). meta = ["来源", "时间"]. -#}
 {% macro notification_item(title, message, meta=[], read=false, id='', active_label='') -%}
 <article class="notification-item" data-read="{{ 'true' if read else 'false' }}"{% if id %} data-notification-id="{{ id }}"{% endif %}>
-  <div class="notification-item-head"><strong>{{ title }}</strong>{{ status_chip('已读' if read else '未读', '' if read else 'success') }}{% if active_label %}{{ status_chip(active_label, 'warning') }}{% endif %}</div>
+  <div class="notification-item-head"><strong>{{ title }}</strong>{{ status_chip('已读' if read else '未读', '' if read else 'info') }}{% if active_label %}{{ status_chip(active_label, 'warning') }}{% endif %}</div>
   <p>{{ message }}</p>
   {% if meta %}<div class="notification-item-meta">{% for entry in meta %}<span>{{ entry }}</span>{% endfor %}</div>{% endif %}
   {% if caller is defined %}<div class="notification-item-actions">{{ caller() }}</div>{% endif %}

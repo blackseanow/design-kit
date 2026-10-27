@@ -102,6 +102,32 @@ button.is-loading { position: relative; pointer-events: none; }
 button.is-loading::after { content: ""; display: inline-block; width: 16px; height: 16px; background: currentColor; mask: url("icons/loader-circle.svg") center / contain no-repeat; animation: ui-spin 1s linear infinite; }
 button.is-loading:has(.loading-inline-spinner)::after { display: none; }
 @keyframes ui-spin { to { transform: rotate(360deg); } }
+/* loading.js keeps the spinner and text in the visible part of the mask, and
+   shows a fixed pill when the mask itself is scrolled away (source: loading-viewport.js). */
+.page-list-loading-content { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); display: flex; align-items: center; justify-content: center; gap: 10px; width: max-content; max-width: calc(100% - 24px); }
+.loading-viewport-fallback { position: fixed; z-index: 80; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid var(--line); border-radius: var(--radius); color: var(--muted); background: var(--surface); box-shadow: var(--shadow); font-size: 13px; pointer-events: none; }
+/* A failed Kit.loading.run(): the mask stays and explains, the content behind is kept. */
+.page-list-loading.is-error { color: var(--ink); }
+.page-list-loading.is-error .page-list-loading-content { flex-direction: column; gap: 6px; text-align: center; }
+.page-list-loading-title { color: var(--danger-text); font-size: 14px; line-height: 22px; font-weight: 550; }
+.page-list-loading.is-error .page-list-loading-text { color: var(--muted); font-size: 13px; }
+.page-list-loading.is-error button { margin-top: 6px; }
+/* Page title slot (page_header(loading=true)): the 20px box is reserved while hidden,
+   so the subtitle never moves (source: .page-title-loading). */
+.page-title-loading { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; margin-inline-start: 6px; vertical-align: middle; color: var(--brand); }
+.page-title-loading[hidden] { display: inline-flex !important; visibility: hidden; }
+.page-title-loading > .page-list-loading-spinner { width: 16px; height: 16px; flex-basis: 16px; }
+/* Three bouncing dots for short inline waits (source: the startup screen). */
+.loading-dots { display: inline-flex; align-items: center; gap: 6px; height: 20px; color: var(--brand); vertical-align: middle; }
+.loading-dots > span { width: 8px; height: 8px; flex: none; border-radius: 50%; background: currentColor; opacity: .6; animation: kit-dot-bounce 1.2s ease-in-out infinite; }
+.loading-dots > span:nth-child(2) { animation-delay: .16s; }
+.loading-dots > span:nth-child(3) { animation-delay: .32s; }
+.loading-dots.muted { color: var(--muted); }
+@keyframes kit-dot-bounce { 0%, 60%, 100% { transform: translateY(0); opacity: .6; } 30% { transform: translateY(-4px); opacity: 1; } }
+/* Header icon buttons spin while busy (source: the mobile refresh button). */
+.header-icon-button[aria-busy="true"] { color: var(--brand); cursor: wait; opacity: 1; }
+.header-icon-button[aria-busy="true"] > svg { animation: ui-spin .8s linear infinite; transform-origin: center; }
+@media(prefers-reduced-motion:reduce) { .loading-dots > span { animation: none; transform: none; opacity: 1; } }
 
 @media(max-width:768px) {
   .modal-panel { width:100%; }

@@ -126,7 +126,10 @@ class BlueprintTests(unittest.TestCase):
         html = app.test_client().get("/").get_data(as_text=True)
         css = re.findall(r'href="/_design-kit/([\w-]+\.css)\?v=[0-9a-f]{12}"', html)
         js = re.findall(r'src="/_design-kit/([\w-]+\.js)\?v=[0-9a-f]{12}"', html)
-        self.assertEqual(css, list(STYLESHEETS))
+        # The demo turns the startup splash on, so each sheet appears twice: the
+        # media="print" link and its <noscript> fallback, both in contract order.
+        self.assertEqual(css, list(STYLESHEETS) * 2)
+        self.assertEqual(html.count("<noscript>"), 1)
         self.assertEqual(js, list(SCRIPTS))
         self.assertIn('data-theme-key="design-kit-demo-theme"', html)
         self.assertRegex(html, r'<meta name="design-kit-icons" content="/_design-kit/icons\.svg\?v=[0-9a-f]{12}">')
@@ -332,7 +335,7 @@ class BlueprintTests(unittest.TestCase):
         self.assertIn('<details class="disclosure-panel danger-disclosure" open>', html)
         self.assertIn('<summary>高级<small>3 项</small></summary>', html)
         self.assertIn('<article class="notification-item" data-read="false" data-notification-id="n1">', html)
-        self.assertIn('<span class="status-chip success">未读</span><span class="status-chip warning">仍需处理</span>', html)
+        self.assertIn('<span class="status-chip info">未读</span><span class="status-chip warning">仍需处理</span>', html)
         self.assertIn('<div class="notification-item-meta"><span>来源</span><span>时间</span></div>', html)
         self.assertIn('<div class="notification-item-actions"><button type="button">已读</button></div>', html)
         self.assertIn('<article class="notification-item" data-read="true">', html)
@@ -354,6 +357,47 @@ class BlueprintTests(unittest.TestCase):
         self.assertIn('<input name="page" type="text" inputmode="numeric" pattern="[0-9]+" value="2" aria-label="页码">', html)
         self.assertIn('<span class="list-pagination-count">/ 5 页</span>', html)
         self.assertNotIn('list-pagination-page', html)
+
+    def test_page_header_loading_slot_and_dots(self):
+        app = self.make_app()
+        source = """{% from "design_kit/macros.html" import page_header, loading_dots %}
+{{ page_header("列表", loading=true) }}{{ page_header("无槽位") }}{{ loading_dots("正在生成") }}{{ loading_dots(muted=true) }}"""
+        with app.test_request_context("/"):
+            html = render_template_string(source)
+        self.assertIn('<h1>列表<span class="page-title-loading" data-page-title-loading hidden aria-hidden="true"><span class="page-list-loading-spinner"></span></span></h1>', html)
+        self.assertIn("<h1>无槽位</h1>", html)
+        self.assertIn('<span class="loading-dots" role="status" aria-label="正在生成"><span></span><span></span><span></span></span>', html)
+        self.assertIn('<span class="loading-dots muted" role="status" aria-hidden="true">', html)
+
+    def test_startup_splash_off_by_default(self):
+        app = self.make_app()
+        with app.test_request_context("/"):
+            html = render_template_string('{% extends "design_kit/layout.html" %}{% block content %}x{% endblock %}')
+        self.assertNotIn("startup-loading", html)
+        self.assertNotIn("data-startup-style", html)
+        self.assertNotIn("<noscript>", html)
+        self.assertRegex(html, r'<link rel="stylesheet" href="/_design-kit/tokens\.css\?v=[0-9a-f]{12}">')
+
+    def test_startup_splash_markup(self):
+        app = self.make_app(DESIGN_KIT_STARTUP_SPLASH=True, DESIGN_KIT_BRAND_NAME="示例", DESIGN_KIT_EXTRA_CSS=["brand.css"])
+        for layout in ("design_kit/layout.html", "design_kit/auth_layout.html"):
+            with app.test_request_context("/"):
+                html = render_template_string('{%% extends "%s" %%}{%% block content %%}x{%% endblock %%}' % layout)
+            self.assertIn("window.KitStartup = {", html)
+            self.assertIn('root.setAttribute("data-startup-pending", "")', html)
+            self.assertIn("}, 4000);", html, "slow hint after 4s")
+            self.assertIn("release(true), 15000);", html, "timeout releases the screen")
+            self.assertRegex(html, r'<link rel="stylesheet" href="/_design-kit/tokens\.css\?v=[0-9a-f]{12}" media="print" data-startup-style onload="window\.KitStartup\.styleReady\(this\)" onerror="window\.KitStartup\.styleReady\(this, true\)">')
+            self.assertIn('<link rel="stylesheet" href="/static/brand.css" media="print" data-startup-style', html)
+            self.assertIn("<noscript>", html)
+            self.assertIn('<div id="startupLoading" class="startup-loading" role="status" aria-live="polite" aria-atomic="true">', html)
+            self.assertIn('<span class="startup-loading-mark" aria-hidden="true">示</span><span>示例</span>', html)
+            self.assertIn('<p id="startupLoadingWarning" class="startup-loading-warning" role="status" hidden></p>', html)
+            # The splash markup is the first thing in <body>, before the progress bar.
+            self.assertLess(html.index('id="startupLoading"'), html.index("route-progress"))
+            # The inline critical CSS comes after the theme bootstrap and before the first stylesheet.
+            self.assertLess(html.index("root.dataset.theme ="), html.index("html[data-startup-pending]"))
+            self.assertLess(html.index("html[data-startup-pending]"), html.index("tokens.css"))
 
     def test_empty_pagination_is_hidden(self):
         app = self.make_app()

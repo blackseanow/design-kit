@@ -187,3 +187,90 @@ test("popover bounds: opens above when the space below is smaller", () => {
   assert.equal(bounds.upwards, true);
   assert.equal(bounds.top + 300, 700 - 6, "bottom edge sits 6px above the trigger");
 });
+
+const { createLoadingController, intersect, placement } = require(path.join(STATIC, "loading.js"));
+
+function loadingHarness() {
+  let clock = 0, serial = 0;
+  const jobs = new Map();
+  const controller = createLoadingController({ clock: {
+    now: () => clock,
+    setTimeout: (fn, delay) => { const id = ++serial; jobs.set(id, { at: clock + delay, fn }); return id; },
+    clearTimeout: (id) => jobs.delete(id),
+  } });
+  const tick = async (delay) => {
+    const end = clock + delay;
+    for (;;) {
+      const next = [...jobs].sort((a, b) => a[1].at - b[1].at)[0];
+      if (!next || next[1].at > end) break;
+      clock = next[1].at; jobs.delete(next[0]); next[1].fn();
+      await Promise.resolve();
+    }
+    clock = end;
+    await Promise.resolve();
+  };
+  return { controller, tick, jobs };
+}
+
+test("loading: finishing within 150ms never shows a mask", async () => {
+  const { controller, tick } = loadingHarness();
+  const events = [];
+  const ticket = controller.begin("list", { onShow: () => events.push("show"), onHide: () => events.push("hide") });
+  await tick(100);
+  const done = ticket.complete();
+  await tick(1000);
+  await done;
+  assert.deepEqual(events, []);
+  assert.equal(controller.isActive("list"), false);
+});
+
+test("loading: shows after 150ms, stays at least 450ms, completes, fades, hides", async () => {
+  const { controller, tick } = loadingHarness();
+  const events = [];
+  const hooks = { onShow: () => events.push(["show", 0]), onComplete: () => events.push("complete"), onFade: () => events.push("fade"), onHide: () => events.push("hide") };
+  const ticket = controller.begin("list", hooks);
+  await tick(150);
+  assert.deepEqual(events, [["show", 0]]);
+  await tick(100);
+  const done = ticket.complete();
+  await tick(349);
+  assert.equal(events.length, 1, "still visible before the 450ms minimum");
+  await tick(1);
+  assert.equal(events[1], "complete");
+  await tick(120);
+  assert.equal(events[2], "fade");
+  await tick(100);
+  assert.equal(events[3], "hide");
+  await done;
+  assert.equal(controller.isActive("list"), false);
+});
+
+test("loading: a failure reports the error and ends the entry", async () => {
+  const { controller, tick, jobs } = loadingHarness();
+  const events = [];
+  const ticket = controller.begin("list", { onShow: () => events.push("show"), onError: (error) => events.push(error.message), onHide: () => events.push("hide") });
+  await tick(150);
+  await ticket.fail(new Error("boom"));
+  assert.deepEqual(events, ["show", "boom"]);
+  assert.equal(jobs.size, 0);
+  assert.equal(ticket.isCurrent(), false);
+});
+
+test("loading: beginning the same scope again hides the previous mask", async () => {
+  const { controller, tick } = loadingHarness();
+  const events = [];
+  const first = controller.begin("list", { onShow: () => events.push("show1"), onHide: () => events.push("hide1") });
+  await tick(150);
+  controller.begin("list", { onShow: () => events.push("show2") });
+  assert.deepEqual(events, ["show1", "hide1"]);
+  assert.equal(first.isCurrent(), false);
+  await tick(150);
+  assert.deepEqual(events, ["show1", "hide1", "show2"]);
+});
+
+test("loading placement: centres in the visible part and refuses a sliver", () => {
+  const area = intersect({ left: 0, top: 100, right: 800, bottom: 1500 }, { left: 0, top: 0, right: 1000, bottom: 700 });
+  assert.deepEqual(area, { left: 0, top: 100, right: 800, bottom: 700 });
+  assert.deepEqual(placement(area, 24), { x: 400, y: 400, width: 776 });
+  assert.equal(placement({ left: 0, top: 680, right: 800, bottom: 700 }, 24), null);
+});
