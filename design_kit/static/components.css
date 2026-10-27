@@ -42,14 +42,14 @@
 .metric-card > small { color: var(--muted); font-size: 12px; }
 
 /* Tabs: client-side (role="tablist" + button[role="tab"]) or links (a[aria-current="page"]) */
-.tabs,.segmented-control { display: flex; flex-wrap: nowrap; gap: 4px; border-bottom: 1px solid var(--line); max-width: 100%; overflow-x: auto; scrollbar-width: var(--scrollbar-width); margin: 0 0 20px; }
-.tabs > :is(button,a),.segmented-control > button { position: relative; display: inline-flex; align-items: center; flex: 0 0 auto; border: 0; border-radius: 0; background: transparent; color: var(--muted); min-height: 40px; padding: 8px 12px; font-weight: 500; white-space: nowrap; text-decoration: none; }
-.tabs > :is(button,a):hover:not(:disabled),.segmented-control > button:hover:not(:disabled) { background: var(--hover); color: var(--ink); }
-.tabs > .active,.segmented-control > [aria-selected="true"],.tabs > [aria-selected="true"],.tabs > [aria-current="page"] { color: var(--brand); box-shadow: inset 0 -2px var(--brand); }
-:is(.tabs > :is(button,a),.segmented-control > button):is(.active,[aria-selected="true"],[aria-current="page"]):hover:not(:disabled) { color: var(--brand); }
+.tabs { display: flex; flex-wrap: nowrap; gap: 4px; border-bottom: 1px solid var(--line); max-width: 100%; overflow-x: auto; scrollbar-width: var(--scrollbar-width); margin: 0 0 20px; }
+.tabs > :is(button,a) { position: relative; display: inline-flex; align-items: center; flex: 0 0 auto; border: 0; border-radius: 0; background: transparent; color: var(--muted); min-height: 40px; padding: 8px 12px; font-weight: 500; white-space: nowrap; text-decoration: none; }
+.tabs > :is(button,a):hover:not(:disabled) { background: var(--hover); color: var(--ink); }
+.tabs > .active,.tabs > [aria-selected="true"],.tabs > [aria-current="page"] { color: var(--brand); box-shadow: inset 0 -2px var(--brand); }
+.tabs > :is(button,a):is(.active,[aria-selected="true"],[aria-current="page"]):hover:not(:disabled) { color: var(--brand); }
 /* Touch browsers keep :hover on the last tapped control; don't leave a sticky surface. */
 @media (hover: none), (pointer: coarse) {
-  .tabs > :is(button,a):hover:not(:disabled),.segmented-control > button:hover:not(:disabled) { background: transparent; }
+  .tabs > :is(button,a):hover:not(:disabled) { background: transparent; }
 }
 
 /* Tables */
@@ -262,7 +262,7 @@ input.enhanced-select-search { flex-shrink: 0; border: 0!important; border-botto
   .wide-label { grid-column: auto; }
   .metric-card { padding: 14px; }
   .metric-card > strong { font-size: 24px; }
-  .tabs > :is(button,a),.segmented-control > button { min-height: 44px; padding-inline: 12px; }
+  .tabs > :is(button,a) { min-height: 44px; padding-inline: 12px; }
   .ui-state { min-height: 200px; padding: 28px 16px; }
   .ui-state-compact { min-height: 80px; padding: 16px; }
   .table-wrap td:last-child,.table-wrap th:last-child { position: sticky; right: 0; background: var(--surface); box-shadow: none; }
