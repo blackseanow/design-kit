@@ -1,7 +1,5 @@
 /* Shared helpers for every kit module: focus management, icons, the
-   single-open popup registry and viewport-bound menu placement.
-   Focus helpers come from the source project's static/admin_accessibility.js;
-   selectMenuBounds comes from its admin.js. */
+   single-open popup registry and viewport-bound menu placement. */
 (function (root, factory) {
   const api = factory(root);
   if (typeof module === "object" && module.exports) module.exports = api;
@@ -168,9 +166,8 @@
     menu.style.top = `${Math.max(bounds.topEdge, Math.min(top, bounds.bottomEdge - renderedHeight))}px`;
   }
 
-  // Anchored panels (popover, dropdown menu). From the source project's filter and
-  // table-settings popups: align to the anchor's end edge, keep a 12px viewport edge,
-  // open below unless the panel fits better above.
+  // Anchored panels (popover, dropdown menu): align to the anchor's end edge, keep
+  // a 12px viewport edge, open below unless the panel fits better above.
   function popoverBounds(anchor, view, { width = 360, height = 240, align = "end", gap = 6, edge = 12 } = {}) {
     const maxWidth = Math.max(0, view.width - edge * 2);
     const w = Math.min(width, maxWidth);

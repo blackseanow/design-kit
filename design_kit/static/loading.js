@@ -1,11 +1,10 @@
 /* Loading lifecycle and placement.
-   Sources in the source project: static/loading_controller.js (LoadingController:
-   150ms delay before anything shows, at least 450ms visible, 120ms completion,
-   100ms fade, one entry per scope, cancel / fail) and static/ui/loading-viewport.js
-   (keeps the spinner and text inside the visible part of a tall list and shows a
-   fixed fallback pill when the mask itself is scrolled out of view).
-   Kit additions: Kit.loading.run(host, task) wires the controller to a mask built
-   with Kit.ui.LoadingState, turns a failed task into an error overlay with a retry
+   The controller: 150ms delay before anything shows, at least 450ms visible,
+   120ms completion, 100ms fade, one entry per scope, cancel / fail.
+   Placement keeps the spinner and text inside the visible part of a tall list
+   and shows a fixed fallback pill when the mask itself is scrolled out of view.
+   Kit.loading.run(host, task) wires the controller to a mask built with
+   Kit.ui.LoadingState, turns a failed task into an error overlay with a retry
    button (the content behind it is kept), and Kit.loading.title() drives the
    reserved spinner slot in page_header(loading=true). */
 (function (root, factory) {

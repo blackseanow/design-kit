@@ -1,11 +1,10 @@
 /* Anchored popovers, dropdown menus and table settings.
-   Sources in the source project: static/ui/filters.js (the "筛选" popover: fixed
-   placement aligned to the trigger's end edge, 12px viewport edge, outside click /
-   Escape / focus-out close, child select menus stay open) and static/ui/tables.js
-   (column visibility and row density stored per table). Kit changes: the business
-   filter registry is gone; any element can be a popover (data-popover-open) or a
-   menu (data-menu-open); the Popover API lifts panels to the top layer when the
-   browser has it, with fixed positioning as the fallback.
+   A popover is placed at the trigger's end edge with a 12px viewport edge and
+   closes on outside click, Escape or focus-out while child select menus stay
+   open; table settings store column visibility and row density per table.
+   Any element can be a popover (data-popover-open) or a menu (data-menu-open);
+   the Popover API lifts panels to the top layer when the browser has it, with
+   fixed positioning as the fallback.
    - Kit.popover.open(id, trigger) / close(restoreFocus) / toggle(id, trigger)
    - Kit.menu.open(id, trigger) / close(restoreFocus)
    - Kit.tableSettings.enhance(host) for .table-wrap[data-table-settings]

@@ -209,7 +209,7 @@
 
 {#- Sidebar navigation. groups = [{title, items: [item]}]
     item = {label, href, icon, endpoint | active}
-         | {label, icon, id, expanded, children: [{label, href, endpoint | active}]}  (two levels, kit addition)
+         | {label, icon, id, expanded, children: [{label, href, endpoint | active}]}  (two levels)
     A parent whose child is the current page starts expanded; shell.js toggles the rest. -#}
 {% macro nav_menu(groups, current_endpoint='') -%}
 {% for group in groups %}
@@ -258,8 +258,8 @@
 
 
 {#- ============================================================================
-    Components added after the first extraction (docs/components.md lists each
-    one's source in the original project). ============================================ -#}
+    Navigation, overlay, feedback and list components (see docs/components.md).
+    ============================================================================ -#}
 
 {#- Header icon button with an optional count badge. One of modal / popover / menu / href
     decides what it opens. badge=0 renders a hidden badge that Kit.badge.set() can fill. -#}
@@ -446,7 +446,7 @@
 </details>
 {%- endmacro %}
 
-{#- One notification row (source: the notification centre). meta = ["来源", "时间"]. -#}
+{#- One notification row. meta = ["来源", "时间"]. -#}
 {% macro notification_item(title, message, meta=[], read=false, id='', active_label='') -%}
 <article class="notification-item" data-read="{{ 'true' if read else 'false' }}"{% if id %} data-notification-id="{{ id }}"{% endif %}>
   <div class="notification-item-head"><strong>{{ title }}</strong>{{ status_chip('已读' if read else '未读', '' if read else 'info') }}{% if active_label %}{{ status_chip(active_label, 'warning') }}{% endif %}</div>

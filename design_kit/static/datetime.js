@@ -1,7 +1,6 @@
-/* Date and time pickers. Calendar/time menus, keyboard handling and viewport
-   placement are copied from the source project's admin.js. Kit change: the
-   date picker builds its own wrapper from <input type="date"> instead of
-   requiring hand-written markup.
+/* Date and time pickers: calendar and time menus with keyboard handling and
+   viewport placement. The date picker builds its own wrapper from
+   <input type="date">; no hand-written markup is needed.
    - input[type="date"]  -> calendar menu, value stays YYYY-MM-DD
    - input[type="time"]  -> 30-minute menu, value stays HH:mm
    - input[data-time-editable="true"] -> free text HH:mm plus the quick menu

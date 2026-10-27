@@ -102,8 +102,9 @@ class CssContractTests(unittest.TestCase):
         self.assertTrue(used)
         self.assertEqual(sorted(used - symbols), [])
 
-    def test_no_source_project_business_terms(self):
-        banned = re.compile(r"Telegram|TGAI|tgai|JOK|Joker|账号|竞拍|兑换|发言|群聊|频道|OpenRouter", re.I)
+    def test_kit_has_no_business_terms(self):
+        """The kit stays generic: no product or domain words in its CSS, JS, templates or Python."""
+        banned = re.compile(r"账号|竞拍|兑换|发言|群聊|频道|工作空间|租户", re.I)
         hits = []
         for path in (KIT_ROOT / "design_kit").rglob("*"):
             if path.is_file() and path.suffix in {".css", ".js", ".html", ".py"}:

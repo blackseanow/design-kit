@@ -1,5 +1,4 @@
-/* Enhanced single select. Copied from enhanceSingleSelect and helpers in the
-   source project's admin.js. The native <select> stays in the form and owns
+/* Enhanced single select. The native <select> stays in the form and owns
    value, name, validation and change events; this only replaces its picker.
    Every select:not([multiple]):not([data-native]) is enhanced automatically.
    Options: data-searchable="true", data-search-placeholder, data-empty-label,

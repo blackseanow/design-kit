@@ -31,7 +31,7 @@
 {% endblock %}
 {% block content %}
 {{ breadcrumb([{"label": "设计规范", "href": url_for('components')}, {"label": "组件", "href": url_for('components')}, {"label": "弹层与导航"}]) }}
-{% call page_header("弹层与导航", "第一次抽取时没有带上的组件：抽屉、弹出层、下拉菜单、提醒角标、多级菜单、面包屑、步骤条等。左侧“组件”分组就是两级菜单。") %}
+{% call page_header("弹层与导航", "抽屉、弹出层、下拉菜单、提醒角标、多级菜单、面包屑、步骤条等。左侧“组件”分组就是两级菜单。") %}
   {{ menu_button("pageMenu", "更多", icon_name="ellipsis", chevron=false, label="页面操作") }}
   {% call dropdown_menu("pageMenu", "页面操作") %}
     <div class="dropdown-menu-label">导出</div>

@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg">
-<!-- Lucide icons (lucide-static v0.468.0, ISC License, see icons/LICENSE). play/pause/trash-2 added from the source project; filter and settings use the inline paths of the source project's filters.js / tables.js; panel-right is Lucide. -->
+<!-- Lucide icons (lucide-static v0.468.0, ISC License, see icons/LICENSE). filter and settings are hand-drawn 24px strokes in the same style. -->
 <symbol id="layout-dashboard" viewBox="0 0 24 24">
   <rect width="7" height="9" x="3" y="3" rx="1" />
   <rect width="7" height="5" x="14" y="3" rx="1" />

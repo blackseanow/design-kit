@@ -1,5 +1,5 @@
-/* Sign-in / registration / set-password surface. Brand artwork from the
-   source project is not included; add your own inside .login-brand. */
+/* Sign-in / registration / set-password surface. Add brand artwork inside
+   .login-brand. */
 .login-shell { display: grid; place-items: center; min-height: 100dvh; padding: 40px 24px; }
 .login-layout { width: min(400px,100%); }
 .login-panel { border: 1px solid var(--line); border-radius: 12px; padding: 32px; background: var(--surface); }
@@ -40,16 +40,16 @@
 .password-visibility-toggle::before { content: ""; width: 18px; height: 18px; background: currentColor; mask: url("icons/eye.svg") center / contain no-repeat; }
 .password-visibility-toggle[aria-pressed="true"]::before { mask-image: url("icons/eye-off.svg"); }
 
-/* Kit addition: image captcha field (input + challenge image + link button). ui.js reloads the image. */
+/* Image captcha field (input + challenge image + link button). ui.js reloads the image. */
 .captcha-field { display: flex; align-items: center; gap: 12px; }
 .captcha-field input { flex: 1 1 auto; }
 .captcha-image { flex: 0 0 120px; width: 120px; height: var(--control-height); border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-subtle); object-fit: cover; }
 .captcha-refresh { flex: 0 0 auto; white-space: nowrap; }
 
 @media(max-width:480px) { .login-shell { padding: 24px 16px; } .login-panel { padding: 24px; } .login-brand { margin-bottom: 24px; } }
-/* Kit addition: keep the toggle at the shared touch height when fields grow to 44px. */
+/* Keep the toggle at the shared touch height when fields grow to 44px. */
 @media(max-width:768px) { .password-visibility-toggle { min-height: var(--touch-height); width: var(--touch-height); } }
-/* Kit addition: the captcha image follows the 44px touch height of the input beside it. */
+/* The captcha image follows the 44px touch height of the input beside it. */
 @media(max-width:768px) { .captcha-image { height: var(--touch-height); } }
-/* Kit addition: on narrow screens the input takes the first row, image and button the second. */
+/* On narrow screens the input takes the first row, image and button the second. */
 @media(max-width:480px) { .captcha-field { flex-wrap: wrap; } .captcha-field input { flex-basis: 100%; } }

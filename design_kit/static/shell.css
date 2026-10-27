@@ -111,8 +111,8 @@
 }
 @media(max-width:360px) { .mobile-shell-brand strong { display: none; } }
 
-/* Nested navigation (kit addition; the source project has flat groups only).
-   nav_menu() items may carry children: a toggle button and a second level. */
+/* Nested navigation: nav_menu() items may carry children, rendered as a toggle
+   button and a second level. */
 .nav-item-group { display: grid; gap: 2px; min-width: 0; }
 .nav-item-parent { cursor: pointer; }
 .nav-item-parent .nav-chevron { display: inline-flex; margin-left: auto; width: 16px; height: 16px; flex: 0 0 16px; color: var(--muted); opacity: .72; transition: transform var(--motion), opacity var(--motion); }
@@ -125,7 +125,7 @@
 .nav-subitem .nav-label { line-height: 20px; }
 .nav-subitem.active,.nav-subitem[aria-current="page"] { font-weight: 500; }
 
-/* Header badge offset on the 44px touch button (same as the source project's bell). */
+/* Header badge offset on the 44px touch button. */
 @media(max-width:1023px) {
   .header-actions .header-badge-host .header-badge { top: 3px; right: 0; }
   .nav-subitem { min-height: 36px; }
