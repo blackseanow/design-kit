@@ -1,5 +1,5 @@
 {% extends "design_kit/layout.html" %}
-{% from "design_kit/macros.html" import page_header, status_chip, empty_state, error_state, active_filters, pagination, icon, modal %}
+{% from "design_kit/macros.html" import page_header, status_chip, empty_state, error_state, active_filters, pagination, icon, modal, filter_popover, selection_bar %}
 {% block title %}任务列表 · {{ kit.brand_name }}{% endblock %}
 {% block content %}
 {% call page_header("任务列表", "筛选、查看和操作示例任务。所有操作只在页面内演示，不写入数据。", count="共 " ~ total ~ " 条") %}
@@ -7,17 +7,30 @@
 {% endcall %}
 
 <section class="panel">
-  <form class="list-filter-toolbar" method="get" action="{{ url_for('records') }}" role="search">
+  <form class="list-filter-toolbar" id="recordsFilterForm" method="get" action="{{ url_for('records') }}" role="search">
     <label class="list-filter-search"><span>搜索</span><input type="search" name="q" value="{{ query }}" placeholder="搜索名称或负责人"></label>
-    <label><span>状态</span>
-      <select name="status" aria-label="按状态筛选" onchange="this.form.requestSubmit()">
-        <option value="">全部状态</option>
-        {% for key, item in statuses.items() %}<option value="{{ key }}"{% if key == status %} selected{% endif %}>{{ item[0] }}</option>{% endfor %}
-      </select>
-    </label>
-    <button class="btn-secondary" type="submit">筛选</button>
+    {% if page_size != page_sizes[0] %}<input type="hidden" name="per_page" value="{{ page_size }}">{% endif %}
+    {% call filter_popover("recordsFilters", count=(1 if status else 0) + (1 if owner else 0), reset_href=url_for('records', q=query or none)) %}
+      <label><span>状态</span>
+        <select name="status" aria-label="按状态筛选">
+          <option value="">全部状态</option>
+          {% for key, item in statuses.items() %}<option value="{{ key }}"{% if key == status %} selected{% endif %}>{{ item[0] }}</option>{% endfor %}
+        </select>
+      </label>
+      <label><span>负责人</span>
+        <select name="owner" aria-label="按负责人筛选">
+          <option value="">全部负责人</option>
+          {% for name in owners %}<option value="{{ name }}"{% if name == owner %} selected{% endif %}>{{ name }}</option>{% endfor %}
+        </select>
+      </label>
+    {% endcall %}
+    <button class="btn-secondary" type="submit">搜索</button>
   </form>
   {{ active_filters(filters, url_for('records')) }}
+  {% call selection_bar("recordsSelection") %}
+    <button class="btn-secondary" type="button" data-demo-bulk="批量暂停">批量暂停</button>
+    <button class="btn-danger-outline" type="button" data-demo-bulk="批量删除">批量删除</button>
+  {% endcall %}
 
   {% if failed %}
     {{ error_state("读取失败", "示例错误：服务暂时不可用。显示原因和重试，不展示假数据。", retry_href=url_for('records')) }}
@@ -26,12 +39,13 @@
       <a class="btn-secondary btn-small" href="{{ url_for('records') }}">清除筛选</a>
     {% endcall %}
   {% else %}
-  <div class="table-wrap">
+  <div class="table-wrap" id="recordsTable" data-selection-bar="recordsSelection" data-table-settings>
     <table class="console-data-table">
-      <thead><tr><th>名称</th><th>负责人</th><th>状态</th><th>执行次数</th><th>更新时间</th><th class="table-actions-heading" aria-label="更多操作"></th></tr></thead>
+      <thead><tr><th><input type="checkbox" data-select-all aria-label="全选本页"></th><th>名称</th><th>负责人</th><th>状态</th><th>执行次数</th><th>更新时间</th><th class="table-actions-heading" aria-label="更多操作"></th></tr></thead>
       <tbody>
         {% for row in rows %}
         <tr>
+          <td><input type="checkbox" data-select-row value="{{ row.id }}" aria-label="选择 {{ row.name }}"></td>
           <td><strong>{{ row.name }}</strong><small>ID {{ row.id }}</small></td>
           <td>{{ row.owner }}</td>
           <td>{{ status_chip(statuses[row.status][0], statuses[row.status][1]) }}</td>
@@ -51,7 +65,7 @@
     </table>
   </div>
   {% endif %}
-  {{ pagination(page, pages, total, 'records', args, start, end) }}
+  {{ pagination(page, pages, total, 'records', args, start, end, sizes=page_sizes, size=page_size, size_param='per_page', jump=true) }}
   <p class="field-helper-text">想看错误状态：<a href="{{ url_for('records', error=1) }}">打开示例错误</a>。</p>
 </section>
 {% endblock %}
@@ -92,6 +106,11 @@
     document.addEventListener("click", async (event) => {
       const action = event.target.closest("[data-demo-action]");
       if (action) Kit.feedback.show(`${action.dataset.demoAction}：${action.dataset.name}（演示）`, "info", { timeout: 2500 });
+      const bulk = event.target.closest("[data-demo-bulk]");
+      if (bulk) {
+        const selected = [...document.querySelectorAll("#recordsTable [data-select-row]:checked")].length;
+        Kit.feedback.show(`${bulk.dataset.demoBulk}：${selected} 项（演示）`, "info", { timeout: 2500 });
+      }
       const remove = event.target.closest("[data-demo-delete]");
       if (!remove) return;
       const ok = await Kit.modal.confirm({ title: "删除任务", message: `确定删除「${remove.dataset.name}」吗？演示环境不会真的删除。`, confirmLabel: "删除", danger: true });

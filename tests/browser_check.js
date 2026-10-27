@@ -206,6 +206,122 @@ async function waitForServer() {
       await desktop.waitForFunction(() => document.querySelector("[data-route-progress]").hidden, null, { timeout: 3000 });
     });
 
+    await desktop.goto(BASE + "/overlays");
+
+    await check("nested navigation: the group with the current page starts open and toggles", async () => {
+      const parent = desktop.locator(".nav-item-parent");
+      assert.equal(await parent.getAttribute("aria-expanded"), "true");
+      assert.equal(await desktop.locator("#navComponents .nav-subitem[aria-current='page']").count(), 1);
+      await parent.click();
+      assert.equal(await parent.getAttribute("aria-expanded"), "false");
+      assert.equal(await desktop.evaluate(() => document.getElementById("navComponents").hidden), true);
+      await parent.click();
+      assert.equal(await desktop.evaluate(() => document.getElementById("navComponents").hidden), false);
+    });
+
+    await check("header badge: Kit.badge.set caps at 99+, hides at 0 and updates the label", async () => {
+      assert.equal(await desktop.locator("#notificationBellBadge").innerText(), "2");
+      await desktop.evaluate(() => Kit.badge.set("notificationBell", 120));
+      assert.equal(await desktop.locator("#notificationBellBadge").innerText(), "99+");
+      assert.equal(await desktop.locator("#notificationBell").getAttribute("aria-label"), "消息中心，120 条未读");
+      await desktop.evaluate(() => Kit.badge.set("notificationBell", 0));
+      assert.equal(await desktop.evaluate(() => document.getElementById("notificationBellBadge").hidden), true);
+      assert.equal(await desktop.locator("#notificationBell").getAttribute("aria-label"), "消息中心");
+    });
+
+    await check("drawer opens from the side, traps focus, Escape closes and focus returns", async () => {
+      await desktop.locator('[data-modal-open="detailDrawer"]').first().click();
+      await desktop.waitForFunction(() => document.getElementById("detailDrawer").contains(document.activeElement));
+      assert.equal(await desktop.locator("#detailDrawer").getAttribute("data-ui-component"), "DrawerShell");
+      // Measure after the 180ms slide-in has finished.
+      await desktop.locator("#detailDrawer .drawer-panel").evaluate((panel) => Promise.all(panel.getAnimations().map((animation) => animation.finished)));
+      const box = await desktop.locator("#detailDrawer .drawer-panel").boundingBox();
+      const viewportWidth = await desktop.evaluate(() => document.documentElement.clientWidth);
+      assert.equal(Math.round(box.x + box.width), viewportWidth, "the panel sits on the right edge");
+      assert.equal(Math.round(box.width), 480);
+      await desktop.locator("#detailDrawer .enhanced-select-button").click();
+      assert.equal(await desktop.evaluate(() => Boolean(document.querySelector('#detailDrawer .enhanced-select-menu[data-open="true"]'))), true, "menus stay inside the drawer");
+      await desktop.keyboard.press("Escape");
+      await desktop.keyboard.press("Escape");
+      await desktop.waitForFunction(() => document.getElementById("detailDrawer").classList.contains("hidden"));
+      await desktop.waitForFunction(() => document.activeElement?.dataset.modalOpen === "detailDrawer");
+    });
+
+    await check("popover keeps its fields, child select closes first, outside click closes", async () => {
+      await desktop.locator('[data-popover-open="settingsPopover"]').click();
+      await desktop.waitForFunction(() => !document.getElementById("settingsPopover").hidden);
+      assert.equal(await desktop.evaluate(() => document.activeElement.classList.contains("enhanced-select-button")), true, "first field focused");
+      await desktop.locator("#settingsPopover .enhanced-select-button").first().click();
+      assert.equal(await desktop.locator('.enhanced-select-menu[data-open="true"]').count(), 1);
+      await desktop.keyboard.press("Escape");
+      assert.equal(await desktop.evaluate(() => document.getElementById("settingsPopover").hidden), false, "first Escape only closes the select");
+      await desktop.keyboard.press("Escape");
+      assert.equal(await desktop.evaluate(() => document.getElementById("settingsPopover").hidden), true);
+      assert.equal(await desktop.evaluate(() => document.activeElement.dataset.popoverOpen), "settingsPopover");
+      await desktop.locator('[data-popover-open="settingsPopover"]').click();
+      await desktop.mouse.click(700, 60);
+      assert.equal(await desktop.evaluate(() => document.getElementById("settingsPopover").hidden), true);
+    });
+
+    await check("dropdown menu: ArrowDown opens and focuses, Enter picks a radio item, Escape returns focus", async () => {
+      await desktop.locator('[data-menu-open="sortMenu"]').focus();
+      await desktop.keyboard.press("ArrowDown");
+      await desktop.waitForFunction(() => !document.getElementById("sortMenu").hidden);
+      assert.equal(await desktop.evaluate(() => document.activeElement.textContent.trim()), "更新时间");
+      await desktop.keyboard.press("ArrowDown");
+      await desktop.keyboard.press("Enter");
+      await desktop.waitForFunction(() => document.getElementById("sortMenu").hidden);
+      assert.deepEqual(await desktop.evaluate(() => [...document.querySelectorAll('#sortMenu [role="menuitemradio"]')].map((n) => n.getAttribute("aria-checked"))), ["false", "true", "false"]);
+      assert.match(await desktop.locator('[data-menu-open="sortMenu"] > span').innerText(), /名称/);
+      await desktop.locator('[data-menu-open="pageMenu"]').click();
+      await desktop.waitForFunction(() => !document.getElementById("pageMenu").hidden);
+      await desktop.keyboard.press("Escape");
+      assert.equal(await desktop.evaluate(() => document.getElementById("pageMenu").hidden), true);
+      assert.equal(await desktop.evaluate(() => document.activeElement.dataset.menuOpen), "pageMenu");
+    });
+
+    await check("tabs show a sliding underline; segmented buttons press one at a time", async () => {
+      await desktop.locator("#notificationBell").click();
+      await desktop.waitForFunction(() => !document.getElementById("notificationPopover").hidden);
+      const width = await desktop.evaluate(() => parseFloat(document.querySelector("#notificationPopover .tab-selection-indicator").style.width));
+      assert.ok(width > 0, "indicator has the width of the selected tab");
+      await desktop.keyboard.press("Escape");
+      await desktop.locator(".segmented > button").nth(1).click();
+      assert.deepEqual(await desktop.evaluate(() => [...document.querySelectorAll(".segmented > button")].map((b) => b.getAttribute("aria-pressed"))), ["false", "true", "false"]);
+    });
+
+    await check("table settings hide a column and remember it after reload", async () => {
+      await desktop.locator("#selectableTable .table-settings-trigger").click();
+      await desktop.waitForFunction(() => Boolean(document.querySelector(".table-settings-panel:not([hidden])")));
+      assert.equal(await desktop.evaluate(() => document.activeElement.getAttribute("role")), "tab");
+      await desktop.locator('.table-settings-panel:not([hidden]) input[data-column="负责人"]').click();
+      assert.equal(await desktop.locator("#selectableTable .table-column-hidden").count(), 6);
+      await desktop.keyboard.press("Escape");
+      await desktop.reload();
+      await desktop.waitForFunction(() => document.querySelectorAll("#selectableTable .table-column-hidden").length === 6, null, { timeout: 3000 });
+      await desktop.evaluate(() => { Object.keys(localStorage).filter((key) => key.startsWith("kit:table:")).forEach((key) => localStorage.removeItem(key)); });
+    });
+
+    await check("selection bar counts checked rows and clears them", async () => {
+      await desktop.locator("#selectableTable [data-select-row]").nth(0).check();
+      await desktop.locator("#selectableTable [data-select-row]").nth(1).check();
+      assert.equal(await desktop.evaluate(() => document.getElementById("rowSelection").hidden), false);
+      assert.equal(await desktop.locator("#rowSelection [data-selection-count]").innerText(), "2");
+      await desktop.locator("#rowSelection [data-selection-clear]").click();
+      assert.equal(await desktop.evaluate(() => document.getElementById("rowSelection").hidden), true);
+      assert.equal(await desktop.locator("#selectableTable [data-select-row]:checked").count(), 0);
+    });
+
+    await check("filter popover submits its fields with the toolbar form", async () => {
+      await desktop.goto(BASE + "/records");
+      await desktop.locator(".list-filter-trigger").click();
+      await desktop.waitForFunction(() => !document.getElementById("recordsFilters").hidden);
+      await desktop.selectOption('#recordsFilters select[name="status"]', "failed");
+      await Promise.all([desktop.waitForURL(/status=failed/), desktop.locator('#recordsFilters button[type="submit"]').click()]);
+      assert.match(await desktop.locator(".list-filter-trigger").innerText(), /筛选 · 1/);
+      await Promise.all([desktop.waitForURL(/per_page=50/), desktop.selectOption("select[data-page-size-nav]", { label: "50" })]);
+    });
+
     const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
     watch(phone);
     await phone.goto(BASE + "/records");
@@ -222,8 +338,23 @@ async function waitForServer() {
       assert.equal(await phone.evaluate(() => document.documentElement.classList.contains("overlay-scroll-locked")), false);
     });
 
+    await check("phone: nested group toggles without closing the drawer; side drawer fills the width", async () => {
+      await phone.goto(BASE + "/overlays");
+      await phone.locator("#mobileMenuToggle").click();
+      await phone.locator(".nav-item-parent").click();
+      assert.equal(await phone.evaluate(() => document.querySelector(".app-shell").classList.contains("sidebar-mobile-open")), true);
+      assert.equal(await phone.locator(".nav-item-parent").getAttribute("aria-expanded"), "false");
+      await phone.keyboard.press("Escape");
+      await phone.waitForFunction(() => !document.querySelector(".main").inert, null, { timeout: 2000 });
+      await phone.locator('[data-modal-open="detailDrawer"]').first().click();
+      await phone.waitForFunction(() => document.getElementById("detailDrawer").contains(document.activeElement));
+      const box = await phone.locator("#detailDrawer .drawer-panel").boundingBox();
+      assert.equal(Math.round(box.width), 390);
+      await phone.keyboard.press("Escape");
+    });
+
     await check("no horizontal page overflow at 320px", async () => {
-      for (const route of ["/", "/records", "/components", "/settings", "/login"]) {
+      for (const route of ["/", "/records", "/components", "/overlays", "/settings", "/login"]) {
         await phone.setViewportSize({ width: 320, height: 640 });
         await phone.goto(BASE + route);
         const overflow = await phone.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);

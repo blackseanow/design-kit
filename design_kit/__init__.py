@@ -28,7 +28,7 @@ from pathlib import Path
 from flask import Blueprint, Flask, url_for
 
 __all__ = ["DesignKit", "STYLESHEETS", "SCRIPTS"]
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 
@@ -53,6 +53,7 @@ SCRIPTS = (
     "select.js",
     "datetime.js",
     "ui.js",
+    "popover.js",
     "shell.js",
 )
 

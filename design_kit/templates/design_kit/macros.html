@@ -139,14 +139,32 @@
 </div>
 {%- endmacro %}
 
-{#- Server-side pagination. Builds links with url_for(endpoint, page=n, **args). -#}
-{% macro pagination(page, pages, total, endpoint, args={}, start=0, end=0) -%}
+{#- Server-side pagination. Builds links with url_for(endpoint, page=n, **args).
+    sizes=[20, 50, 100] + size=20 add a "每页" select (option values are URLs;
+    ui.js navigates on change); jump=true adds a page-number form between the arrows. -#}
+{% macro pagination(page, pages, total, endpoint, args={}, start=0, end=0, sizes=none, size=none, size_param='per_page', jump=false) -%}
 <nav class="list-pagination"{% if not total %} data-empty="true"{% endif %} aria-label="分页">
   <span class="list-pagination-summary">{% if total %}第 {{ start }}-{{ end }} 条，共 {{ total }} 条{% else %}共 0 条{% endif %}</span>
   <div class="list-pagination-controls">
+    {% if sizes %}
+    <label class="list-pagination-size"><span>每页</span>
+      <select data-page-size-nav aria-label="每页条数">
+        {% for n in sizes %}{% set size_args = dict(args) %}{% set _ = size_args.update({size_param: n}) %}<option value="{{ url_for(endpoint, page=1, **size_args) }}"{% if n == size %} selected{% endif %}>{{ n }}</option>{% endfor %}
+      </select>
+    </label>
+    {% endif %}
     <div class="list-pagination-navigation">
       <a data-page-prev href="{{ url_for(endpoint, page=page - 1, **args) if page > 1 else '#' }}" aria-label="上一页"{% if page <= 1 %} aria-disabled="true" tabindex="-1"{% endif %}>{{ icon('chevron-left') }}</a>
+      {% if jump %}
+      <form class="list-pagination-jump" method="get" action="{{ url_for(endpoint) }}">
+        {% for key, value in args.items() %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}
+        <label><span class="sr-only">页码</span><input name="page" type="text" inputmode="numeric" pattern="[0-9]+" value="{{ page }}" aria-label="页码"{% if pages <= 1 %} disabled{% endif %}></label>
+        <span class="list-pagination-count">/ {{ pages }} 页</span>
+        <button class="text-button" type="submit" aria-label="跳转到指定页"{% if pages <= 1 %} disabled{% endif %}>跳转</button>
+      </form>
+      {% else %}
       <span class="list-pagination-page">{{ page }} / {{ pages }}</span>
+      {% endif %}
       <a data-page-next href="{{ url_for(endpoint, page=page + 1, **args) if page < pages else '#' }}" aria-label="下一页"{% if page >= pages %} aria-disabled="true" tabindex="-1"{% endif %}>{{ icon('chevron-right') }}</a>
     </div>
   </div>
@@ -184,17 +202,41 @@
 {% endfor %}
 {%- endmacro %}
 
-{#- Sidebar navigation: groups = [{title, items: [{label, href, icon, endpoint|active}]}] -#}
+{#- Sidebar navigation. groups = [{title, items: [item]}]
+    item = {label, href, icon, endpoint | active}
+         | {label, icon, id, expanded, children: [{label, href, endpoint | active}]}  (two levels, kit addition)
+    A parent whose child is the current page starts expanded; shell.js toggles the rest. -#}
 {% macro nav_menu(groups, current_endpoint='') -%}
 {% for group in groups %}
+{% set group_index = loop.index %}
 <div class="nav-group">
   {% if group.title %}<span class="nav-group-title">{{ group.title }}</span>{% endif %}
   {% for item in group['items'] %}
+  {% if item.children %}
+  {% set state = namespace(active=false) %}
+  {% for child in item.children %}{% if (child.active if child.active is defined else (child.endpoint and child.endpoint == current_endpoint)) %}{% set state.active = true %}{% endif %}{% endfor %}
+  {% set sub_id = item.id or ('navGroup' ~ group_index ~ '-' ~ loop.index) %}
+  {% set expanded = state.active or item.expanded %}
+  <div class="nav-item-group">
+    <button class="nav-item nav-item-parent{% if state.active %} has-active{% endif %}" type="button" aria-expanded="{{ 'true' if expanded else 'false' }}" aria-controls="{{ sub_id }}">
+      {% if item.icon %}<span class="nav-icon" aria-hidden="true"><svg><use href="{{ kit.icon_href(item.icon) }}"></use></svg></span>{% endif %}
+      <span class="nav-label">{{ item.label }}</span>
+      <span class="nav-chevron" aria-hidden="true"><svg><use href="{{ kit.icon_href('chevron-down') }}"></use></svg></span>
+    </button>
+    <div class="nav-subitems" id="{{ sub_id }}"{% if not expanded %} hidden{% endif %}>
+      {% for child in item.children %}
+      {% set active = child.active if child.active is defined else (child.endpoint and child.endpoint == current_endpoint) %}
+      <a class="nav-item nav-subitem{% if active %} active{% endif %}" href="{{ child.href }}"{% if active %} aria-current="page"{% endif %}><span class="nav-label">{{ child.label }}</span></a>
+      {% endfor %}
+    </div>
+  </div>
+  {% else %}
   {% set active = item.active if item.active is defined else (item.endpoint and item.endpoint == current_endpoint) %}
   <a class="nav-item{% if active %} active{% endif %}" href="{{ item.href }}"{% if active %} aria-current="page"{% endif %}>
     {% if item.icon %}<span class="nav-icon" aria-hidden="true"><svg><use href="{{ kit.icon_href(item.icon) }}"></use></svg></span>{% endif %}
     <span class="nav-label">{{ item.label }}</span>
   </a>
+  {% endif %}
   {% endfor %}
 </div>
 {% endfor %}
@@ -207,4 +249,204 @@
   <button type="button" role="radio" data-theme-choice="dark" aria-label="夜间" title="夜间" aria-checked="false" tabindex="-1">{{ icon('moon') }}</button>
   <button type="button" role="radio" data-theme-choice="system" aria-label="跟随系统" title="跟随系统" aria-checked="false" tabindex="-1">{{ icon('monitor') }}</button>
 </div>
+{%- endmacro %}
+
+
+{#- ============================================================================
+    Components added after the first extraction (docs/components.md lists each
+    one's source in the original project). ============================================ -#}
+
+{#- Header icon button with an optional count badge. One of modal / popover / menu / href
+    decides what it opens. badge=0 renders a hidden badge that Kit.badge.set() can fill. -#}
+{% macro header_icon_button(icon_name, label, id='', href='', modal='', popover='', menu='', badge=none, badge_id='', badge_suffix='条未读') -%}
+{% set shown = badge if badge is not none and badge > 0 else 0 %}
+<span class="header-badge-host">
+  {% if href %}<a class="header-icon-button" href="{{ href }}"{% if id %} id="{{ id }}"{% endif %} aria-label="{{ label }}{% if shown %}，{{ shown }} {{ badge_suffix }}{% endif %}" data-badge-label="{{ label }}">{{ icon(icon_name) }}</a>
+  {%- else %}<button class="header-icon-button" type="button"{% if id %} id="{{ id }}"{% endif %} aria-label="{{ label }}{% if shown %}，{{ shown }} {{ badge_suffix }}{% endif %}" data-badge-label="{{ label }}"
+    {%- if modal %} data-modal-open="{{ modal }}" aria-haspopup="dialog"{% endif %}
+    {%- if popover %} data-popover-open="{{ popover }}" aria-haspopup="dialog" aria-expanded="false" aria-controls="{{ popover }}"{% endif %}
+    {%- if menu %} data-menu-open="{{ menu }}" aria-haspopup="menu" aria-expanded="false" aria-controls="{{ menu }}"{% endif %}>{{ icon(icon_name) }}</button>{% endif %}
+  {% if badge is not none %}<span class="header-badge"{% if badge_id %} id="{{ badge_id }}"{% endif %} aria-hidden="true"{% if not shown %} hidden{% endif %}>{{ '99+' if shown > 99 else shown }}</span>{% endif %}
+</span>
+{%- endmacro %}
+
+{#- Notification bell: the header icon with an unread badge. Update from JS with
+    Kit.badge.set("notificationBell", count). -#}
+{% macro notification_bell(count=0, modal='', popover='', href='', id='notificationBell', label='消息中心') -%}
+{{ header_icon_button('bell', label, id=id, href=href, modal=modal, popover=popover, badge=count, badge_id=id ~ 'Badge') }}
+{%- endmacro %}
+
+{#- Side drawer: a modal that slides in from the right (or left). Same slot call
+    block as modal(); sizes sm 400 / md 480 / lg 640 / xl 1040px, full width on phones. -#}
+{% macro drawer(id, title, description='', side='right', size='md', dismissible=true, form_action='', method='post') -%}
+<div id="{{ id }}" class="modal-backdrop drawer-backdrop drawer-{{ side }} hidden" data-modal-dismissible="{{ 'true' if dismissible else 'false' }}">
+  <div class="modal-panel drawer-panel drawer-size-{{ size }}">
+    <div class="modal-head">
+      <div>
+        <h2>{{ title }}</h2>
+        {% if description %}<p>{{ description }}</p>{% endif %}
+      </div>
+    </div>
+    {% if form_action %}<form action="{{ form_action }}" method="{{ method }}">{% endif %}
+    <div class="modal-body">{{ caller('body') }}</div>
+    <div class="modal-actions">{{ caller('actions') }}</div>
+    {% if form_action %}</form>{% endif %}
+  </div>
+</div>
+{%- endmacro %}
+
+{#- Anchored popover. Stays where it is written (fields inside keep their form).
+    Open with any element carrying data-popover-open="id". -#}
+{% macro popover(id, title='', label='', width=360, align='end', close=true) -%}
+<div id="{{ id }}" class="popover-panel" role="dialog" aria-label="{{ label or title }}" popover="manual" hidden data-popover-width="{{ width }}" data-popover-align="{{ align }}">
+  {% if title or close %}<div class="popover-head">{% if title %}<strong>{{ title }}</strong>{% else %}<span></span>{% endif %}{% if close %}<button class="popover-close" type="button" data-popover-close aria-label="关闭"></button>{% endif %}</div>{% endif %}
+  <div class="popover-body">{{ caller() }}</div>
+</div>
+{%- endmacro %}
+
+{% macro popover_button(id, text, class_name='btn-secondary', icon_name='') -%}
+<button class="{{ class_name }}" type="button" data-popover-open="{{ id }}" aria-haspopup="dialog" aria-expanded="false" aria-controls="{{ id }}">{% if icon_name %}{{ icon(icon_name) }}{% endif %}<span>{{ text }}</span></button>
+{%- endmacro %}
+
+{#- Filter popover inside a <form class="list-filter-toolbar"> (GET): the trigger shows
+    the active count, the call block holds the extra fields, the apply button submits
+    the form (pass form_id when the trigger sits outside the form). -#}
+{% macro filter_popover(id, count=0, title='筛选条件', apply_label='筛选', reset_href='', form_id='', width=360) -%}
+{% set body = caller() %}
+<button class="btn-secondary list-filter-trigger" type="button" data-popover-open="{{ id }}" aria-haspopup="dialog" aria-expanded="false" aria-controls="{{ id }}">{{ icon('filter') }}<span>筛选{% if count %}<span class="list-filter-count"> · {{ count }}</span>{% endif %}</span></button>
+{% call popover(id, title, width=width) %}
+  {{ body }}
+  <div class="popover-actions">
+    {% if reset_href %}<a class="btn-ghost btn-small" href="{{ reset_href }}">重置</a>{% endif %}
+    <button class="btn-primary btn-small" type="submit"{% if form_id %} form="{{ form_id }}"{% endif %}>{{ apply_label }}</button>
+  </div>
+{% endcall %}
+{%- endmacro %}
+
+{#- Dropdown menu. Items in the call block: <button type="button" role="menuitem">,
+    <a role="menuitem" href>, role="menuitemradio" aria-checked, .dropdown-menu-separator,
+    .dropdown-menu-label. Open with data-menu-open="id" (menu_button()). -#}
+{% macro dropdown_menu(id, label='菜单', align='') -%}
+<div id="{{ id }}" class="dropdown-menu" role="menu" aria-label="{{ label }}" popover="manual" hidden{% if align %} data-menu-align="{{ align }}"{% endif %}>{{ caller() }}</div>
+{%- endmacro %}
+
+{% macro menu_button(id, text, class_name='btn-secondary', icon_name='', chevron=true, label='') -%}
+<button class="{{ class_name }}" type="button" data-menu-open="{{ id }}" aria-haspopup="menu" aria-expanded="false" aria-controls="{{ id }}"{% if label %} aria-label="{{ label }}"{% endif %}>{% if icon_name %}{{ icon(icon_name) }}{% endif %}{% if text %}<span>{{ text }}</span>{% endif %}{% if chevron %}{{ icon('chevron-down', 'menu-chevron') }}{% endif %}</button>
+{%- endmacro %}
+
+{#- Breadcrumb: items = [{label, href}]; the last item is the current page. -#}
+{% macro breadcrumb(items, label='面包屑', back=false) -%}
+<nav class="breadcrumb" aria-label="{{ label }}">
+  <ol>
+  {% for item in items %}
+    <li>{% if item.href and not loop.last %}<a href="{{ item.href }}">{% if back and loop.first %}{{ icon('chevron-left') }}{% endif %}{{ item.label }}</a>{% else %}<span aria-current="page">{{ item.label }}</span>{% endif %}</li>
+  {% endfor %}
+  </ol>
+</nav>
+{%- endmacro %}
+
+{#- Steps: items = ["标题", ...] or [{label, hint}]; current is 1-based. -#}
+{% macro steps(items, current=1, label='步骤', vertical=false) -%}
+<ol class="steps{% if vertical %} steps-vertical{% endif %}" aria-label="{{ label }}">
+  {% for item in items %}
+  {% set n = loop.index %}
+  <li class="{{ 'complete' if n < current else ('active' if n == current else '') }}"{% if n == current %} aria-current="step"{% endif %}>
+    <span class="step-mark" aria-hidden="true">{% if n < current %}{{ icon('check') }}{% else %}{{ n }}{% endif %}</span>
+    <span class="step-copy"><span>{{ item.label if item is mapping else item }}</span>{% if item is mapping and item.hint %}<small>{{ item.hint }}</small>{% endif %}</span>
+  </li>
+  {% endfor %}
+</ol>
+{%- endmacro %}
+
+{#- Segmented control backed by radio inputs (submits like a field).
+    options = ["值", ...] | [("值", "文字"), ...] | [{value, label}] -#}
+{% macro segmented(name, options, value='', label='', large=false, id='') -%}
+<div class="segmented{% if large %} segmented-large{% endif %}" role="radiogroup"{% if label %} aria-label="{{ label }}"{% endif %}{% if id %} id="{{ id }}"{% endif %}>
+  {% for option in options %}
+  {% if option is mapping %}{% set val = option.value %}{% set text = option.label %}{% elif option is string %}{% set val = option %}{% set text = option %}{% else %}{% set val = option[0] %}{% set text = option[1] %}{% endif %}
+  <label><input type="radio" name="{{ name }}" value="{{ val }}"{% if val == value %} checked{% endif %}><span>{{ text }}</span></label>
+  {% endfor %}
+</div>
+{%- endmacro %}
+
+{#- Notice banner. tone: '' | info | success | warning | error. Call block = actions. -#}
+{% macro notice(title, text='', tone='', dismissible=false, id='') -%}
+{% set icons = {'error': 'triangle-alert', 'warning': 'triangle-alert', 'success': 'check', 'info': 'info'} %}
+<div class="notice{% if tone %} {{ tone }}{% endif %}" role="{{ 'alert' if tone == 'error' else 'status' }}"{% if id %} id="{{ id }}"{% endif %}>
+  {{ icon(icons.get(tone, 'info')) }}
+  <div class="notice-body"><strong>{{ title }}</strong>{% if text %}<span>{{ text }}</span>{% endif %}</div>
+  {% if caller is defined %}<div class="notice-actions">{{ caller() }}</div>{% endif %}
+  {% if dismissible %}<button class="notice-close" type="button" data-notice-close aria-label="关闭提示"></button>{% endif %}
+</div>
+{%- endmacro %}
+
+{#- Progress bar: 4px track. show_value prints the percentage on the right. -#}
+{% macro progress_bar(value, max=100, label='', show_value=true, tone='', id='', thick=false) -%}
+{% set pct = (100 * value / max) if max else 0 %}
+{% set pct = 0 if pct < 0 else (100 if pct > 100 else pct) %}
+<div class="progress-field"{% if id %} id="{{ id }}"{% endif %}>
+  {% if label or show_value %}<div class="progress-label">{% if label %}<span>{{ label }}</span>{% endif %}{% if show_value %}<strong data-progress-value>{{ pct|round|int }}%</strong>{% endif %}</div>{% endif %}
+  <div class="progress-bar{% if tone %} {{ tone }}{% endif %}{% if thick %} thick{% endif %}" role="progressbar" aria-valuemin="0" aria-valuemax="{{ max }}" aria-valuenow="{{ value }}"{% if label %} aria-label="{{ label }}"{% endif %}><span style="width:{{ pct|round(1) }}%"></span></div>
+</div>
+{%- endmacro %}
+
+{#- tone: '' | success | warning | error | info; is_on=true is the success dot -#}
+{% macro status_dot(text, tone='') -%}
+<span class="status-dot{% if tone %} {{ tone }}{% endif %}">{{ text }}</span>
+{%- endmacro %}
+
+{% macro tag(text, tone='', remove_url='', remove_label='') -%}
+<span class="tag{% if tone %} {{ tone }}{% endif %}">{{ text }}{% if remove_url %}<a class="tag-remove" href="{{ remove_url }}" aria-label="{{ remove_label or ('移除：' ~ text) }}"></a>{% endif %}</span>
+{%- endmacro %}
+
+{#- Inline count badge (tabs, menu items). tone: '' (danger) | brand | neutral -#}
+{% macro count_badge(count, tone='', max=99, id='') -%}
+<span class="count-badge{% if tone %} {{ tone }}{% endif %}"{% if id %} id="{{ id }}"{% endif %}{% if not count %} hidden{% endif %}>{{ (max ~ '+') if count > max else count }}</span>
+{%- endmacro %}
+
+{#- Avatar: image or the first letter. size: '' (28px) | sm (20) | lg (48) | xl (72) -#}
+{% macro avatar(name, src='', size='', alt='') -%}
+<span class="avatar{% if size %} avatar-{{ size }}{% endif %}"{% if not src %} aria-hidden="true"{% endif %}>{% if src %}<img src="{{ src }}" alt="{{ alt or name }}">{% else %}{{ name[:1]|upper }}{% endif %}</span>
+{%- endmacro %}
+
+{#- Timeline: items = [{time, datetime, title, text, status, tone}] -#}
+{% macro timeline(items, label='时间线') -%}
+<ol class="timeline" aria-label="{{ label }}">
+  {% for item in items %}
+  <li>
+    <time{% if item.datetime %} datetime="{{ item.datetime }}"{% endif %}>{{ item.time }}</time>
+    <div><strong>{{ item.title }}</strong>{% if item.status %}{{ status_chip(item.status, item.tone or '') }}{% endif %}{% if item.text %}<small>{{ item.text }}</small>{% endif %}</div>
+  </li>
+  {% endfor %}
+</ol>
+{%- endmacro %}
+
+{#- Bulk selection bar. Pair with [data-selection-bar="id"] on the list whose rows have
+    input[data-select-row]; ui.js counts and shows/hides it. Call block = actions. -#}
+{% macro selection_bar(id, count=0, label='已选择', unit='项') -%}
+<div class="selection-bar" id="{{ id }}" role="status" aria-live="polite"{% if not count %} hidden{% endif %}>
+  <span class="selection-bar-summary">{{ label }} <strong data-selection-count>{{ count }}</strong> {{ unit }}</span>
+  <div class="button-group">
+    {% if caller is defined %}{{ caller() }}{% endif %}
+    <button class="btn-ghost btn-small" type="button" data-selection-clear>取消选择</button>
+  </div>
+</div>
+{%- endmacro %}
+
+{#- Disclosure: <details> with a chevron. plain=true drops the border. -#}
+{% macro disclosure(title, meta='', open=false, plain=false, danger=false, id='') -%}
+<details class="disclosure-panel{% if plain %} disclosure-plain{% endif %}{% if danger %} danger-disclosure{% endif %}"{% if id %} id="{{ id }}"{% endif %}{% if open %} open{% endif %}>
+  <summary>{{ title }}{% if meta %}<small>{{ meta }}</small>{% endif %}</summary>
+  <div>{{ caller() }}</div>
+</details>
+{%- endmacro %}
+
+{#- One notification row (source: the notification centre). meta = ["来源", "时间"]. -#}
+{% macro notification_item(title, message, meta=[], read=false, id='', active_label='') -%}
+<article class="notification-item" data-read="{{ 'true' if read else 'false' }}"{% if id %} data-notification-id="{{ id }}"{% endif %}>
+  <div class="notification-item-head"><strong>{{ title }}</strong>{{ status_chip('已读' if read else '未读', '' if read else 'success') }}{% if active_label %}{{ status_chip(active_label, 'warning') }}{% endif %}</div>
+  <p>{{ message }}</p>
+  {% if meta %}<div class="notification-item-meta">{% for entry in meta %}<span>{{ entry }}</span>{% endfor %}</div>{% endif %}
+  {% if caller is defined %}<div class="notification-item-actions">{{ caller() }}</div>{% endif %}
+</article>
 {%- endmacro %}

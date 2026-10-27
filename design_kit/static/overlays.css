@@ -120,3 +120,84 @@ button.is-loading:has(.loading-inline-spinner)::after { display: none; }
 @media(max-width:768px), (pointer:coarse) {
   .modal-panel :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),textarea,select) { font-size:max(16px,1rem)!important; }
 }
+
+/* Side drawer (kit addition, values from the source project's retired reply-test drawer:
+   max 1040px on desktop, full width on phones, 180ms ease slide). It reuses the modal
+   stack: .modal-backdrop.drawer-backdrop > .modal-panel.drawer-panel, so modal.js owns
+   focus, Escape, scroll lock and stacking. Markup: macros.drawer(). */
+.drawer-backdrop { align-items: stretch; justify-content: flex-end; padding: 0; }
+.drawer-backdrop.drawer-left { justify-content: flex-start; }
+.drawer-panel { height: 100%; max-height: none; width: min(480px,100%); border-radius: 0; border-block: 0; border-right: 0; box-shadow: var(--dialog-shadow); }
+.drawer-left .drawer-panel { border-left: 0; border-right: 1px solid var(--line); }
+.drawer-size-sm { width: min(400px,100%); }
+.drawer-size-md { width: min(480px,100%); }
+.drawer-size-lg { width: min(640px,100%); }
+.drawer-size-xl { width: min(1040px,calc(100vw - 48px)); }
+.drawer-panel .modal-head { padding: 20px 24px 0; }
+.drawer-panel .modal-close-button { top: 14px; }
+.drawer-backdrop:not(.hidden) > .drawer-panel { animation: drawer-enter-right 180ms ease; }
+.drawer-backdrop.drawer-left:not(.hidden) > .drawer-panel { animation: drawer-enter-left 180ms ease; }
+@keyframes drawer-enter-right { from { transform: translateX(100%); } to { transform: none; } }
+@keyframes drawer-enter-left { from { transform: translateX(-100%); } to { transform: none; } }
+@media(prefers-reduced-motion:reduce) { .drawer-backdrop:not(.hidden) > .drawer-panel,.drawer-backdrop.drawer-left:not(.hidden) > .drawer-panel { animation: none; } }
+@media(max-width:768px) {
+  .drawer-panel,.drawer-size-sm,.drawer-size-md,.drawer-size-lg,.drawer-size-xl { width: 100%; border: 0; }
+  .drawer-panel .modal-close-button { top: 10px; }
+}
+
+/* Anchored popover (popover.js, Kit.popover). Values from the source project's
+   list-filter popover: 8px radius, 12px padding, popover shadow, width 360 max.
+   The element stays where it is written, so form fields inside still submit;
+   the Popover API lifts it to the top layer when available. */
+.popover-panel { position: fixed; inset: auto; margin: 0; z-index: 5000; width: min(360px,calc(100vw - 24px)); padding: 12px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--panel-radius); box-shadow: var(--popover-shadow); overflow: auto; overscroll-behavior: contain; scrollbar-width: var(--scrollbar-width); }
+.popover-panel::backdrop { background: transparent; pointer-events: none; }
+/* A panel written inside a table heading must not inherit its nowrap/muted text. */
+th .popover-panel { white-space: normal; text-align: left; font-weight: 400; color: var(--ink); }
+.popover-panel[hidden] { display: none; }
+.popover-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; font-size: 13px; }
+.popover-head > strong { min-width: 0; overflow-wrap: anywhere; font-size: 13px; }
+.popover-close { display: grid; place-items: center; flex: 0 0 28px; width: 28px; height: 28px; min-height: 28px; padding: 0; border: 0; background: transparent; color: var(--muted); font-size: 0; }
+.popover-close::before { content: ""; width: 16px; height: 16px; background: currentColor; mask: url("icons/x.svg") center / contain no-repeat; }
+.popover-close:hover:not(:disabled),.popover-close:active:not(:disabled) { background: var(--hover); color: var(--ink); filter: none; }
+.popover-body { display: grid; gap: 12px; min-width: 0; }
+.popover-body > label { display: grid; width: 100%; min-width: 0; gap: 6px; }
+.popover-body label > span:first-child { font-size: 12px; color: var(--muted); }
+.popover-actions { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 16px; }
+.popover-actions > .popover-action-spacer { flex: 1; }
+/* Filter popover: trigger shows the active count; fields keep their form. */
+.list-filter-trigger { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding-inline: 12px; white-space: nowrap; flex: 0 0 auto; }
+.list-filter-trigger > svg { width: 16px; height: 16px; }
+.list-filter-trigger[aria-expanded="true"] { background: var(--hover); border-color: var(--line-strong); color: var(--ink); }
+.list-filter-trigger .list-filter-count { color: var(--brand); }
+.list-filter-toolbar > .popover-panel { flex: 0 0 auto; }
+
+/* Dropdown menu (popover.js, Kit.menu). Same surface as the row menu:
+   184px, 4px padding, 32px items (44px on touch). */
+.dropdown-menu { position: fixed; inset: auto; margin: 0; z-index: 5000; min-width: 184px; max-width: calc(100vw - 24px); padding: 4px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink); box-shadow: var(--shadow); overflow: auto; overscroll-behavior: contain; scrollbar-width: var(--scrollbar-width); }
+.dropdown-menu::backdrop { background: transparent; pointer-events: none; }
+.dropdown-menu[hidden] { display: none; }
+.dropdown-menu :is(button,a) { display: flex; width: 100%; min-height: 32px; padding: 6px 8px; border: 0; border-radius: 4px; align-items: center; gap: 8px; justify-content: flex-start; color: var(--ink); background: transparent; font-size: 14px; line-height: 20px; font-weight: 400; text-align: left; text-decoration: none; white-space: nowrap; }
+.dropdown-menu :is(button,a) > svg { flex: 0 0 16px; width: 16px; height: 16px; color: var(--muted); }
+.dropdown-menu :is(button,a):hover:not(:disabled),.dropdown-menu :is(button,a):focus-visible { background: var(--hover); outline: none; }
+.dropdown-menu :is(button,a):active:not(:disabled) { background: var(--hover); filter: none; }
+.dropdown-menu :is(button,a).danger-text { color: var(--danger-text); }
+.dropdown-menu :is(button,a).danger-text:hover:not(:disabled) { background: var(--danger-tint); }
+.dropdown-menu [role="menuitemradio"],.dropdown-menu [role="menuitemcheckbox"] { padding-right: 32px; position: relative; }
+.dropdown-menu [aria-checked="true"]::after { content: ""; position: absolute; right: 10px; top: 50%; width: 14px; height: 14px; transform: translateY(-50%); background: var(--brand); mask: url("icons/check.svg") center / contain no-repeat; }
+.dropdown-menu [aria-checked="true"] { color: var(--brand); background: var(--brand-tint); }
+.dropdown-menu-label { padding: 6px 8px 4px; color: var(--muted); font-size: 12px; line-height: 18px; white-space: nowrap; }
+.dropdown-menu-separator { height: 1px; margin: 4px 0; background: var(--line); }
+.dropdown-menu-search { padding: 2px 2px 6px; }
+.dropdown-menu-search input { min-height: 34px; padding-block: 5px; }
+.dropdown-menu-footer { margin: 4px -4px -4px; padding: 4px; border-top: 1px solid var(--line); }
+.dropdown-menu-footer :is(button,a) { color: var(--muted); }
+.dropdown-menu-footer :is(button,a):hover:not(:disabled) { color: var(--ink); }
+.btn-menu-trigger[aria-expanded="true"],.btn-secondary[data-menu-open][aria-expanded="true"] { background: var(--hover); border-color: var(--line-strong); }
+.menu-chevron { width: 14px; height: 14px; flex: 0 0 14px; color: var(--muted); transition: transform var(--motion); }
+[aria-expanded="true"] > .menu-chevron { transform: rotate(180deg); }
+@media(max-width:768px) {
+  .popover-panel { padding: 12px; }
+  .popover-close { flex-basis: 40px; width: 40px; height: 40px; min-height: 40px; }
+  .dropdown-menu :is(button,a) { min-height: 44px; }
+  .dropdown-menu-search input { min-height: 40px; }
+}

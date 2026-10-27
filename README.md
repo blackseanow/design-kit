@@ -3,7 +3,7 @@
 这是从原项目 [blackseanow/temp10](https://github.com/blackseanow/temp10) 的生产样式里抽出来的通用设计规范包，给第二个 Flask 项目直接复用。内容包括：
 
 - 1 个 Token 文件（颜色、字体、间距、圆角、尺寸、动效，含日间和夜间两套）
-- 8 个组件 CSS 文件，9 个 JS 模块（无框架、无构建步骤）
+- 8 个组件 CSS 文件，10 个 JS 模块（无框架、无构建步骤）
 - Jinja 布局（应用页、登录页）和宏
 - 一个用虚构数据运行的演示应用
 - Python、Node 和浏览器测试
@@ -16,7 +16,7 @@
 design-kit/
   design_kit/                Flask Blueprint 包（复制或 pip 安装这个目录）
     __init__.py              DesignKit(app)、配置项、资源加载顺序
-    static/                  tokens.css 等 8 个 CSS、9 个 JS、icons.svg、icons/（Lucide，ISC 许可）
+    static/                  tokens.css 等 8 个 CSS、10 个 JS、icons.svg、icons/（Lucide，ISC 许可）
     templates/design_kit/    layout.html、auth_layout.html、macros.html、head.html、scripts.html
   demo/                      演示应用（虚构数据，只在本机运行）
   tests/                     test_design_kit.py、js/kit.test.js、browser_check.js
@@ -50,6 +50,9 @@ def shell():
     return {
         "nav_groups": [{"title": "工作台", "items": [
             {"label": "总览", "href": url_for("index"), "icon": "layout-dashboard", "endpoint": "index"},
+            {"label": "报表", "icon": "activity", "children": [          # 两级菜单：父项展开，子项跳转
+                {"label": "日报", "href": url_for("daily"), "endpoint": "daily"},
+            ]},
         ]}],
         "user_menu": {"name": "张三", "logout_url": url_for("logout")},
     }
@@ -70,7 +73,7 @@ def shell():
 {% endblock %}
 ```
 
-演示应用 `demo/app.py` 是一个完整例子：列表筛选、分页、表格行操作、弹窗表单、设置页、登录页。
+演示应用 `demo/app.py` 是一个完整例子：列表筛选、分页、表格行操作、弹窗表单、设置页、登录页；`/overlays` 页面集中展示抽屉、弹出层、下拉菜单、提醒角标、两级菜单、面包屑、步骤条等。
 
 ## 配置项
 
@@ -125,6 +128,12 @@ def shell():
 | `Kit.modal.open(id)` / `.hide(id)` / `.close(id, reason)` | 打开、关闭弹窗；`close` 会检查是否允许关闭 |
 | `Kit.modal.confirm({title, message, confirmLabel, danger})` | 返回 `Promise<boolean>`；`danger` 时默认聚焦“取消” |
 | `Kit.modal.onClose(id, fn)` | 关闭前回调；返回 `false` 可阻止关闭（例如请求进行中） |
+| `Kit.popover.open(id, trigger)` / `.close(restoreFocus)` / `.toggle(id, trigger)` | 锚定弹出层；元素留在原位置，字段照常提交 |
+| `Kit.menu.open(id, trigger)` / `.close(restoreFocus)` | 下拉菜单；选中项后在菜单上触发 `kit:menu-select` |
+| `Kit.badge.set("notificationBell", count)` | 顶栏角标：超过 99 显示 `99+`，0 隐藏，`aria-label` 带未读数 |
+| `Kit.tableSettings.enhance(scope)` | 给新插入的 `[data-table-settings]` 表格加显示列 / 行密度设置 |
+| `Kit.shell.setNavGroupOpen(button, open)` | 展开或收起两级菜单的一个分组 |
+| `Kit.ui.Selection(container)` | 手动绑定批量选择（页面加载时 `[data-selection-bar]` 已自动绑定） |
 | `Kit.ui.runButtonAction(button, "保存中", asyncFn)` | 按钮加载态：禁用、转圈、结束后恢复原内容 |
 | `Kit.ui.renderEmpty(host, {title, description})` / `renderError(...)` | 用 JS 渲染空状态和错误状态 |
 | `Kit.ui.LoadingState({label})` | 生成加载占位 |
@@ -137,7 +146,13 @@ def shell():
 | 属性 | 用途 |
 | --- | --- |
 | `data-modal-open="id"` / `data-modal-close` | 打开 / 关闭弹窗 |
-| `data-modal-dismissible="true"` | 允许 Esc 和遮罩关闭 |
+| `data-modal-dismissible="true"` | 允许 Esc 和遮罩关闭（抽屉同样适用） |
+| `data-popover-open="id"` / `data-popover-close` | 打开 / 关闭弹出层 |
+| `data-menu-open="id"` | 打开下拉菜单（`aria-haspopup="menu"`） |
+| `data-table-settings` | 在 `.table-wrap`（需要 `id`）上开启显示列和行密度设置 |
+| `data-selection-bar="id"` + `data-select-row` / `data-select-all` / `data-selection-clear` | 批量选择条 |
+| `data-notice-close` | 关闭横幅 |
+| `data-page-size-nav` | 每页条数下拉：选项值是 URL，`change` 时跳转 |
 | `data-searchable="true"` | 下拉框带搜索（写在 `<select>` 上） |
 | `data-native` | 不增强，保留浏览器原生控件 |
 | `data-time-editable="true"` | 时间可手动输入，同时保留快捷菜单 |
@@ -153,9 +168,9 @@ def shell():
 cd design-kit
 pip install Flask==3.1.2
 python demo/app.py                                    # http://127.0.0.1:5058/
-python -m unittest discover -s tests                  # 16 项：CSS 规则、Blueprint、宏、验证码
-node --test tests/js/kit.test.js                      # 14 项：进度条、菜单定位、焦点、主题
-PYTHON=python3 node tests/browser_check.js            # 20 项浏览器交互，需要 playwright
+python -m unittest discover -s tests                  # 21 项：CSS 规则、Blueprint、宏、验证码、新组件的宏
+node --test tests/js/kit.test.js                      # 17 项：进度条、菜单和弹出层定位、焦点、主题
+PYTHON=python3 node tests/browser_check.js            # 30 项浏览器交互，需要 playwright
 ```
 
 本仓库目前没有配置 CI，以上命令需要手动运行。
@@ -163,9 +178,9 @@ PYTHON=python3 node tests/browser_check.js            # 20 项浏览器交互，
 ## 验证情况
 
 **已验证（本次实际运行）：**
-- Python 测试 16 项、Node 测试 14 项全部通过（Python 3.13.17、Flask 3.1.2、Node 22.22.0；2026-10-26 在提交 8986841 上重新运行）。
-- 浏览器检查 20 项全部通过（Playwright + Chromium；2026-10-26 在提交 8986841 上重新运行）：下拉的键盘操作和 Esc、日期和时间选择、同一时间只开一个菜单、帮助气泡、选项卡、行操作菜单、弹窗焦点圈定和焦点返回、弹窗内的下拉菜单、危险确认、按钮加载态、主题保存、服务端 flash 提示、进度条结束、手机侧栏抽屉、320px 无横向滚动、验证码刷新（换图、清空并聚焦输入框）、无控制台错误。
-- 截图人工查看：1440px 和 390px，日间和夜间，5 个页面。
+- Python 测试 21 项、Node 测试 17 项全部通过（Python 3.13.17、Flask 3.1.2、Node 22.22.0；2026-10-27 在加入第二批组件后运行）。
+- 浏览器检查 30 项全部通过（Playwright + Chromium；2026-10-27）：原有 20 项，加上两级菜单展开收起、角标 `99+` 和 `aria-label`、抽屉贴边 480px 和焦点返回、弹出层里的下拉先关再关弹出层、点击外部关闭、下拉菜单键盘操作和单选项、选项卡滑动底线、分段按钮、表格设置隐藏列并在刷新后保持、批量选择计数、筛选弹出层提交 GET 表单、每页条数跳转、手机上父项展开不关闭侧栏、手机抽屉铺满、`/overlays` 在 320px 无横向滚动。
+- 截图人工查看：1440px 和 390px、320px，日间和夜间，6 个页面（含抽屉、弹出层、下拉菜单、表格设置、消息中心弹出层打开的状态）。
 - `pip install` 后静态文件、图标、许可证和模板都在包里。
 
 **未验证：**
@@ -173,6 +188,7 @@ PYTHON=python3 node tests/browser_check.js            # 20 项浏览器交互，
 - 读屏软件（VoiceOver、NVDA）的实际朗读效果。
 - 基于 nonce 的 CSP（模板支持 `csp_nonce`，但没有测试）。
 - 几千行以上的大表格性能。
+- 不支持 Popover API 的浏览器（弹出层和下拉菜单退回 `position: fixed`）。
 
 ## 文档
 

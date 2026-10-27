@@ -167,3 +167,23 @@ test("theme: explicit choice ignores OS changes", () => {
   state.listeners.forEach((listener) => listener());
   assert.equal(state.root.dataset.theme, "light");
 });
+
+test("popover bounds: aligns to the anchor's end edge, below, inside the viewport", () => {
+  const bounds = core.popoverBounds({ left: 700, right: 820, top: 100, bottom: 140, width: 120 }, { left: 0, top: 0, width: 1000, height: 800 }, { width: 360, height: 240 });
+  assert.equal(bounds.left, 460, "right edge of the panel meets the trigger's right edge");
+  assert.equal(bounds.top, 146, "6px below the trigger");
+  assert.equal(bounds.width, 360);
+  assert.equal(bounds.upwards, false);
+});
+
+test("popover bounds: start alignment and viewport clamping on a phone", () => {
+  const bounds = core.popoverBounds({ left: 300, right: 340, top: 100, bottom: 140, width: 40 }, { left: 0, top: 0, width: 320, height: 640 }, { width: 360, height: 240, align: "start" });
+  assert.equal(bounds.width, 296, "never wider than the viewport minus 12px edges");
+  assert.equal(bounds.left, 12);
+});
+
+test("popover bounds: opens above when the space below is smaller", () => {
+  const bounds = core.popoverBounds({ left: 100, right: 200, top: 700, bottom: 740, width: 100 }, { left: 0, top: 0, width: 1000, height: 800 }, { width: 288, height: 300 });
+  assert.equal(bounds.upwards, true);
+  assert.equal(bounds.top + 300, 700 - 6, "bottom edge sits 6px above the trigger");
+});

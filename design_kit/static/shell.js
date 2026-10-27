@@ -85,7 +85,7 @@
     toggle()?.addEventListener("click", () => setDrawerOpen(!app.classList.contains("sidebar-mobile-open")));
     app.querySelector(".sidebar-backdrop")?.addEventListener("click", () => setDrawerOpen(false));
     app.querySelector(".sidebar")?.addEventListener("click", (event) => {
-      if (event.target.closest(".nav-item")) setDrawerOpen(false);
+      if (event.target.closest("a.nav-item")) setDrawerOpen(false);
     });
     document.addEventListener("keydown", (event) => {
       if (!app.classList.contains("sidebar-mobile-open") || Kit.modal?.top?.()) return;
@@ -142,12 +142,62 @@
     drawerQuery?.addEventListener?.("change", () => close());
   }
 
+  /* Nested navigation (kit addition): button.nav-item-parent[aria-expanded]
+     toggles its .nav-subitems; a group with the current page inside starts open. */
+  function setNavGroupOpen(button, open) {
+    const list = document.getElementById(button.getAttribute("aria-controls") || "");
+    button.setAttribute("aria-expanded", String(open));
+    if (list) list.hidden = !open;
+  }
+  function initNestedNav() {
+    document.querySelectorAll(".nav-item-parent[aria-controls]").forEach((button) => {
+      const list = document.getElementById(button.getAttribute("aria-controls") || "");
+      const hasActive = Boolean(list?.querySelector('.nav-item.active, .nav-item[aria-current="page"]'));
+      button.classList.toggle("has-active", hasActive);
+      if (hasActive) setNavGroupOpen(button, true);
+      else setNavGroupOpen(button, button.getAttribute("aria-expanded") === "true");
+    });
+    document.addEventListener("click", (event) => {
+      const button = event.target.closest?.(".nav-item-parent[aria-controls]");
+      if (!button || button.disabled) return;
+      event.preventDefault();
+      setNavGroupOpen(button, button.getAttribute("aria-expanded") !== "true");
+    });
+  }
+
+  /* Header badge: Kit.badge.set("notificationBell", 12). The count caps at
+     max ("99+"), hides at 0 and is read into the button's aria-label. */
+  function formatBadge(count, max = 99) {
+    const value = Math.max(0, Math.floor(Number(count) || 0));
+    return value > max ? `${max}+` : String(value);
+  }
+  function setBadge(target, count, { max = 99, suffix = "条未读" } = {}) {
+    const host = typeof target === "string" ? document.getElementById(target) : target;
+    if (!host) return null;
+    const wrapper = host.closest(".header-badge-host") || host;
+    const badge = wrapper.querySelector(".header-badge, .count-badge");
+    const button = wrapper.querySelector("button, a") || host;
+    const value = Math.max(0, Math.floor(Number(count) || 0));
+    if (badge) {
+      badge.textContent = formatBadge(value, max);
+      badge.hidden = value === 0;
+    }
+    if (button) {
+      if (button.dataset.badgeLabel === undefined) button.dataset.badgeLabel = button.getAttribute("aria-label") || "";
+      const base = button.dataset.badgeLabel;
+      button.setAttribute("aria-label", value ? `${base}，${value} ${suffix}` : base);
+    }
+    return badge;
+  }
+
   function init() {
     initDrawer();
     initUserMenu();
+    initNestedNav();
   }
 
-  Kit.shell = { setDrawerOpen };
+  Kit.shell = { setDrawerOpen, setNavGroupOpen };
+  Kit.badge = { set: setBadge, format: formatBadge };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
   else init();
 })(typeof window !== "undefined" ? window : globalThis, typeof document !== "undefined" ? document : null);

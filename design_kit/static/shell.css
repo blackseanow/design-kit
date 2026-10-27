@@ -110,3 +110,23 @@
   .user-menu-popover { top: calc(100% + 6px); right: -4px; max-width: calc(100vw - 20px); }
 }
 @media(max-width:360px) { .mobile-shell-brand strong { display: none; } }
+
+/* Nested navigation (kit addition; the source project has flat groups only).
+   nav_menu() items may carry children: a toggle button and a second level. */
+.nav-item-group { display: grid; gap: 2px; min-width: 0; }
+.nav-item-parent { cursor: pointer; }
+.nav-item-parent .nav-chevron { display: inline-flex; margin-left: auto; width: 16px; height: 16px; flex: 0 0 16px; color: var(--muted); opacity: .72; transition: transform var(--motion), opacity var(--motion); }
+.nav-item-parent[aria-expanded="true"] .nav-chevron { transform: rotate(180deg); opacity: 1; }
+.nav-item-parent.has-active[aria-expanded="false"] { color: var(--brand); }
+.nav-item-parent.has-active[aria-expanded="false"] .nav-chevron { color: var(--brand); }
+.nav-subitems { display: grid; gap: 2px; margin: 2px 0 2px 19px; padding-left: 9px; border-left: 1px solid var(--line); }
+.nav-subitems[hidden] { display: none; }
+.nav-subitem { min-height: 32px; padding: 5px 10px; font-size: 13px; font-weight: 450; line-height: 20px; }
+.nav-subitem .nav-label { line-height: 20px; }
+.nav-subitem.active,.nav-subitem[aria-current="page"] { font-weight: 500; }
+
+/* Header badge offset on the 44px touch button (same as the source project's bell). */
+@media(max-width:1023px) {
+  .header-actions .header-badge-host .header-badge { top: 3px; right: 0; }
+  .nav-subitem { min-height: 36px; }
+}

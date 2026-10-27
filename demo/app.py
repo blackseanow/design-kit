@@ -52,13 +52,20 @@ NAV = [
     {"title": "工作台", "items": [
         {"label": "总览", "href": "/", "icon": "layout-dashboard", "endpoint": "overview"},
         {"label": "任务列表", "href": "/records", "icon": "activity", "endpoint": "records"},
-        {"label": "组件", "href": "/components", "icon": "sliders-horizontal", "endpoint": "components"},
+    ]},
+    {"title": "设计规范", "items": [
+        # A two-level group: the parent toggles, the children navigate.
+        {"label": "组件", "icon": "sliders-horizontal", "id": "navComponents", "children": [
+            {"label": "基础组件", "href": "/components", "endpoint": "components"},
+            {"label": "弹层与导航", "href": "/overlays", "endpoint": "overlays"},
+        ]},
     ]},
     {"title": "系统", "items": [
         {"label": "设置", "href": "/settings", "icon": "shield-check", "endpoint": "settings"},
         {"label": "登录页", "href": "/login", "icon": "log-out", "endpoint": "login"},
     ]},
 ]
+PAGE_SIZES = (10, 20, 50)
 
 
 def create_app(config: dict | None = None) -> Flask:
@@ -96,29 +103,48 @@ def create_app(config: dict | None = None) -> Flask:
     def records():
         query = request.args.get("q", "").strip()
         status = request.args.get("status", "")
+        owner = request.args.get("owner", "")
+        page_size = request.args.get("per_page", PAGE_SIZES[0], type=int)
+        if page_size not in PAGE_SIZES:
+            page_size = PAGE_SIZES[0]
+        common = {"query": query, "status": status, "owner": owner, "owners": OWNERS, "page_size": page_size, "page_sizes": PAGE_SIZES}
         if request.args.get("error") == "1":
-            return render_template("demo/records.html", failed=True, rows=[], query=query, status=status,
-                                   page=1, pages=1, total=0, start=0, end=0, filters=[], args={})
+            return render_template("demo/records.html", failed=True, rows=[], page=1, pages=1, total=0, start=0, end=0,
+                                   filters=[], args={}, **common)
         rows = [row for row in RECORDS
                 if (not query or query in row["name"] or query in row["owner"])
-                and (not status or row["status"] == status)]
-        page_size = 10
+                and (not status or row["status"] == status)
+                and (not owner or row["owner"] == owner)]
         pages = max(1, math.ceil(len(rows) / page_size))
         page = min(max(1, request.args.get("page", 1, type=int)), pages)
         start = (page - 1) * page_size
-        args = {key: value for key, value in {"q": query, "status": status}.items() if value}
+        args = {key: value for key, value in {"q": query, "status": status, "owner": owner}.items() if value}
+        if page_size != PAGE_SIZES[0]:
+            args["per_page"] = page_size
         filters = []
         if query:
             filters.append({"name": "关键词", "value": query, "remove_url": url_for("records", **{k: v for k, v in args.items() if k != "q"})})
         if status:
             filters.append({"name": "状态", "value": STATUSES[status][0], "remove_url": url_for("records", **{k: v for k, v in args.items() if k != "status"})})
-        return render_template("demo/records.html", failed=False, rows=rows[start:start + page_size], query=query,
-                               status=status, page=page, pages=pages, total=len(rows), start=start + 1 if rows else 0,
-                               end=min(len(rows), start + page_size), filters=filters, args=args)
+        if owner:
+            filters.append({"name": "负责人", "value": owner, "remove_url": url_for("records", **{k: v for k, v in args.items() if k != "owner"})})
+        return render_template("demo/records.html", failed=False, rows=rows[start:start + page_size],
+                               page=page, pages=pages, total=len(rows), start=start + 1 if rows else 0,
+                               end=min(len(rows), start + page_size), filters=filters, args=args, **common)
 
     @app.get("/components")
     def components():
         return render_template("demo/components.html", rows=RECORDS[:4])
+
+    @app.get("/overlays")
+    def overlays():
+        notices = [
+            {"id": "n1", "title": "示例任务 03 执行失败", "message": "连接超时，已自动重试 3 次。", "meta": ["示例成员 A", "2026-10-26 09:12"], "read": False, "active": "仍需处理"},
+            {"id": "n2", "title": "示例任务 07 已暂停", "message": "由示例成员 B 手动暂停。", "meta": ["示例成员 B", "2026-10-25 18:40"], "read": False, "active": ""},
+            {"id": "n3", "title": "每日摘要已生成", "message": "昨日共执行 128 次，其中 3 次失败。", "meta": ["系统", "2026-10-25 08:00"], "read": True, "active": ""},
+        ]
+        return render_template("demo/overlays.html", rows=RECORDS[:5], notices=notices,
+                               unread=sum(1 for item in notices if not item["read"]))
 
     @app.route("/settings", methods=["GET", "POST"])
     def settings():
