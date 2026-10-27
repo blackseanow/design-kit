@@ -75,6 +75,59 @@ def shell():
 
 演示应用 `demo/app.py` 是一个完整例子：列表筛选、分页、表格行操作、弹窗表单、设置页、登录页；`/overlays` 页面集中展示抽屉、弹出层、下拉菜单、提醒角标、两级菜单、面包屑、步骤条等。
 
+## 让 AI 工具帮你改造现有项目
+
+把下面这段提示词交给 Codex、Claude Code、Cursor 这类工具，让它在你的项目仓库里把前端整体改成本 kit 的规范。先把 design-kit 放到工具能读到的地方（同一个会话里打开这个仓库，或把 `design_kit/` 目录拷进项目），再把 `<…>` 填好。
+
+````text
+把这个项目的前端整体改成 design-kit 的设计规范。业务逻辑、路由、表单字段名和提交格式一律不动，只改外观和交互层。
+
+## 资料（先读完再动手）
+- design-kit 位置：<路径或仓库名>
+- 必读：README.md（接入步骤、配置项、“必须遵守的规则”）、docs/components.md（每个组件的 HTML 写法）、docs/design-system.md、docs/interactions.md、docs/responsive-accessibility.md、docs/qa-checklist.md
+- 参考实现：demo/app.py 和 demo/templates/（列表、筛选、分页、表格行操作、弹窗表单、登录页、/overlays 页面）
+- 本项目的技术栈：<Flask + Jinja / 其他>。不是 Flask + Jinja 时，只用 kit 的 CSS、JS 和 HTML 结构，不用 Blueprint 和宏。
+
+## 第 1 步：盘点，先不改代码
+1. 列出本项目所有模板和页面，每个页面用到的组件（表格、表单、弹窗、下拉、日期、提示、空状态、分页等）。
+2. 对照 docs/components.md，做一张映射表：现有写法 → design-kit 对应的类名或宏。
+3. 单独列出 design-kit 里没有的组件。这些先停下来告诉我，由我决定是加进 design-kit 还是改需求，不要在页面里自己造一个。
+4. 把盘点结果写成 docs/design-kit-migration.md 提交，再开始改。
+
+## 第 2 步：接入
+- 安装：pip install -e <design-kit 路径>（或把 design_kit/ 目录复制到 app.py 同级）。
+- 注册 DesignKit(app)，配置 DESIGN_KIT_BRAND_NAME、DESIGN_KIT_THEME_KEY（本项目独有的 key）。
+- 品牌色写在 static/brand.css，只覆盖 Token（照 README“改品牌色”一节和 demo/static/brand-example.css），通过 DESIGN_KIT_EXTRA_CSS 加载。检查 --on-brand 文字在 --brand 上的对比度不低于 4.5:1。
+- 用 context_processor 提供 nav_groups 和 user_menu，导航结构和现在一致。
+
+## 第 3 步：逐页迁移
+- 一次只迁一个页面，一个页面一个提交，提交信息写清改了什么、没改什么。
+- 页面继承 design_kit/layout.html（登录类页面用 auth_layout.html），用 macros.html 的宏：page_header、empty_state、error_state、pagination、password_field、captcha_field 等。
+- 下拉、日期、时间只换外观，原生 <select> / <input> 继续提交同样的 name 和 value。
+- 确认类操作用 Kit.modal.confirm()，不用 window.confirm。
+- 每个列表和详情页都要有空、错、加载三种状态，不填假数据。
+- 旧的页面 CSS 迁完一页删一页；迁移期间两套样式可以并存，但新页面不得再引用旧 CSS。
+- 全部迁完后删除旧的公共 CSS 和 JS，并 grep 确认没有残留引用。
+
+## 规则（违反就算没做完）
+1. 颜色只能用 var(--…)，页面 CSS 里不许出现 #fff、rgba(…) 这类字面量。
+2. 不改 design_kit/ 目录里的任何文件。要改公共组件，告诉我，在 design-kit 仓库里改。
+3. 不往 design-kit 里写本项目的业务词汇和业务组件。
+4. 不改后端行为：路由、表单字段、接口返回、权限判断、数据库全部不动。如果某个样式改动必须碰后端，先停下来说明。
+
+## 每个页面迁完后的验证
+- 跑本项目自己的测试，全部通过。
+- 用 Playwright 截图：1440px 和 390px，日间和夜间，四张；空状态、错误状态、弹窗打开各一张。截图放在 docs/migration-shots/<页面>/。
+- 键盘走一遍：Tab 顺序、Esc 关闭弹窗、焦点回到打开它的按钮。
+- 320px 下没有横向滚动条。
+- 按 docs/qa-checklist.md 过一遍，把结果记在 docs/design-kit-migration.md 对应页面下面。
+
+## 汇报方式
+每迁完一页，用一段话说明：改了哪些文件、删了哪些旧样式、哪些验证实际跑过、哪些没跑、有没有发现 design-kit 缺的东西。只写实际做过的事。
+````
+
+两点说明：第 1 步的盘点和报缺口比直接开改稳得多，kit 缺的组件应该补进 kit 而不是散落在各项目里；`pip install -e` 适合本机开发，部署时用 `pip install git+https://…`（私有仓库要 token）或把 `design_kit/` 拷进项目，拷贝最省事但以后更新要手动同步。
+
 ## 配置项
 
 | 配置 | 作用 | 默认值 |
