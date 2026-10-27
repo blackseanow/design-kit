@@ -18,7 +18,6 @@
 
   function elementIsFocusable(element) {
     if (!element || element.disabled || element.hidden || element.inert || element.closest?.("[inert]")) return false;
-    if (typeof element.tabIndex === "number" && element.tabIndex < 0) return false;
     if (element.getAttribute?.("aria-hidden") === "true") return false;
     if (element.getAttribute?.("aria-disabled") === "true") return false;
     if (typeof element.matches === "function" && !element.matches(FOCUSABLE_SELECTOR)) return false;
@@ -28,7 +27,7 @@
 
   function focusableElements(container) {
     if (!container?.querySelectorAll) return [];
-    return Array.from(container.querySelectorAll(FOCUSABLE_SELECTOR)).filter(elementIsFocusable);
+    return Array.from(container.querySelectorAll(FOCUSABLE_SELECTOR)).filter((element) => elementIsFocusable(element) && !(typeof element.tabIndex === "number" && element.tabIndex < 0));
   }
 
   function focusElement(element) {

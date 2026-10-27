@@ -296,6 +296,7 @@ test("focus trap skips roving tabs with negative tabindex", () => {
   const first = { tabIndex: 0, focus() { this.focused = true; } };
   const inactiveTab = { tabIndex: -1, focus() { this.focused = true; } };
   const container = { querySelectorAll: () => [first, inactiveTab], contains: node => [first, inactiveTab].includes(node) };
+  assert.equal(core.a11y.elementIsFocusable(inactiveTab), true, "negative tabindex remains programmatically focusable for menu arrow keys");
   assert.deepEqual(core.a11y.focusableElements(container), [first]);
   let prevented = false;
   assert.equal(core.a11y.trapTabKey({ key: "Tab", preventDefault() { prevented = true; } }, container, first), true);
