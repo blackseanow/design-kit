@@ -1,10 +1,15 @@
 // Browser regression for the design kit demo. Uses fictional demo data only.
 // Run from design-kit/:  PYTHON=python3 node tests/browser_check.js
+//   BROWSER=webkit or BROWSER=firefox runs the same checks in another engine
+//   (the engine must be installed: npx playwright install webkit firefox).
 // Needs Flask importable by $PYTHON and the playwright npm package.
 const { spawn } = require("node:child_process");
 const path = require("node:path");
 const assert = require("node:assert/strict");
-const { chromium } = require("playwright");
+const playwright = require("playwright");
+
+const BROWSER = process.env.BROWSER || "chromium";
+if (!["chromium", "webkit", "firefox"].includes(BROWSER)) throw new Error(`BROWSER must be chromium, webkit or firefox, not ${BROWSER}`);
 
 const PORT = process.env.PORT || "5071";
 const BASE = `http://127.0.0.1:${PORT}`;
@@ -26,7 +31,7 @@ async function waitForServer() {
   const server = spawn(process.env.PYTHON || "python3", [path.join(__dirname, "..", "demo", "app.py")], {
     env: { ...process.env, PORT }, stdio: "ignore",
   });
-  const browser = await chromium.launch();
+  const browser = await playwright[BROWSER].launch();
   try {
     await waitForServer();
     const consoleErrors = [];
@@ -444,12 +449,14 @@ async function waitForServer() {
       assert.ok(widths.six > 0, "a 6-column table keeps its 680px floor and scrolls");
     });
 
-    await check("no horizontal page overflow at 320px", async () => {
-      for (const route of ["/", "/records", "/components", "/overlays", "/settings", "/login"]) {
-        await phone.setViewportSize({ width: 320, height: 640 });
-        await phone.goto(BASE + route);
-        const overflow = await phone.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-        assert.equal(overflow, 0, `${route} overflows by ${overflow}px`);
+    await check("no horizontal page overflow at 320, 768 and 1024px", async () => {
+      for (const width of [320, 768, 1024]) {
+        for (const route of ["/", "/records", "/components", "/overlays", "/settings", "/login"]) {
+          await phone.setViewportSize({ width, height: 640 });
+          await phone.goto(BASE + route);
+          const overflow = await phone.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+          assert.equal(overflow, 0, `${route} at ${width}px overflows by ${overflow}px`);
+        }
       }
     });
 
@@ -458,5 +465,6 @@ async function waitForServer() {
     await browser.close();
     server.kill();
   }
+  console.log(`[${BROWSER}]`);
   console.log(results.join("\n"));
 })();
