@@ -1,14 +1,12 @@
 # Design Kit（Flask + Jinja）
 
-这是从原项目 [blackseanow/temp10](https://github.com/blackseanow/temp10) 的生产样式里抽出来的通用设计规范包，给第二个 Flask 项目直接复用。内容包括：
+一套给 Flask + Jinja 项目用的控制台设计规范包：Token、组件 CSS、无依赖的 JS 模块、Jinja 布局和宏，注册一次就能用。内容包括：
 
 - 1 个 Token 文件（颜色、字体、间距、圆角、尺寸、动效，含日间和夜间两套）
 - 8 个组件 CSS 文件，11 个 JS 模块（无框架、无构建步骤）
 - Jinja 布局（应用页、登录页）和宏
 - 一个用虚构数据运行的演示应用
 - Python、Node 和浏览器测试
-
-这是一个独立仓库，不依赖原项目，原项目也不包含这些文件。
 
 ## 目录
 
@@ -108,14 +106,14 @@ def shell():
 
 用 `DEMO_BRAND_CSS=1 python demo/app.py` 可以看到换色后的效果。示例里的青绿色是随手选的值，你换成自己的颜色后，要检查 `--on-brand` 文字在 `--brand` 背景上的对比度（WCAG AA 要求正文至少 4.5:1）。
 
-关于默认颜色：日间紫色 `#7624f4` 和夜间黄绿色 `#c8ff00` 来自原项目，原项目文档写明这些值是在 OpenRouter 控制台上实测的（见原项目的 `design-reference/openrouter/tokens.json`）。如果第二个项目要对外发布，建议换成自己的品牌色，避免看起来像别家产品。这是我的建议，不是法律意见。
+关于默认颜色：日间品牌色是紫色 `#7624f4`，夜间是黄绿色 `#c8ff00`，只是一组能直接运行的默认值。正式发布前建议换成自己的品牌色，并重新检查 `--on-brand` 文字的对比度。
 
 ## 必须遵守的规则
 
 1. **颜色只写在 Token 里。** 组件 CSS 和页面 CSS 只能用 `var(--…)`。`tests/test_design_kit.py` 会扫描 kit 里除 `tokens.css` 外的所有 CSS，发现 `#fff`、`rgba(…)` 这类写法就失败。
 2. **加载顺序固定：** tokens → base → shell → components → overlays → page → auth → buttons → 你的 CSS。`head.html` 已经按这个顺序输出。
 3. **页面 CSS 不重定义公共 Token 和组件。** 需要新组件时先加进 kit，再在页面里用。
-4. **原生字段负责数据。** 下拉、日期、时间控件只替换外观，原来的 `<select>` / `<input>` 仍然提交 `name` 和 `value`，并触发 `change`。
+4. **原生字段负责数据。** 下拉、日期、时间控件只替换外观，原生的 `<select>` / `<input>` 仍然提交 `name` 和 `value`，并触发 `change`。
 5. **弹窗只有一个关闭入口：** 右上角的关闭图标（自动添加）。`data-modal-dismissible="true"` 时，Esc 和点击遮罩也能关闭。不要用 `window.confirm`，用 `Kit.modal.confirm()`。
 6. **空、错、加载三种状态都要有。** 没数据时用 `empty_state`，不填假数字。读取失败时用 `error_state`，写出原因并提供重试。
 7. **改公共组件后检查：** 1440 / 1024 / 768 / 390 / 320px，日间和夜间，展开、禁用、关闭和焦点恢复。清单见 `docs/qa-checklist.md`。
@@ -203,4 +201,4 @@ PYTHON=python3 node tests/browser_check.js            # 34 项浏览器交互，
 | `docs/interactions.md` | 键盘、焦点、关闭规则 |
 | `docs/responsive-accessibility.md` | 断点和无障碍规则 |
 | `docs/qa-checklist.md` | 改动后的检查清单 |
-| `docs/extraction-notes.md` | 每个文件的来源、删掉了什么、修了什么、和原项目的差异 |
+| `docs/extraction-notes.md` | 每个文件的来历和改动记录（内部参考） |
