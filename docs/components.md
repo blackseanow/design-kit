@@ -398,6 +398,8 @@ await Kit.loading.run("recordsTable", () => fetch("/api/items").then(render), { 
 </form>
 ```
 
+480px 以下搜索框独占一行，“筛选”和“搜索”按钮并排在下一行；更宽时按钮跟在搜索框后面，放不下才换行。
+
 弹出层里的“筛选”是 `type="submit"`，直接提交 GET 表单；触发按钮放在表单外时传 `form_id`。已生效的条件仍用 `active_filters` 显示成可移除的芯片。
 
 ## 下拉菜单

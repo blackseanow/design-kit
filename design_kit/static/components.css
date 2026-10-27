@@ -285,6 +285,8 @@ input.enhanced-select-search { flex-shrink: 0; border: 0!important; border-botto
   .row-overflow-menu button { min-height: 44px; }
   .list-row-actions > .row-overflow-trigger { flex: 0 0 44px; min-width: 44px; width: 44px; max-width: 44px; height: 44px; min-height: 44px; padding: 0; touch-action: manipulation; }
   .list-filter-toolbar > label:has(input[type="search"]) { flex:1 1 180px; max-width:none; }
+  /* Phones: the search field takes its own row, the buttons share the next one. */
+  @media(max-width:480px) { .list-filter-toolbar > label:has(input[type="search"]) { flex-basis:100%; } }
   .active-filter-value { max-width:160px; }
   .list-pagination { gap:8px; }
   .list-pagination-controls { width:100%; justify-content:space-between; gap:8px; }
