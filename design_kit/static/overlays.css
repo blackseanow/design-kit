@@ -8,7 +8,7 @@
 
 /* Modal: .modal-backdrop > .modal-panel > (.modal-head, .modal-body, .modal-actions).
    An optional <form> may wrap body and actions. */
-.modal-backdrop { position: fixed; inset: 0; top:var(--ui-viewport-top,0px); bottom:auto; height:var(--ui-viewport-height,100dvh); z-index: 1000; display: flex; align-items: center; justify-content: center; padding:var(--overlay-space-top) var(--overlay-gutter) var(--overlay-space-bottom); background: var(--modal-scrim); overscroll-behavior: contain; }
+.modal-backdrop { position: fixed; inset: 0; top:var(--ui-viewport-top,0px); bottom:auto; height:var(--ui-viewport-height,100dvh); z-index: 1000; display: flex; align-items: center; justify-content: center; padding:var(--overlay-space-top) var(--overlay-gutter) var(--overlay-space-bottom); background: var(--scrim); overscroll-behavior: contain; }
 .modal-panel { position: relative; display: flex; flex-direction: column; min-width: 0; width: min(512px,100%); max-height:var(--dialog-available-height); background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: var(--dialog-radius); box-shadow: var(--dialog-shadow); overflow: hidden; }
 .modal-size-sm { width: min(512px,100%); }
 .modal-size-md { width: min(512px,100%); }

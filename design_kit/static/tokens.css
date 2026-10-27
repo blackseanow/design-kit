@@ -24,8 +24,8 @@
   --danger: #c9362b; --danger-text: #c9362b; --danger-tint: #fff0ee; --on-danger: #fff;
   --danger-hover: color-mix(in srgb,var(--danger) 88%,#000);
 
-  /* Overlays and focus */
-  --scrim: rgba(3,8,10,.32); --drawer-scrim: rgba(3,8,10,.32); --modal-scrim: rgba(252,252,254,.8);
+  /* Overlays and focus: one scrim behind modals, drawers and the mobile sidebar */
+  --scrim: rgba(3,8,10,.32);
   --focus-border: rgba(3,8,10,.3); --focus-shadow: rgba(3,8,10,.06);
 
   /* Typography: system UI fonts only, Chinese fallbacks, no webfont download */
@@ -70,7 +70,7 @@
   --success: #7ee787; --success-tint: rgba(126,231,135,.12);
   --warning: #f2cc60; --warning-tint: rgba(242,204,96,.12);
   --danger: #e11d48; --danger-text: #fb7185; --danger-tint: rgba(225,29,72,.14); --on-danger: #fff;
-  --scrim: rgba(0,0,0,.55); --drawer-scrim: rgba(3,8,10,.6); --modal-scrim: rgba(3,8,10,.8);
+  --scrim: rgba(0,0,0,.55);
   --focus-border: rgba(252,252,254,.3); --focus-shadow: rgba(252,252,254,.06);
   --switch-off: rgba(252,252,254,.30);
 }

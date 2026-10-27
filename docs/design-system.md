@@ -120,8 +120,6 @@ kit 不带任何 Logo。配置 `DESIGN_KIT_LOGO_LIGHT` / `DESIGN_KIT_LOGO_DARK` 
 | `--on-danger` | `#fff` | `#fff` |
 | `--danger-hover` | `color-mix(in srgb,var(--danger) 88%,#000)` | 同日间 |
 | `--scrim` | `rgba(3,8,10,.32)` | `rgba(0,0,0,.55)` |
-| `--drawer-scrim` | `rgba(3,8,10,.32)` | `rgba(3,8,10,.6)` |
-| `--modal-scrim` | `rgba(252,252,254,.8)` | `rgba(3,8,10,.8)` |
 | `--focus-border` | `rgba(3,8,10,.3)` | `rgba(252,252,254,.3)` |
 | `--focus-shadow` | `rgba(3,8,10,.06)` | `rgba(252,252,254,.06)` |
 | `--font` | `system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif` | 同日间 |
