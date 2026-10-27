@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "design-kit"
-version = "1.2.0"
+version = "1.0.0"
 description = "Console design system for Flask + Jinja: tokens, CSS, JS components and macros"
 requires-python = ">=3.10"
 dependencies = ["Flask>=3.0"]
