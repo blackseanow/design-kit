@@ -103,7 +103,7 @@
     return `${meta?.content || "icons.svg"}#${name}`;
   }
   function iconMarkup(name, className = "") {
-    return `<svg${className ? ` class="${escapeHtml(className)}"` : ""} aria-hidden="true"><use href="${escapeHtml(iconUrl(name))}"></use></svg>`;
+    return `<svg class="ui-icon${className ? ` ${escapeHtml(className)}` : ""}" aria-hidden="true"><use href="${escapeHtml(iconUrl(name))}"></use></svg>`;
   }
 
   const isTouchLayout = () => Boolean(root.matchMedia?.("(max-width: 768px), (pointer: coarse)").matches);

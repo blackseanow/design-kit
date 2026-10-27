@@ -21,7 +21,7 @@
   --success: #16803c; --success-tint: #eef9f0;
   --warning: #916000; --warning-tint: #fff8e7;
   --danger: #c9362b; --danger-text: #c9362b; --danger-tint: #fff0ee; --on-danger: #fff;
-  --danger-hover: color-mix(in srgb,var(--danger) 88%,#000);
+  --danger-hover: #b13026; /* --danger at 88% toward black; color-mix() version below where supported */
 
   /* Overlays and focus: one scrim behind modals, drawers and the mobile sidebar */
   --scrim: rgba(3,8,10,.32);
@@ -73,11 +73,13 @@
   --success: #7ee787; --success-tint: rgba(126,231,135,.12);
   --warning: #f2cc60; --warning-tint: rgba(242,204,96,.12);
   --danger: #e11d48; --danger-text: #fb7185; --danger-tint: rgba(225,29,72,.14); --on-danger: #fff;
+  --danger-hover: #c61a3f;
   --scrim: rgba(0,0,0,.55);
   --focus-border: rgba(252,252,254,.3); --focus-shadow: rgba(252,252,254,.06);
   --switch-off: rgba(252,252,254,.30);
 }
 
+@supports (color: color-mix(in srgb, red 50%, blue)) { :root, :root[data-theme="dark"] { --danger-hover: color-mix(in srgb,var(--danger) 88%,#000); } }
 @media(prefers-reduced-motion:reduce) { :root { --drawer-duration: 0ms; } }
 
 /* One spacing contract for all touch/narrow overlays, including landscape. */

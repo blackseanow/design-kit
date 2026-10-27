@@ -499,7 +499,15 @@
     bar?.querySelector("[data-selection-clear]")?.addEventListener("click", () => { rows().forEach((row) => { row.checked = false; }); sync(); });
     sync();
   }
+  /* Segmented radios: .is-checked on the selected label, for browsers without :has(). */
+  function Segmented(group) {
+    group.querySelectorAll(":scope > label").forEach((label) => label.classList.toggle("is-checked", Boolean(label.querySelector("input:checked"))));
+  }
   function bindSmallControls() {
+    document.addEventListener("change", (event) => {
+      const group = event.target.closest?.(".segmented");
+      if (group && event.target.matches("input[type='radio']")) Segmented(group);
+    });
     document.addEventListener("click", (event) => {
       // Segmented buttons: one pressed at a time.
       const segment = event.target.closest?.(".segmented > button[aria-pressed]");
@@ -559,12 +567,12 @@
 
   const selectors = {
     Panel: ".panel", Toolbar: ".toolbar", FilterBar: ".filter-bar", MetricCard: ".metric-card",
-    DataTable: ".table-wrap", Tabs: '[role="tablist"]', TabMotion: ".tabs", Selection: "[data-selection-bar]",
+    DataTable: ".table-wrap", Tabs: '[role="tablist"]', TabMotion: ".tabs", Selection: "[data-selection-bar]", Segmented: ".segmented",
   };
   const components = {
     Panel: (node) => identify(node, "Panel"), Toolbar: (node) => identify(node, "Toolbar"),
     FilterBar: (node) => identify(node, "FilterBar"), MetricCard: (node) => identify(node, "MetricCard"),
-    DataTable, Tabs, TabMotion, Selection,
+    DataTable, Tabs, TabMotion, Selection, Segmented,
   };
   function enhance(scope = document) {
     if (!scope?.querySelectorAll) return;

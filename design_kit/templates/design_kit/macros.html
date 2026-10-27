@@ -3,7 +3,7 @@
     Markup and class names match the CSS contract; see docs/components.md. -#}
 
 {% macro icon(name, class_name='') -%}
-<svg{% if class_name %} class="{{ class_name }}"{% endif %} aria-hidden="true"><use href="{{ kit.icon_href(name) }}"></use></svg>
+<svg class="ui-icon{% if class_name %} {{ class_name }}{% endif %}" aria-hidden="true"><use href="{{ kit.icon_href(name) }}"></use></svg>
 {%- endmacro %}
 
 {% macro brand_mark() -%}

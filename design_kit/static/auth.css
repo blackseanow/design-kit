@@ -37,7 +37,7 @@
 .password-visibility-toggle:active:not(:disabled) { background: var(--brand-tint); color: var(--brand-hover); filter: none; }
 .password-visibility-toggle:focus-visible { z-index: 1; outline: 2px solid var(--focus-border); outline-offset: -2px; color: var(--brand); background: var(--brand-tint); }
 .password-visibility-toggle[aria-pressed="true"] { color: var(--brand); }
-.password-visibility-toggle::before { content: ""; width: 18px; height: 18px; background: currentColor; mask: url("icons/eye.svg") center / contain no-repeat; }
+.password-visibility-toggle::before { content: ""; width: 18px; height: 18px; background: currentColor; -webkit-mask: url("icons/eye.svg") center / contain no-repeat; mask: url("icons/eye.svg") center / contain no-repeat; }
 .password-visibility-toggle[aria-pressed="true"]::before { mask-image: url("icons/eye-off.svg"); }
 
 /* Image captcha field (input + challenge image + link button). ui.js reloads the image. */

@@ -31,7 +31,7 @@
 .modal-body .field-helper-text { display: block; margin-top: 2px; }
 /* One shared close icon in the top-right corner; no duplicate footer close button. */
 .modal-close-button { position: absolute; top: 16px; right: 16px; display: grid; place-items: center; flex: 0 0 32px; width: 32px; height: 32px; min-height: 32px; padding: 0; border: 0; border-radius: var(--radius); background: transparent; color: var(--muted); font-size: 0; line-height: 0; }
-.modal-close-button::before { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); content: ""; width: 16px; height: 16px; background: currentColor; mask: url("icons/x.svg") center / contain no-repeat; }
+.modal-close-button::before { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); content: ""; width: 16px; height: 16px; background: currentColor; -webkit-mask: url("icons/x.svg") center / contain no-repeat; mask: url("icons/x.svg") center / contain no-repeat; }
 .modal-close-button:hover:not(:disabled),.modal-close-button:active:not(:disabled) { background: var(--hover); color: var(--ink); filter: none; }
 .modal-close-button:focus-visible { outline: 2px solid var(--focus-border); outline-offset: 2px; }
 .modal-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 24px; scroll-padding-block: 16px; }
@@ -97,10 +97,10 @@ body.overlay-scroll-locked .workspace-header { width: calc(100% - var(--overlay-
 .page-list-loading-text { min-width: 0; overflow-wrap: anywhere; }
 .page-list-loading.role-inline-loading { position: relative; inset: auto; width: 100%; }
 .page-list-loading.is-leaving { opacity: 0; transition: opacity 200ms linear; }
-.page-list-loading-spinner,.loading-inline-spinner { display: inline-block; flex: 0 0 18px; width: 18px; height: 18px; background: currentColor; mask: url("icons/loader-circle.svg") center / contain no-repeat; animation: ui-spin 1s linear infinite; }
+.page-list-loading-spinner,.loading-inline-spinner { display: inline-block; flex: 0 0 18px; width: 18px; height: 18px; background: currentColor; -webkit-mask: url("icons/loader-circle.svg") center / contain no-repeat; mask: url("icons/loader-circle.svg") center / contain no-repeat; animation: ui-spin 1s linear infinite; }
 .page-list-loading-spinner { color: var(--brand); }
 button.is-loading { position: relative; pointer-events: none; }
-button.is-loading::after { content: ""; display: inline-block; width: 16px; height: 16px; background: currentColor; mask: url("icons/loader-circle.svg") center / contain no-repeat; animation: ui-spin 1s linear infinite; }
+button.is-loading::after { content: ""; display: inline-block; width: 16px; height: 16px; background: currentColor; -webkit-mask: url("icons/loader-circle.svg") center / contain no-repeat; mask: url("icons/loader-circle.svg") center / contain no-repeat; animation: ui-spin 1s linear infinite; }
 button.is-loading:has(.loading-inline-spinner)::after { display: none; }
 @keyframes ui-spin { to { transform: rotate(360deg); } }
 /* loading.js keeps the spinner and text in the visible part of the mask, and
@@ -184,7 +184,7 @@ th .popover-panel { white-space: normal; text-align: left; font-weight: 400; col
 .popover-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; font-size: 13px; }
 .popover-head > strong { min-width: 0; overflow-wrap: anywhere; font-size: 13px; }
 .popover-close { display: grid; place-items: center; flex: 0 0 28px; width: 28px; height: 28px; min-height: 28px; padding: 0; border: 0; background: transparent; color: var(--muted); font-size: 0; }
-.popover-close::before { content: ""; width: 16px; height: 16px; background: currentColor; mask: url("icons/x.svg") center / contain no-repeat; }
+.popover-close::before { content: ""; width: 16px; height: 16px; background: currentColor; -webkit-mask: url("icons/x.svg") center / contain no-repeat; mask: url("icons/x.svg") center / contain no-repeat; }
 .popover-close:hover:not(:disabled),.popover-close:active:not(:disabled) { background: var(--hover); color: var(--ink); filter: none; }
 .popover-body { display: grid; gap: 12px; min-width: 0; }
 .popover-body > label { display: grid; width: 100%; min-width: 0; gap: 6px; }
@@ -210,7 +210,7 @@ th .popover-panel { white-space: normal; text-align: left; font-weight: 400; col
 .dropdown-menu :is(button,a).danger-text { color: var(--danger-text); }
 .dropdown-menu :is(button,a).danger-text:hover:not(:disabled) { background: var(--danger-tint); }
 .dropdown-menu [role="menuitemradio"],.dropdown-menu [role="menuitemcheckbox"] { padding-right: 32px; position: relative; }
-.dropdown-menu [aria-checked="true"]::after { content: ""; position: absolute; right: 10px; top: 50%; width: 14px; height: 14px; transform: translateY(-50%); background: var(--brand); mask: url("icons/check.svg") center / contain no-repeat; }
+.dropdown-menu [aria-checked="true"]::after { content: ""; position: absolute; right: 10px; top: 50%; width: 14px; height: 14px; transform: translateY(-50%); background: var(--brand); -webkit-mask: url("icons/check.svg") center / contain no-repeat; mask: url("icons/check.svg") center / contain no-repeat; }
 .dropdown-menu [aria-checked="true"] { color: var(--brand); background: var(--brand-tint); }
 .dropdown-menu-label { padding: 6px 8px 4px; color: var(--muted); font-size: 12px; line-height: 18px; white-space: nowrap; }
 .dropdown-menu-separator { height: 1px; margin: 4px 0; background: var(--line); }

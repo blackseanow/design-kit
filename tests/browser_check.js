@@ -330,6 +330,10 @@ async function waitForServer() {
       await desktop.keyboard.press("Escape");
       await desktop.locator(".segmented > button").nth(1).click();
       assert.deepEqual(await desktop.evaluate(() => [...document.querySelectorAll(".segmented > button")].map((b) => b.getAttribute("aria-pressed"))), ["false", "true", "false"]);
+      // Radio version: the checked label also carries .is-checked (the :has()-free fallback).
+      assert.deepEqual(await desktop.evaluate(() => [...document.querySelectorAll('.segmented[role="radiogroup"] > label')].map((l) => l.classList.contains("is-checked"))), [true, false, false]);
+      await desktop.locator('.segmented[role="radiogroup"] > label').nth(2).click();
+      assert.deepEqual(await desktop.evaluate(() => [...document.querySelectorAll('.segmented[role="radiogroup"] > label')].map((l) => l.classList.contains("is-checked"))), [false, false, true]);
     });
 
     await check("table settings hide a column and remember it after reload", async () => {
