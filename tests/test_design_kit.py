@@ -211,10 +211,11 @@ class BlueprintTests(unittest.TestCase):
             html = render_template_string(source)
         self.assertIn('<label for="captcha">', html)
         self.assertIn('<input id="captcha" name="captcha" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="8" required>', html)
-        self.assertIn('<img class="captcha-image" src="/captcha.svg?k=1" alt="图形验证码" width="120" height="40" data-captcha-image="captcha">', html)
-        self.assertIn('<button class="btn-link captcha-refresh" type="button" data-captcha-refresh="captcha">换一张</button>', html)
+        self.assertIn('<button class="captcha-image-button" type="button" data-captcha-refresh="captcha" aria-label="换一张验证码">'
+                      '<img class="captcha-image" src="/captcha.svg?k=1" alt="图形验证码" width="120" height="40" data-captcha-image="captcha"></button>', html)
+        self.assertNotIn("captcha-refresh\"", html.replace('data-captcha-refresh="', ""), "no separate refresh link any more")
         self.assertIn('<input id="signupCode" name="code" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="6">', html)
-        self.assertIn('data-captcha-refresh="signupCode">看不清</button>', html)
+        self.assertIn('data-captcha-refresh="signupCode" aria-label="看不清">', html)
 
     def test_demo_captcha_image_is_not_cached(self):
         from app import create_app

@@ -109,17 +109,17 @@
 </label>
 {%- endmacro %}
 
-{#- Image captcha: text input, the challenge image, and a "load another" link button.
+{#- Image captcha: text input and the challenge image. The image is itself the "load
+    another" button (no separate link): clicking or activating it reloads the image.
     image_url must return a fresh image on every request; ui.js appends a cache-busting
-    query and clears the input when the button is pressed. -#}
-{% macro captcha_field(name, label, image_url, id='', refresh_label='换一张', image_alt='图形验证码', maxlength=8, required=true) -%}
+    query, clears the input and focuses it. refresh_label is the button's accessible name. -#}
+{% macro captcha_field(name, label, image_url, id='', refresh_label='换一张验证码', image_alt='图形验证码', maxlength=8, required=true) -%}
 {% set field_id = id or name %}
 <label for="{{ field_id }}">
   <span>{{ label }}</span>
   <span class="captcha-field">
     <input id="{{ field_id }}" name="{{ name }}" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="{{ maxlength }}"{% if required %} required{% endif %}>
-    <img class="captcha-image" src="{{ image_url }}" alt="{{ image_alt }}" width="120" height="40" data-captcha-image="{{ field_id }}">
-    <button class="btn-link captcha-refresh" type="button" data-captcha-refresh="{{ field_id }}">{{ refresh_label }}</button>
+    <button class="captcha-image-button" type="button" data-captcha-refresh="{{ field_id }}" aria-label="{{ refresh_label }}"><img class="captcha-image" src="{{ image_url }}" alt="{{ image_alt }}" width="120" height="40" data-captcha-image="{{ field_id }}"></button>
   </span>
 </label>
 {%- endmacro %}
