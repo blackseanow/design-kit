@@ -1,0 +1,7 @@
+# Support baseline, see docs/browser-support.md. Used by doiuse and eslint-plugin-compat.
+Chrome >= 120
+Edge >= 120
+Safari >= 16.4
+iOS >= 16.4
+Firefox >= 121
+ChromeAndroid >= 120

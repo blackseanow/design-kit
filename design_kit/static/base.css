@@ -79,12 +79,14 @@ img,svg { max-width: 100%; vertical-align: middle; }
 @media(max-width:768px) { .btn-small { --button-height: 40px; } }
 
 /* Icons: 16px, 1.75 stroke, from the local Lucide sprite */
-svg:has(> use),.ui-icon,.nav-icon { display: inline-flex; width: 16px; height: 16px; flex: 0 0 16px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.ui-icon,.nav-icon { display: inline-flex; width: 16px; height: 16px; flex: 0 0 16px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+/* Hand-written <svg><use> without the class gets the same treatment where :has() exists. */
+svg:has(> use) { display: inline-flex; width: 16px; height: 16px; flex: 0 0 16px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
 .nav-icon > svg { display: block; width: 100%; height: 100%; overflow: visible; }
 
 /* Help icon next to a label or title; the text is shown by ui.js */
 .title-help-button { display: inline-grid; place-items: center; width: 16px; height: 16px; min-height: 16px; flex: 0 0 16px; padding: 0; border: 0; background: transparent; color: var(--muted); vertical-align: middle; font-size: 0; border-radius: 4px; }
-.title-help-button::before { content: ""; width: 16px; height: 16px; background: currentColor; mask: url("icons/info.svg") center / contain no-repeat; }
+.title-help-button::before { content: ""; width: 16px; height: 16px; background: currentColor; -webkit-mask: url("icons/info.svg") center / contain no-repeat; mask: url("icons/info.svg") center / contain no-repeat; }
 .title-help-button:hover:not(:disabled) { background: var(--hover); color: var(--brand); }
 .help-title-inline,.field-label-with-help,.field-label { display: inline-flex; align-items: center; gap: 4px; min-height: 24px; }
 .help-tooltip-layer { position: fixed; z-index: 20000; max-width: min(340px,calc(100vw - 24px)); max-height: min(240px,calc(100dvh - 24px)); padding: 10px 12px; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 2px 8px var(--line); font-size: 12px; font-weight: 400; line-height: 1.6; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity var(--motion),visibility 0s linear var(--motion); overflow: auto; overscroll-behavior: contain; scrollbar-width: var(--scrollbar-width); overflow-wrap: anywhere; transform: none; }
@@ -92,7 +94,7 @@ svg:has(> use),.ui-icon,.nav-icon { display: inline-flex; width: 16px; height: 1
 .help-tooltip-layer[role="dialog"] { padding-right: 44px; }
 .help-tooltip-copy { white-space: pre-wrap; }
 .help-tooltip-layer .help-tooltip-close { position: absolute; right: 4px; top: 4px; }
-.help-tooltip-close::before { content: ""; width: 14px; height: 14px; background: currentColor; mask: url("icons/x.svg") center / contain no-repeat; }
+.help-tooltip-close::before { content: ""; width: 14px; height: 14px; background: currentColor; -webkit-mask: url("icons/x.svg") center / contain no-repeat; mask: url("icons/x.svg") center / contain no-repeat; }
 .help-tooltip-layer .help-tooltip-close:hover:not(:disabled),
 .help-tooltip-layer .help-tooltip-close:active:not(:disabled) { background: var(--hover); color: var(--ink); filter: none; }
 
@@ -115,10 +117,10 @@ input.toggle-switch-input:disabled { opacity: .4; cursor: not-allowed; }
 .form-field-error:not([hidden]) { font-size: 14px; line-height: 1.625; margin: 6px 0 0; }
 .form-submit-error { margin: 0 0 16px; }
 :is(input,textarea,select,button,[role="group"])[aria-invalid="true"] { scroll-margin-block: 16px; }
-:is(input,select,textarea)[aria-invalid="true"] { color: var(--ink); border-color: var(--danger)!important; background: var(--danger-tint); box-shadow: 0 0 0 3px color-mix(in srgb,var(--danger) 12%,transparent); }
-:is(input,select,textarea)[aria-invalid="true"]:focus-visible { border-color: var(--danger)!important; box-shadow: 0 0 0 3px color-mix(in srgb,var(--danger) 18%,transparent); }
+:is(input,select,textarea)[aria-invalid="true"] { color: var(--ink); border-color: var(--danger)!important; background: var(--danger-tint); box-shadow: 0 0 0 3px var(--danger-tint); box-shadow: 0 0 0 3px color-mix(in srgb,var(--danger) 12%,transparent); }
+:is(input,select,textarea)[aria-invalid="true"]:focus-visible { border-color: var(--danger)!important; box-shadow: 0 0 0 3px var(--danger-tint); box-shadow: 0 0 0 3px color-mix(in srgb,var(--danger) 18%,transparent); }
 .field-helper-text,.panel-note { color: var(--muted); font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
-.form-error { background: var(--danger-tint); padding: 12px; border-radius: var(--radius); border: 1px solid color-mix(in srgb,var(--danger) 24%,var(--line)); }
+.form-error { background: var(--danger-tint); padding: 12px; border-radius: var(--radius); border: 1px solid var(--line); border: 1px solid color-mix(in srgb,var(--danger) 24%,var(--line)); }
 
 @media(max-width:768px) {
   h1 { font-size: 20px; line-height: 28px; }

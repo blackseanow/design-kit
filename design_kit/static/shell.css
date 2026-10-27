@@ -96,7 +96,7 @@
   .mobile-menu-toggle:hover:not(:disabled) { background: var(--hover); }
   .mobile-menu-toggle[aria-expanded="true"] { border: 1px solid var(--brand); color: var(--brand); }
   .mobile-menu-toggle[aria-expanded="true"] .nav-icon { display: none; }
-  .mobile-menu-toggle[aria-expanded="true"]::before { content: ""; width: 18px; height: 18px; background: currentColor; mask: url("icons/x.svg") center / contain no-repeat; }
+  .mobile-menu-toggle[aria-expanded="true"]::before { content: ""; width: 18px; height: 18px; background: currentColor; -webkit-mask: url("icons/x.svg") center / contain no-repeat; mask: url("icons/x.svg") center / contain no-repeat; }
   .mobile-shell-brand { display: inline-flex; align-items: center; gap: 8px; height: 44px; min-height: 44px; padding: 0 4px; border-radius: var(--radius); color: var(--ink); text-decoration: none; min-width: 0; }
   .mobile-shell-brand:hover { background: var(--hover); }
   .mobile-shell-brand .brand-mark { flex-basis: 28px; width: 28px; height: 28px; }

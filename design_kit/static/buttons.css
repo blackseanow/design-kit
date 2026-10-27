@@ -60,8 +60,8 @@ button.btn-link:hover:not(:disabled),:where(.text-link):hover { background: tran
 
 :where(button.btn-danger) { border: 1px solid var(--danger); border-radius: var(--radius); background: var(--danger); color: var(--on-danger); font-weight: 650; }
 :where(button.btn-danger):hover:not(:disabled) { background: var(--danger-hover); border-color: var(--danger-hover); filter: none; }
-:where(button.btn-danger-outline) { color: var(--danger); border-color: color-mix(in srgb,var(--danger) 36%,var(--line)); background: var(--surface); }
-:where(button.btn-danger-outline):hover:not(:disabled) { background: var(--danger-tint); border-color: color-mix(in srgb,var(--danger) 48%,var(--line)); }
+:where(button.btn-danger-outline) { color: var(--danger); border-color: var(--line-strong); border-color: color-mix(in srgb,var(--danger) 36%,var(--line)); background: var(--surface); }
+:where(button.btn-danger-outline):hover:not(:disabled) { background: var(--danger-tint); border-color: var(--line-strong); border-color: color-mix(in srgb,var(--danger) 48%,var(--line)); }
 
 button.btn-icon,:where(.header-icon-button) { display: inline-grid; place-items: center; width: 32px; height: 32px; min-height: 32px; flex: 0 0 32px; padding: 0; border: 1px solid transparent; border-radius: var(--radius); background: transparent; color: var(--muted); }
 button.btn-icon:hover:not(:disabled),:where(.header-icon-button):hover:not(:disabled) { background: var(--hover); color: var(--ink); }
@@ -94,7 +94,7 @@ button[aria-busy="true"] > :not(.loading-inline-spinner),button.is-loading > :no
 
 /* Inline removal: neutral trash icon, danger treatment only on interaction. */
 button.btn-delete-icon {display:inline-flex;align-items:center;justify-content:center;width:32px;min-width:32px;min-height:32px;padding:0;border:0;border-radius:var(--radius);background:transparent;color:var(--muted);}
-button.btn-delete-icon::before {content:"";width:16px;height:16px;background:currentColor;mask:url("icons/trash-2.svg") center / contain no-repeat;}
+button.btn-delete-icon::before {content:"";width:16px;height:16px;background:currentColor;-webkit-mask: url("icons/trash-2.svg") center / contain no-repeat; mask: url("icons/trash-2.svg") center / contain no-repeat;}
 button.btn-delete-icon:hover:not(:disabled) {background:var(--danger-tint);color:var(--danger-text);}
 @media(max-width:768px) {button.btn-delete-icon {width:40px;min-width:40px;min-height:40px;}}
 button.btn-delete-icon.is-loading::before {display:none;}

@@ -1,7 +1,7 @@
 {% extends "design_kit/auth_layout.html" %}
 {% from "design_kit/macros.html" import password_field, captcha_field %}
 {% block content %}
-<h2>登录</h2>
+<h1>登录</h1>
 <form class="login-form" method="post" action="{{ url_for('login') }}">
   <label for="username"><span>用户名</span><input id="username" name="username" autocomplete="username" required value="demo"></label>
   {{ password_field("password", "密码") }}

@@ -9,7 +9,7 @@
 .login-brand strong { white-space: normal; }
 /* Tagline only; the source rule (.login-brand span) also hit the kit's letter mark. */
 .login-brand > div > span { display: block; font-size: 12px; margin-top: 2px; color: var(--muted); }
-.login-panel h2 { font-size: 22px; line-height: 32px; margin-bottom: 24px; }
+.login-panel h1,.login-panel h2 { font-size: 22px; line-height: 32px; font-weight: 600; margin-bottom: 24px; }
 .login-form { display: grid; gap: 20px; }
 .login-form > button[type="submit"] { width: 100%; }
 .login-secondary-link { color: var(--muted); font-size: 13px; text-align: center; }
@@ -37,7 +37,7 @@
 .password-visibility-toggle:active:not(:disabled) { background: var(--brand-tint); color: var(--brand-hover); filter: none; }
 .password-visibility-toggle:focus-visible { z-index: 1; outline: 2px solid var(--focus-border); outline-offset: -2px; color: var(--brand); background: var(--brand-tint); }
 .password-visibility-toggle[aria-pressed="true"] { color: var(--brand); }
-.password-visibility-toggle::before { content: ""; width: 18px; height: 18px; background: currentColor; mask: url("icons/eye.svg") center / contain no-repeat; }
+.password-visibility-toggle::before { content: ""; width: 18px; height: 18px; background: currentColor; -webkit-mask: url("icons/eye.svg") center / contain no-repeat; mask: url("icons/eye.svg") center / contain no-repeat; }
 .password-visibility-toggle[aria-pressed="true"]::before { mask-image: url("icons/eye-off.svg"); }
 
 /* Image captcha field (input + challenge image + link button). ui.js reloads the image. */

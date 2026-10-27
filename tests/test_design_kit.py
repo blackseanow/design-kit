@@ -305,7 +305,7 @@ class BlueprintTests(unittest.TestCase):
         with app.test_request_context("/"):
             html = render_template_string(source)
         self.assertIn('<nav class="breadcrumb" aria-label="面包屑">', html)
-        self.assertIn('<li><a href="/items"><svg aria-hidden="true"><use href="', html)
+        self.assertIn('<li><a href="/items"><svg class="ui-icon" aria-hidden="true"><use href="', html)
         self.assertIn('<li><span aria-current="page">详情</span></li>', html)
         self.assertIn('<li class="complete">', html)
         self.assertIn('<li class="active" aria-current="step">', html)

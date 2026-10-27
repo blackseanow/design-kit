@@ -1,10 +1,18 @@
 // Browser regression for the design kit demo. Uses fictional demo data only.
 // Run from design-kit/:  PYTHON=python3 node tests/browser_check.js
+//   BROWSER=webkit or BROWSER=firefox runs the same checks in another engine
+//   (the engine must be installed: npx playwright install webkit firefox).
 // Needs Flask importable by $PYTHON and the playwright npm package.
 const { spawn } = require("node:child_process");
 const path = require("node:path");
 const assert = require("node:assert/strict");
-const { chromium } = require("playwright");
+const playwright = require("playwright");
+
+let AxeBuilder = null;
+try { ({ default: AxeBuilder } = require("@axe-core/playwright")); } catch { /* npm install adds it; without it the scan is skipped */ }
+
+const BROWSER = process.env.BROWSER || "chromium";
+if (!["chromium", "webkit", "firefox"].includes(BROWSER)) throw new Error(`BROWSER must be chromium, webkit or firefox, not ${BROWSER}`);
 
 const PORT = process.env.PORT || "5071";
 const BASE = `http://127.0.0.1:${PORT}`;
@@ -26,7 +34,7 @@ async function waitForServer() {
   const server = spawn(process.env.PYTHON || "python3", [path.join(__dirname, "..", "demo", "app.py")], {
     env: { ...process.env, PORT }, stdio: "ignore",
   });
-  const browser = await chromium.launch();
+  const browser = await playwright[BROWSER].launch();
   try {
     await waitForServer();
     const consoleErrors = [];
@@ -330,6 +338,10 @@ async function waitForServer() {
       await desktop.keyboard.press("Escape");
       await desktop.locator(".segmented > button").nth(1).click();
       assert.deepEqual(await desktop.evaluate(() => [...document.querySelectorAll(".segmented > button")].map((b) => b.getAttribute("aria-pressed"))), ["false", "true", "false"]);
+      // Radio version: the checked label also carries .is-checked (the :has()-free fallback).
+      assert.deepEqual(await desktop.evaluate(() => [...document.querySelectorAll('.segmented[role="radiogroup"] > label')].map((l) => l.classList.contains("is-checked"))), [true, false, false]);
+      await desktop.locator('.segmented[role="radiogroup"] > label').nth(2).click();
+      assert.deepEqual(await desktop.evaluate(() => [...document.querySelectorAll('.segmented[role="radiogroup"] > label')].map((l) => l.classList.contains("is-checked"))), [false, false, true]);
     });
 
     await check("table settings hide a column and remember it after reload", async () => {
@@ -440,13 +452,36 @@ async function waitForServer() {
       assert.ok(widths.six > 0, "a 6-column table keeps its 680px floor and scrolls");
     });
 
-    await check("no horizontal page overflow at 320px", async () => {
-      for (const route of ["/", "/records", "/components", "/overlays", "/settings", "/login"]) {
-        await phone.setViewportSize({ width: 320, height: 640 });
-        await phone.goto(BASE + route);
-        const overflow = await phone.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-        assert.equal(overflow, 0, `${route} overflows by ${overflow}px`);
+    await check("no horizontal page overflow at 320, 768 and 1024px", async () => {
+      for (const width of [320, 768, 1024]) {
+        for (const route of ["/", "/records", "/components", "/overlays", "/settings", "/login"]) {
+          await phone.setViewportSize({ width, height: 640 });
+          await phone.goto(BASE + route);
+          const overflow = await phone.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+          assert.equal(overflow, 0, `${route} at ${width}px overflows by ${overflow}px`);
+        }
       }
+    });
+
+    await check("axe: no serious or critical accessibility violations on any page", async () => {
+      if (!AxeBuilder) { results.push("skip axe scan (@axe-core/playwright is not installed; run npm install)"); return; }
+      // @axe-core/playwright needs a page from an explicit context.
+      const scanContext = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+      const scan = await scanContext.newPage();
+      const problems = [];
+      for (const route of ["/", "/records", "/components", "/overlays", "/settings", "/login"]) {
+        await scan.goto(BASE + route);
+        await scan.waitForFunction(() => document.querySelector("[data-route-progress]")?.hidden, null, { timeout: 5000 }).catch(() => {});
+        const report = await new AxeBuilder({ page: scan }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "best-practice"]).analyze();
+        report.violations.forEach((violation) => {
+          const targets = violation.nodes.slice(0, 3).map((node) => node.target.join(" ")).join(" | ");
+          problems.push(`${route} [${violation.impact}] ${violation.id}: ${violation.help} (${violation.nodes.length}) -> ${targets}`);
+        });
+      }
+      await scanContext.close();
+      const blocking = problems.filter((line) => /\[(serious|critical)\]/.test(line));
+      problems.filter((line) => !/\[(serious|critical)\]/.test(line)).forEach((line) => results.push(`note ${line}`));
+      assert.deepEqual(blocking, []);
     });
 
     await check("no console errors", async () => assert.deepEqual(consoleErrors, []));
@@ -454,5 +489,6 @@ async function waitForServer() {
     await browser.close();
     server.kill();
   }
+  console.log(`[${BROWSER}]`);
   console.log(results.join("\n"));
 })();
