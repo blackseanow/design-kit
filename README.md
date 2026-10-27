@@ -83,7 +83,7 @@ def shell():
 把这个项目的前端整体改成 design-kit 的设计规范。业务逻辑、路由、表单字段名和提交格式一律不动，只改外观和交互层。
 
 ## 资料（先读完再动手）
-- design-kit 位置：<路径或仓库名>
+- design-kit 位置：https://github.com/blackseanow/design-kit
 - 必读：README.md（接入步骤、配置项、“必须遵守的规则”）、docs/components.md（每个组件的 HTML 写法）、docs/design-system.md、docs/interactions.md、docs/responsive-accessibility.md、docs/qa-checklist.md
 - 参考实现：demo/app.py 和 demo/templates/（列表、筛选、分页、表格行操作、弹窗表单、登录页、/overlays 页面）
 - 本项目的技术栈：<Flask + Jinja / 其他>。不是 Flask + Jinja 时，只用 kit 的 CSS、JS 和 HTML 结构，不用 Blueprint 和宏。
