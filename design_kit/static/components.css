@@ -65,7 +65,11 @@ td small { display: block; }
 td .button-group,td.list-row-actions { flex-wrap: nowrap; }
 .ui-table-overflow { outline-offset: 2px; }
 .ui-table-overflow:focus-visible { outline: 2px solid var(--focus-border); }
-.table-wrap table { min-width: 680px; }
+/* Wide tables scroll inside the wrapper instead of squeezing: 680px for 4+ columns.
+   Narrow tables (1-3 columns) fit the wrapper; .table-fit forces that for any table;
+   --table-min-width on the wrapper sets another floor. */
+.table-wrap table { min-width: var(--table-min-width, 680px); }
+.table-wrap:not(:has(thead th:nth-child(4))) table,.table-wrap.table-fit table { min-width: 0; }
 .table-wrap td:last-child { white-space: nowrap; }
 
 /* Activity / Logs table rhythm, shared by every data list. */
