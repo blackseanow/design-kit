@@ -295,8 +295,8 @@ input.enhanced-select-search { flex-shrink: 0; border: 0!important; border-botto
 /* ---- Navigation, feedback and list components ---- */
 
 /* Breadcrumb (source: account-detail breadcrumb: 13px muted, 10px gaps) */
-.breadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; color: var(--muted); font-size: 13px; min-width: 0; }
-.breadcrumb ol { display: contents; list-style: none; margin: 0; padding: 0; }
+.breadcrumb { color: var(--muted); font-size: 13px; min-width: 0; }
+.breadcrumb ol { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; list-style: none; margin: 0; padding: 0; }
 .breadcrumb li { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
 .breadcrumb li + li::before { content: "/"; color: var(--line-strong); }
 .breadcrumb a { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; color: var(--muted); text-decoration: none; white-space: nowrap; }

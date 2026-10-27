@@ -189,7 +189,10 @@
     const heading = document.createElement("th");
     heading.scope = "col";
     heading.className = "table-actions-heading";
-    heading.setAttribute("aria-label", "表格设置");
+    const name = document.createElement("span");
+    name.className = "sr-only";
+    name.textContent = "表格设置";
+    heading.append(name);
     heading.dataset.tableSettingsColumn = "true";
     last.after(heading);
     headers.push(heading);

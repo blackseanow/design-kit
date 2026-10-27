@@ -89,7 +89,7 @@
 
 <section class="panel" id="navigation">
   {{ panel_head("面包屑、步骤条、分段控件") }}
-  {{ breadcrumb([{"label": "任务列表", "href": url_for('records')}, {"label": "示例任务 01", "href": url_for('records')}, {"label": "编辑"}], back=true) }}
+  {{ breadcrumb([{"label": "任务列表", "href": url_for('records')}, {"label": "示例任务 01", "href": url_for('records')}, {"label": "编辑"}], label="示例面包屑", back=true) }}
   <div style="margin-top:20px">
     {{ steps(["填写信息", {"label": "验证", "hint": "等待确认"}, "完成"], current=2) }}
   </div>

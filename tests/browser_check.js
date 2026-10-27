@@ -8,6 +8,9 @@ const path = require("node:path");
 const assert = require("node:assert/strict");
 const playwright = require("playwright");
 
+let AxeBuilder = null;
+try { ({ default: AxeBuilder } = require("@axe-core/playwright")); } catch { /* npm install adds it; without it the scan is skipped */ }
+
 const BROWSER = process.env.BROWSER || "chromium";
 if (!["chromium", "webkit", "firefox"].includes(BROWSER)) throw new Error(`BROWSER must be chromium, webkit or firefox, not ${BROWSER}`);
 
@@ -458,6 +461,27 @@ async function waitForServer() {
           assert.equal(overflow, 0, `${route} at ${width}px overflows by ${overflow}px`);
         }
       }
+    });
+
+    await check("axe: no serious or critical accessibility violations on any page", async () => {
+      if (!AxeBuilder) { results.push("skip axe scan (@axe-core/playwright is not installed; run npm install)"); return; }
+      // @axe-core/playwright needs a page from an explicit context.
+      const scanContext = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+      const scan = await scanContext.newPage();
+      const problems = [];
+      for (const route of ["/", "/records", "/components", "/overlays", "/settings", "/login"]) {
+        await scan.goto(BASE + route);
+        await scan.waitForFunction(() => document.querySelector("[data-route-progress]")?.hidden, null, { timeout: 5000 }).catch(() => {});
+        const report = await new AxeBuilder({ page: scan }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "best-practice"]).analyze();
+        report.violations.forEach((violation) => {
+          const targets = violation.nodes.slice(0, 3).map((node) => node.target.join(" ")).join(" | ");
+          problems.push(`${route} [${violation.impact}] ${violation.id}: ${violation.help} (${violation.nodes.length}) -> ${targets}`);
+        });
+      }
+      await scanContext.close();
+      const blocking = problems.filter((line) => /\[(serious|critical)\]/.test(line));
+      problems.filter((line) => !/\[(serious|critical)\]/.test(line)).forEach((line) => results.push(`note ${line}`));
+      assert.deepEqual(blocking, []);
     });
 
     await check("no console errors", async () => assert.deepEqual(consoleErrors, []));

@@ -172,22 +172,24 @@ cd design-kit
 pip install Flask==3.1.2
 python demo/app.py                                    # http://127.0.0.1:5058/
 python -m unittest discover -s tests                  # 24 项：CSS 规则、Blueprint、宏、验证码、新组件的宏、启动画面
-node --test tests/js/kit.test.js                      # 23 项：进度条、菜单和弹出层定位、焦点、主题、加载生命周期、共享观察者
-PYTHON=python3 node tests/browser_check.js            # 36 项浏览器交互，需要 playwright；BROWSER=webkit / firefox 换引擎
+npm ci                                                # 开发工具：playwright、axe、doiuse、eslint-plugin-compat
+npm run test:js                                       # 23 项：进度条、菜单和弹出层定位、焦点、主题、加载生命周期、共享观察者
+npm run lint:compat                                   # CSS 和 JS 是否超出 .browserslistrc 的支持基线
+PYTHON=python3 npm run test:browser                   # 37 项浏览器交互（含 axe 无障碍扫描）；BROWSER=webkit / firefox 换引擎
 ```
 
-本仓库目前没有配置 CI，以上命令需要手动运行。
+GitHub Actions（`.github/workflows/ci.yml`）在每次推送和 PR 上跑以上全部，浏览器检查在 Chromium、WebKit、Firefox 各跑一遍。
 
 ## 验证情况
 
 **已验证（本次实际运行）：**
 - Python 测试 24 项、Node 测试 23 项全部通过（Python 3.13.17、Flask 3.1.2、Node 22.22.0；2026-10-27）。
-- 浏览器检查 36 项全部通过（Playwright + Chromium；2026-10-27）：原有 20 项，加上区块加载（快任务不显示、慢任务遮罩和 `aria-busy`、失败后重试）、标题加载位占位、顶栏刷新图标转圈、启动画面释放和 `whenReady`、两级菜单展开收起、角标 `99+` 和 `aria-label`、抽屉贴边 480px 和焦点返回、弹出层里的下拉先关再关弹出层、点击外部关闭、下拉菜单键盘操作和单选项、选项卡滑动底线、分段按钮、表格设置隐藏列并在刷新后保持、批量选择计数、筛选弹出层提交 GET 表单、每页条数跳转、手机上父项展开不关闭侧栏、手机抽屉铺满、`/overlays` 在 320px 无横向滚动。
+- 浏览器检查 37 项全部通过（Playwright + Chromium；2026-10-27）：原有 20 项，加上 axe 扫描（6 个页面没有 serious / critical 级别的问题）、区块加载（快任务不显示、慢任务遮罩和 `aria-busy`、失败后重试）、标题加载位占位、顶栏刷新图标转圈、启动画面释放和 `whenReady`、两级菜单展开收起、角标 `99+` 和 `aria-label`、抽屉贴边 480px 和焦点返回、弹出层里的下拉先关再关弹出层、点击外部关闭、下拉菜单键盘操作和单选项、选项卡滑动底线、分段按钮、表格设置隐藏列并在刷新后保持、批量选择计数、筛选弹出层提交 GET 表单、每页条数跳转、手机上父项展开不关闭侧栏、手机抽屉铺满、`/overlays` 在 320px 无横向滚动。
 - 截图人工查看：1440px 和 390px、320px，日间和夜间，6 个页面（含抽屉、弹出层、下拉菜单、表格设置、消息中心弹出层、加载遮罩、错误遮罩、启动画面）。
 - `pip install` 后静态文件、图标、许可证和模板都在包里。
 
 **未验证：**
-- Safari、Firefox；iOS / Android 真机；手机软键盘弹出时的弹窗表现。
+- Safari、Firefox：WebKit 和 Firefox 引擎的检查只在 CI 里跑，本机只跑了 Chromium；iOS / Android 真机；手机软键盘弹出时的弹窗表现。
 - 读屏软件（VoiceOver、NVDA）的实际朗读效果。
 - 基于 nonce 的 CSP（模板支持 `csp_nonce`，但没有测试）。
 - 几千行以上的大表格性能。

@@ -191,7 +191,7 @@ await Kit.ui.runButtonAction(button, "保存中", () => fetch(...));
 ```html
 <div class="table-wrap">
   <table class="console-data-table">
-    <thead><tr><th>名称</th><th>状态</th><th class="table-actions-heading" aria-label="更多操作"></th></tr></thead>
+    <thead><tr><th>名称</th><th>状态</th><th class="table-actions-heading"><span class="sr-only">更多操作</span></th></tr></thead>
     <tbody>
       <tr>
         <td><strong>示例任务</strong><small>ID 1</small></td>
@@ -210,7 +210,7 @@ await Kit.ui.runButtonAction(button, "保存中", () => fetch(...));
 
 - 宽表在 `.table-wrap` 里横向滚动，超宽时容器可以用键盘聚焦和滚动。4 列及以上的表格最小 680px；1–3 列的表格直接适应容器宽度，手机上不用滑。任何表格加 `.table-fit` 都按容器宽度排；在容器上设 `--table-min-width` 可以换一个下限。
 - 最后一列在 `.page-content` 里固定在右侧。
-- `.list-row-actions` 里的按钮全部收进“更多操作”菜单；菜单图标根据按钮文字自动选择，也可以用 `data-icon` 指定。
+- 操作列的表头放一个 `.sr-only` 文字（空表头读屏无法命名）。`.list-row-actions` 里的按钮全部收进“更多操作”菜单；菜单图标根据按钮文字自动选择，也可以用 `data-icon` 指定。
 - 行里的开关 `<label><input class="toggle-switch-input" type="checkbox"></label>` 也会收进菜单，行内留一个“已启用/已暂停”状态。
 - 行密度：`data-density="compact"` 或 `"expanded"`。
 - `pagination` 的 `args` 里不要放 `page`。
