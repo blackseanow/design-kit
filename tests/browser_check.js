@@ -92,9 +92,26 @@ async function waitForServer() {
 
     await check("only one floating menu is open at a time", async () => {
       await desktop.locator(".custom-date-button").first().click();
-      await desktop.locator(".enhanced-select-button").first().click();
+      await desktop.locator('.custom-date-menu[data-open="true"]').waitFor();
+      // The date menu opens above or below its button depending on the room left in the
+      // viewport and can cover the neighbouring trigger. Pick a second trigger whose centre
+      // it does not cover, so the click lands on the trigger in every engine.
+      const second = await desktop.evaluate(() => {
+        const selectors = [".enhanced-select-button", ".custom-time-picker:not(.custom-time-editable) .custom-time-button"];
+        for (const selector of selectors) {
+          for (const [index, button] of [...document.querySelectorAll(selector)].entries()) {
+            const rect = button.getBoundingClientRect();
+            if (rect.top < 0 || rect.bottom > innerHeight) continue;
+            const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+            if (hit && button.contains(hit)) return { selector, index };
+          }
+        }
+        return null;
+      });
+      assert.ok(second, "a second trigger the date menu does not cover");
+      await desktop.locator(second.selector).nth(second.index).click();
       assert.equal(await desktop.locator('.custom-date-menu[data-open="true"]').count(), 0);
-      assert.equal(await desktop.locator('.enhanced-select-menu[data-open="true"]').count(), 1);
+      assert.equal(await desktop.locator('[data-open="true"]').count(), 1);
       await desktop.keyboard.press("Escape");
     });
 
