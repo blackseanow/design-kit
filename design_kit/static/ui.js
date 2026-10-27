@@ -555,6 +555,28 @@
     const base = String(src || "").replace(/([?&])_cb=\d+(&|$)/, (match, lead, tail) => (tail ? lead : ""));
     return `${base}${base.includes("?") ? "&" : "?"}_cb=${stamp}`;
   }
+  /* Native form submission: the submitter (or the form's first submit button) shows the
+     loading state while the browser navigates, e.g. "登录" becomes a spinner + "登录中…".
+     Label: data-loading-text on the button, default text + "中…". Opt out with
+     data-submit-loading="false" on the form or the button; forms marked data-no-progress or
+     targeting another window (downloads) are left alone, like the route progress bar. The
+     state is cleared when the page is restored from the back-forward cache. */
+  function bindSubmitLoading() {
+    const busy = new Set();
+    document.addEventListener("submit", (event) => {
+      const form = event.target;
+      if (!(form instanceof HTMLFormElement) || event.defaultPrevented) return;
+      if (form.dataset.submitLoading === "false" || form.hasAttribute("data-no-progress") || (form.target && form.target !== "_self")) return;
+      const button = event.submitter || form.querySelector('button[type="submit"], button:not([type])');
+      if (!(button instanceof HTMLButtonElement) || button.dataset.submitLoading === "false" || button.classList.contains("is-loading")) return;
+      const label = button.dataset.loadingText || `${button.textContent.trim()}中…`;
+      // The browser builds the form data right after this event; disabling the submitter
+      // later keeps its name/value in the submission.
+      setTimeout(() => { setButtonLoading(button, true, label); busy.add(button); }, 0);
+    });
+    root.addEventListener("pageshow", () => { busy.forEach((button) => setButtonLoading(button, false)); busy.clear(); });
+  }
+
   function bindCaptchaRefresh() {
     document.addEventListener("click", (event) => {
       const button = event.target.closest?.("[data-captcha-refresh]");
@@ -601,6 +623,7 @@
     initHelp();
     bindPasswordToggles();
     bindCaptchaRefresh();
+    bindSubmitLoading();
     bindSmallControls();
     const inside = (event, node) => Boolean(node && (node.contains(event.target) || event.composedPath?.().includes(node)));
     document.addEventListener("pointerdown", (event) => {

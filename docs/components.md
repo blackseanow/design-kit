@@ -97,8 +97,11 @@
 加载态：
 
 ```js
-await Kit.ui.runButtonAction(button, "保存中", () => fetch(...));
+await Kit.ui.runButtonAction(button, "保存中", () => fetch(...));   // 禁用、转圈、结束后恢复
+Kit.ui.setButtonLoading(button, true, "登录中…");                     // 手动开关
 ```
+
+原生表单提交时不用写 JS：提交后，点的那个提交按钮自动变成转圈加“登录中…”（按钮文字加“中…”），直到浏览器跳到下一页；`data-loading-text="正在登录"` 自定义文字。表单或按钮加 `data-submit-loading="false"` 关闭；`data-no-progress` 的表单和提交到新窗口的表单（下载）不会进入加载态，否则按钮会一直转。
 
 ## 表单
 
