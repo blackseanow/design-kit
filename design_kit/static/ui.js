@@ -95,6 +95,8 @@
       binding.sync = () => {
         const overflowing = Boolean(host.querySelector("table")) && host.clientWidth > 0 && host.scrollWidth > host.clientWidth + 1;
         host.classList.toggle("ui-table-overflow", overflowing);
+        // .is-scroll-end: nothing is hidden under the pinned last column any more.
+        host.classList.toggle("is-scroll-end", !overflowing || host.scrollLeft + host.clientWidth >= host.scrollWidth - 1);
         if (overflowing && !binding.managed) {
           binding.managed = true;
           host.setAttribute("tabindex", "0");
@@ -111,6 +113,7 @@
         binding.resize = new ResizeObserver(binding.sync);
         binding.resize.observe(host);
       }
+      host.addEventListener("scroll", binding.sync, { passive: true });
       tableBindings.set(host, binding);
     }
     if (binding.table !== table) {

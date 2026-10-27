@@ -467,6 +467,16 @@ async function waitForServer() {
       });
       assert.equal(widths.three, 0, "a 3-column table has no inner scroll");
       assert.ok(widths.six > 0, "a 6-column table keeps its 680px floor and scrolls");
+      // The pinned last column casts a shadow while columns are hidden under it, and drops it at the end.
+      const six = phone.locator(".page-content > .table-wrap").last();
+      await phone.waitForFunction(() => { const wraps = document.querySelectorAll(".page-content > .table-wrap"); return wraps[wraps.length - 1].classList.contains("ui-table-overflow"); });
+      const shadowAt = () => six.evaluate((wrap) => getComputedStyle(wrap.querySelector("th:last-child")).boxShadow);
+      assert.equal(await six.evaluate((wrap) => wrap.classList.contains("is-scroll-end")), false);
+      assert.notEqual(await shadowAt(), "none", "pinned column shows the scroll cue");
+      await six.evaluate((wrap) => { wrap.scrollLeft = wrap.scrollWidth; });
+      await phone.waitForFunction(() => { const wraps = document.querySelectorAll(".page-content > .table-wrap"); return wraps[wraps.length - 1].classList.contains("is-scroll-end"); });
+      assert.equal(await shadowAt(), "none", "no cue once the table is scrolled to the end");
+      assert.equal(await phone.locator(".page-content > .table-wrap").first().evaluate((wrap) => wrap.classList.contains("is-scroll-end")), true, "a fitting table counts as at the end");
     });
 
     await check("no horizontal page overflow at 320, 768 and 1024px", async () => {

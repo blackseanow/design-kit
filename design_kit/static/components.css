@@ -107,6 +107,8 @@ td .button-group,td.list-row-actions { flex-wrap: nowrap; }
 }
 .page-content .console-data-table tbody tr > td { background-color: var(--table-row-surface) !important; }
 .page-content .console-data-table :is(th,td):last-child { position: sticky; right: 0; z-index: 2; border-left: 0; box-shadow: none; }
+/* While columns are still hidden under the pinned column (DataTable toggles .is-scroll-end), it casts a shadow as a scroll cue. */
+.page-content .table-wrap.ui-table-overflow:not(.is-scroll-end) .console-data-table :is(th,td):last-child { box-shadow: var(--pin-shadow); }
 .page-content .console-data-table th:last-child { background: var(--surface); width: 52px; min-width: 52px; padding-inline: 8px; }
 .page-content .console-data-table td:last-child { width: 52px; min-width: 52px; padding-inline: 8px; }
 /* The row menu shares the same right-hand inset. */
@@ -276,6 +278,7 @@ input.enhanced-select-search { flex-shrink: 0; border: 0!important; border-botto
   .ui-state-compact { min-height: 80px; padding: 16px; }
   .table-wrap td:last-child,.table-wrap th:last-child { position: sticky; right: 0; background: var(--surface); box-shadow: none; }
   .console-data-table :is(th,td):last-child { position: sticky; right: 0; z-index: 2; background: var(--surface); box-shadow: none; }
+  .table-wrap.ui-table-overflow:not(.is-scroll-end) :is(th,td):last-child { box-shadow: var(--pin-shadow); }
   .enhanced-select-option { min-height: 44px; }
   .summary-list { grid-template-columns: minmax(0,1fr); }
   .row-overflow-trigger { flex-basis: 44px; width: 44px; height: 44px; min-height: 44px; }
