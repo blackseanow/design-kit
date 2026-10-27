@@ -38,9 +38,10 @@ label:has(> input[type="checkbox"]), label:has(> input[type="radio"]) { display:
 fieldset { min-width: 0; padding: 0; margin: 0; border: 0; }
 fieldset:disabled { opacity: .65; }
 
-/* Type scale: page 20px, panel 16px, body 14px, helper 12-13px */
+/* Type scale: page title 22px (20px on phones), panel 16px, body 14px, helper 12-13px.
+   The bare h1 and the page_header() title are the same size. */
 h1,h2,h3,h4,p { margin: 0; }
-h1 { font-size: 20px; line-height: 36px; font-weight: 600; letter-spacing: -.02em; }
+h1 { font-size: 22px; line-height: 30px; font-weight: 650; letter-spacing: -.02em; }
 h2 { font-size: 16px; line-height: 24px; font-weight: 600; }
 h3 { font-size: 14px; line-height: 24px; font-weight: 600; }
 h4 { font-size: 13px; }
@@ -120,6 +121,7 @@ input.toggle-switch-input:disabled { opacity: .4; cursor: not-allowed; }
 .form-error { background: var(--danger-tint); padding: 12px; border-radius: var(--radius); border: 1px solid color-mix(in srgb,var(--danger) 24%,var(--line)); }
 
 @media(max-width:768px) {
+  h1 { font-size: 20px; line-height: 28px; }
   button { min-height: var(--touch-height); }
   /* 16px inputs stop mobile Safari from zooming on focus. */
   input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),select,textarea { font-size: 16px; min-height: var(--touch-height); }
