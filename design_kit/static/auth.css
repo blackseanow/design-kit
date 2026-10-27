@@ -40,11 +40,15 @@
 .password-visibility-toggle::before { content: ""; width: 18px; height: 18px; background: currentColor; -webkit-mask: url("icons/eye.svg") center / contain no-repeat; mask: url("icons/eye.svg") center / contain no-repeat; }
 .password-visibility-toggle[aria-pressed="true"]::before { mask-image: url("icons/eye-off.svg"); }
 
-/* Image captcha field (input + challenge image + link button). ui.js reloads the image. */
+/* Image captcha field (input + challenge image). The image is a button: ui.js reloads it on click. */
 .captcha-field { display: flex; align-items: center; gap: 12px; }
 .captcha-field input { flex: 1 1 auto; }
-.captcha-image { flex: 0 0 120px; width: 120px; height: var(--control-height); border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-subtle); object-fit: cover; }
-.captcha-refresh { flex: 0 0 auto; white-space: nowrap; }
+.captcha-image-button { display: block; flex: 0 0 120px; width: 120px; min-height: 0; height: auto; padding: 0; border: 0; border-radius: var(--radius); background: none; cursor: pointer; line-height: 0; }
+.captcha-image-button:hover .captcha-image { border-color: var(--line-strong); }
+.captcha-image-button:focus-visible { outline: 2px solid var(--focus-border); outline-offset: 2px; }
+/* The image keeps a light, opaque backdrop in both themes (--captcha-surface): captcha
+   glyphs are drawn for a light background, and a transparent image must stay readable at night. */
+.captcha-image { display: block; width: 120px; height: var(--control-height); border: 1px solid var(--line); border-radius: var(--radius); background: var(--captcha-surface); object-fit: cover; }
 
 @media(max-width:480px) { .login-shell { padding: 24px 16px; } .login-panel { padding: 24px; } .login-brand { margin-bottom: 24px; } }
 /* Keep the toggle at the shared touch height when fields grow to 44px. */

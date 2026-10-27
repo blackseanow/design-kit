@@ -17,9 +17,11 @@ design-kit/
     static/                  tokens.css 等 8 个 CSS、11 个 JS、icons.svg、icons/（Lucide，ISC 许可）
     templates/design_kit/    layout.html、auth_layout.html、macros.html、head.html、scripts.html、startup.html
   demo/                      演示应用（虚构数据，只在本机运行）
-  tests/                     test_design_kit.py、js/kit.test.js、browser_check.js
+  tests/                     test_design_kit.py、js/kit.test.js、browser_check.js、compat_check.mjs
+  scripts/check.mjs          npm run check：本机一次跑完全部检查
+  .githooks/pre-push         可选的推送前检查钩子
   docs/                      规范文档（见下方“文档”）
-  pyproject.toml
+  pyproject.toml             Python 包；package.json 只装开发工具
 ```
 
 ## 接入新项目
@@ -163,7 +165,8 @@ def shell():
 | `class="list-row-actions"` | 表格行操作统一收进“更多操作”菜单 |
 | `data-primary-visible="true"` | 行操作有 3 个及以上时，第一个保留在行内 |
 | `data-icon="copy"` | 指定行操作菜单里的图标 |
-| `data-no-progress` | 下载链接不启动顶部进度条 |
+| `data-no-progress` | 下载链接或下载表单不启动顶部进度条，表单的提交按钮也不进入加载态 |
+| `data-loading-text="登录中…"` / `data-submit-loading="false"` | 原生表单提交时提交按钮自动转圈的文字 / 关闭这个行为（写在表单或按钮上） |
 
 ## 运行演示和测试
 
@@ -176,7 +179,7 @@ npm ci                                                # 开发工具：playwrigh
 npm run test:js                                       # 23 项：进度条、菜单和弹出层定位、焦点、主题、加载生命周期、共享观察者
 npm run lint:compat                                   # CSS 和 JS 是否超出 .browserslistrc 的支持基线
 npm run browsers                                      # 第一次：下载 Chromium、WebKit、Firefox 三个引擎（Linux 可能还要 npx playwright install-deps）
-PYTHON=python3 npm run test:browser                   # 39 项浏览器交互（含 axe 无障碍扫描）；BROWSER=webkit / firefox 换引擎
+PYTHON=python3 npm run test:browser                   # 41 项浏览器交互（含 axe 无障碍扫描）；BROWSER=webkit / firefox 换引擎
 PYTHON=python3 npm run check                          # 一次跑完以上全部，浏览器检查在已安装的每个引擎各跑一遍
 ```
 
@@ -186,7 +189,7 @@ PYTHON=python3 npm run check                          # 一次跑完以上全部
 
 **已验证（本次实际运行）：**
 - Python 测试 24 项、Node 测试 23 项全部通过（Python 3.13.17、Flask 3.1.2、Node 22.22.0；2026-10-27）。
-- 浏览器检查 39 项在三个引擎各跑一遍全部通过（Playwright 1.63：Chromium 153、WebKit 26.6、Firefox 155；2026-10-27）：原有 20 项，加上固定列滚动提示、包了一层的字段也有必填星号、加载兜底提示条只在看到过的遮罩滚出时出现、axe 扫描（6 个页面没有 serious / critical 级别的问题）、区块加载（快任务不显示、慢任务遮罩和 `aria-busy`、失败后重试）、标题加载位占位、顶栏刷新图标转圈、启动画面释放和 `whenReady`、两级菜单展开收起、角标 `99+` 和 `aria-label`、抽屉贴边 480px 和焦点返回、弹出层里的下拉先关再关弹出层、点击外部关闭、下拉菜单键盘操作和单选项、选项卡滑动底线、分段按钮、表格设置隐藏列并在刷新后保持、批量选择计数、筛选弹出层提交 GET 表单、每页条数跳转、手机上父项展开不关闭侧栏、手机抽屉铺满、`/overlays` 在 320px 无横向滚动。
+- 浏览器检查 41 项在三个引擎各跑一遍全部通过（Playwright 1.63：Chromium 153、WebKit 26.6、Firefox 155；2026-10-27）：原有 20 项，加上固定列滚动提示、包了一层的字段也有必填星号、验证码图在夜间保持浅色底、登录按钮提交时转圈、加载兜底提示条只在看到过的遮罩滚出时出现、axe 扫描（6 个页面没有 serious / critical 级别的问题）、区块加载（快任务不显示、慢任务遮罩和 `aria-busy`、失败后重试）、标题加载位占位、顶栏刷新图标转圈、启动画面释放和 `whenReady`、两级菜单展开收起、角标 `99+` 和 `aria-label`、抽屉贴边 480px 和焦点返回、弹出层里的下拉先关再关弹出层、点击外部关闭、下拉菜单键盘操作和单选项、选项卡滑动底线、分段按钮、表格设置隐藏列并在刷新后保持、批量选择计数、筛选弹出层提交 GET 表单、每页条数跳转、手机上父项展开不关闭侧栏、手机抽屉铺满、`/overlays` 在 320px 无横向滚动。
 - 截图人工查看：1440px 和 390px、320px，日间和夜间，6 个页面（含抽屉、弹出层、下拉菜单、表格设置、消息中心弹出层、加载遮罩、错误遮罩、启动画面）。
 - `pip install` 后静态文件、图标、许可证和模板都在包里。
 

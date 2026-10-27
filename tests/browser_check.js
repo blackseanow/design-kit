@@ -202,12 +202,17 @@ async function waitForServer() {
       await desktop.evaluate(() => window.scrollTo(0, 0));
       await desktop.waitForTimeout(150);
       assert.equal(await desktop.locator(".loading-viewport-fallback").count(), 0, "the loading panel below the fold adds no pill at the top");
-      await desktop.locator("#loadingRunDemo").click();
-      await desktop.locator("#loadingDemoTable .page-list-loading").waitFor();
+      // Start a 2.5s task on the demo table while it is centred in the viewport, so the mask
+      // is seen in every engine regardless of where a button click scrolled the page.
+      await desktop.evaluate(() => {
+        document.getElementById("loadingDemoTable").scrollIntoView({ block: "center" });
+        window.__pillTask = Kit.loading.run("loadingDemoTable", () => new Promise((resolve) => setTimeout(resolve, 2500)), { label: "滚出测试" });
+      });
+      await desktop.locator("#loadingDemoTable .page-list-loading .page-list-loading-content").waitFor({ state: "visible" });
       await desktop.evaluate(() => window.scrollTo(0, 0));
-      const pill = desktop.locator(".loading-viewport-fallback", { hasText: "正在刷新任务" });
-      await pill.waitFor({ timeout: 1500 });
-      await desktop.waitForFunction(() => ![...document.querySelectorAll(".loading-viewport-fallback")].some((node) => node.textContent.includes("正在刷新任务")), null, { timeout: 4000 });
+      await desktop.locator(".loading-viewport-fallback", { hasText: "滚出测试" }).waitFor({ timeout: 1500 });
+      await desktop.evaluate(() => window.__pillTask);
+      await desktop.waitForFunction(() => ![...document.querySelectorAll(".loading-viewport-fallback")].some((node) => node.textContent.includes("滚出测试")), null, { timeout: 4000 });
     });
 
     await check("loading run: a failed task shows an error overlay whose retry runs the task again", async () => {
@@ -253,6 +258,38 @@ async function waitForServer() {
       await desktop.goto(BASE + "/login");
       const marks = await desktop.evaluate(() => [...document.querySelectorAll(".login-form label")].map((label) => [label.querySelector(":scope > span").textContent.trim(), getComputedStyle(label.querySelector(":scope > span"), "::after").content]));
       assert.deepEqual(marks, [["用户名", '" *"'], ["密码", '" *"'], ["验证码", '" *"']]);
+    });
+
+    await check("submitting the login form turns its button into a spinner with 登录中…", async () => {
+      // Playwright cannot evaluate in a page whose navigation is pending, so the page records
+      // the button's state into sessionStorage while the (delayed) POST is in flight.
+      await desktop.goto(BASE + "/login");
+      await desktop.route("**/login", async (route) => {
+        if (route.request().method() === "POST") await new Promise((resolve) => setTimeout(resolve, 700));
+        await route.continue();
+      });
+      await desktop.evaluate(() => {
+        sessionStorage.removeItem("kitSubmitState");
+        new MutationObserver(() => {
+          const button = document.querySelector(".login-form button[type=submit]");
+          if (button?.classList.contains("is-loading")) sessionStorage.setItem("kitSubmitState", JSON.stringify({ busy: button.getAttribute("aria-busy"), spinner: button.querySelectorAll(".loading-inline-spinner").length, text: button.innerText, disabled: button.disabled }));
+        }).observe(document.body, { subtree: true, attributes: true, childList: true });
+      });
+      await desktop.fill("#password", "demo");
+      await desktop.fill("#captcha", "ABCD");
+      await desktop.locator(".login-form button[type=submit]").click({ noWaitAfter: true });
+      await desktop.waitForURL("**/", { timeout: 5000 });
+      await desktop.unroute("**/login");
+      const state = await desktop.evaluate(() => { const value = sessionStorage.getItem("kitSubmitState"); sessionStorage.removeItem("kitSubmitState"); return value && JSON.parse(value); });
+      assert.deepEqual(state, { busy: "true", spinner: 1, text: "登录中…", disabled: true }, "button showed the loading state while the POST was pending");
+    });
+
+    await check("captcha image keeps a light backdrop in the dark theme", async () => {
+      await desktop.goto(BASE + "/login");
+      await desktop.evaluate(() => document.documentElement.setAttribute("data-theme", "dark"));
+      const backdrop = await desktop.evaluate(() => getComputedStyle(document.querySelector(".captcha-image")).backgroundColor);
+      assert.equal(backdrop, "rgb(242, 242, 245)");
+      await desktop.evaluate(() => document.documentElement.removeAttribute("data-theme"));
     });
 
     await check("captcha refresh reloads the image, clears and focuses the input", async () => {

@@ -7,6 +7,7 @@
 
   /* Surfaces and text */
   --canvas: #fcfcfe; --surface: #fff; --surface-subtle: #f7f7fa;
+  --captcha-surface: #f2f2f5; /* backdrop behind the captcha image; stays light in both themes because captcha glyphs are drawn for a light background */
   --sidebar-surface: rgba(3,8,10,.01085); --input-surface: var(--surface);
   --ink: #03080a; --muted: rgba(3,8,10,.69);
   --line: rgba(3,8,10,.08); --line-subtle: rgba(3,8,10,.0312); --line-strong: rgba(3,8,10,.22);
@@ -64,6 +65,7 @@
   color-scheme: dark;
   --search-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fcfcfe' stroke-opacity='.627' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
   --canvas: #03080a; --surface: #080d0f; --surface-subtle: rgba(252,252,254,.031);
+  --captcha-surface: #f2f2f5;
   --sidebar-surface: rgba(252,252,254,.00372); --input-surface: #fcfcfe0a;
   --ink: #fcfcfe; --muted: rgba(252,252,254,.627);
   --line: rgba(252,252,254,.078); --line-subtle: rgba(252,252,254,.0312); --line-strong: rgba(252,252,254,.18);

@@ -82,7 +82,7 @@
 {{ icon('search') }}
 ```
 
-`icons.svg` 里有 37 个图标。需要新图标时，从 Lucide 同版本取 SVG 加进 `icons.svg` 的 `<symbol>`，不要混用填充风格的图标或用字符代替图标。CSS 遮罩用到的单个 SVG 放在 `static/icons/`。
+`icons.svg` 里有 40 个图标，是模板里 `icon()` 可用的全部。需要新图标时，从 Lucide 同版本取 SVG 加进 `icons.svg` 的 `<symbol>`，不要混用填充风格的图标或用字符代替图标。`static/icons/` 只放 CSS 遮罩实际用到的单个 SVG（关闭、箭头、帮助、转圈、日历、时钟等 10 个），新的遮罩图标也从 Lucide 同版本取。
 
 ## Logo
 
