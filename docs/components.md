@@ -112,7 +112,7 @@ await Kit.ui.runButtonAction(button, "保存中", () => fetch(...));
 </div>
 ```
 
-- `label > span:first-child` 是字段名；必填字段自动加灰色 `*`。
+- `label > span:first-child` 是字段名；必填字段自动加灰色 `*`（字段包在一层容器里也算，比如密码、验证码、日期）。
 - `.wide-label` 占满两列。
 - 错误：给字段加 `aria-invalid="true"`，在下面放 `<span class="field-error">原因</span>`。
 - 设置页的“左标签、右控件”整行布局：给 `.form-grid` 再加 `.settings-rows`。
@@ -209,7 +209,7 @@ await Kit.ui.runButtonAction(button, "保存中", () => fetch(...));
 ```
 
 - 宽表在 `.table-wrap` 里横向滚动，超宽时容器可以用键盘聚焦和滚动。4 列及以上的表格最小 680px；1–3 列的表格直接适应容器宽度，手机上不用滑。任何表格加 `.table-fit` 都按容器宽度排；在容器上设 `--table-min-width` 可以换一个下限。
-- 最后一列在 `.page-content` 里固定在右侧。
+- 最后一列在 `.page-content` 里固定在右侧。表格还能往右滚（有列藏在固定列下面）时，固定列左侧有一道阴影作提示；滚到头阴影消失（`DataTable` 在容器上切换 `.is-scroll-end`）。
 - 操作列的表头放一个 `.sr-only` 文字（空表头读屏无法命名）。`.list-row-actions` 里的按钮全部收进“更多操作”菜单；菜单图标根据按钮文字自动选择，也可以用 `data-icon` 指定。
 - 行里的开关 `<label><input class="toggle-switch-input" type="checkbox"></label>` 也会收进菜单，行内留一个“已启用/已暂停”状态。
 - 行密度：`data-density="compact"` 或 `"expanded"`。
@@ -251,7 +251,7 @@ await Kit.loading.run("recordsTable", () => fetch("/api/items").then(render), { 
 - 任务 reject 时遮罩变成错误（`role="alert"`）：标题、错误信息和“重试”按钮，重试会再次运行同一个任务；`run()` 返回的 Promise 也会 reject。选项：`errorTitle`、`errorDescription`、`retryLabel`、`retry: false`。
 - 同一个容器再次 `run()` 会取消上一次；`Kit.loading.clear(host)` 手动清掉。
 - 容器上触发 `kit:loading-start` / `kit:loading-end`（`detail.ok`）。
-- 遮罩里的转圈和文字始终停在容器可见的那一部分（长列表滚动时跟着走）；整个遮罩滚出视口时，在可见区域顶部显示一个固定的小提示条。
+- 遮罩里的转圈和文字始终停在容器可见的那一部分（长列表滚动时跟着走）；看到过的遮罩整个滚出视口时，在可见区域顶部显示一个固定的小提示条。一开始就在视口外的遮罩（首屏下方的面板）和 `loading_state()` 这类行内加载态不会在顶部冒出提示条。
 - 底层控制器可以单独用：`Kit.loading.begin(scope, {onShow, onComplete, onFade, onHide, onError, immediate})` 返回 `{complete, fail, cancel}`。
 
 ### 页面标题的加载位
@@ -397,6 +397,8 @@ await Kit.loading.run("recordsTable", () => fetch("/api/items").then(render), { 
   <button class="btn-secondary" type="submit">搜索</button>
 </form>
 ```
+
+480px 以下搜索框独占一行，“筛选”和“搜索”按钮并排在下一行；更宽时按钮跟在搜索框后面，放不下才换行。
 
 弹出层里的“筛选”是 `type="submit"`，直接提交 GET 表单；触发按钮放在表单外时传 `form_id`。已生效的条件仍用 `active_filters` 显示成可移除的芯片。
 

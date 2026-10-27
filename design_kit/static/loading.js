@@ -2,7 +2,9 @@
    The controller: 150ms delay before anything shows, at least 450ms visible,
    120ms completion, 100ms fade, one entry per scope, cancel / fail.
    Placement keeps the spinner and text inside the visible part of a tall list
-   and shows a fixed fallback pill when the mask itself is scrolled out of view.
+   and shows a fixed fallback pill when a mask the reader has already seen is
+   scrolled out of view (never for inline loading states or masks that were
+   below the fold from the start).
    Kit.loading.run(host, task) wires the controller to a mask built with
    Kit.ui.LoadingState, turns a failed task into an error overlay with a retry
    button (the content behind it is kept), and Kit.loading.title() drives the
@@ -270,7 +272,7 @@
       observer.observe(content);
       for (let parent = node.parentElement; parent; parent = parent.parentElement) observer.observe(parent);
     }
-    records.set(node, { content, observer });
+    records.set(node, { content, observer, seen: false });
     schedule();
   }
   function update() {
@@ -301,7 +303,10 @@
         writeStyle(content, "left", `${position.x - bounds.left}px`);
         writeStyle(content, "top", `${position.y - bounds.top}px`);
         pending.visible = true;
-      } else if (!node.classList.contains("is-leaving") && !node.classList.contains("is-error")) {
+        record.seen = true;
+      } else if (record.seen && !node.classList.contains("role-inline-loading") && !node.classList.contains("is-leaving") && !node.classList.contains("is-error")) {
+        // Only a mask the reader has watched leave the viewport earns the fixed pill;
+        // one that was out of view from the start would float over unrelated content.
         pending.labels.push(node.querySelector(".page-list-loading-text")?.textContent || "正在加载数据");
       }
     });

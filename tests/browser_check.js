@@ -198,6 +198,18 @@ async function waitForServer() {
       assert.equal(await desktop.locator("#loadingDemoTable").getAttribute("aria-busy"), null);
     });
 
+    await check("loading fallback pill: only for a mask that was in view before it scrolled away", async () => {
+      await desktop.evaluate(() => window.scrollTo(0, 0));
+      await desktop.waitForTimeout(150);
+      assert.equal(await desktop.locator(".loading-viewport-fallback").count(), 0, "the loading panel below the fold adds no pill at the top");
+      await desktop.locator("#loadingRunDemo").click();
+      await desktop.locator("#loadingDemoTable .page-list-loading").waitFor();
+      await desktop.evaluate(() => window.scrollTo(0, 0));
+      const pill = desktop.locator(".loading-viewport-fallback", { hasText: "正在刷新任务" });
+      await pill.waitFor({ timeout: 1500 });
+      await desktop.waitForFunction(() => ![...document.querySelectorAll(".loading-viewport-fallback")].some((node) => node.textContent.includes("正在刷新任务")), null, { timeout: 4000 });
+    });
+
     await check("loading run: a failed task shows an error overlay whose retry runs the task again", async () => {
       await desktop.locator("#loadingFailDemo").click();
       const error = desktop.locator("#loadingDemoTable .page-list-loading.is-error");
@@ -235,6 +247,12 @@ async function waitForServer() {
       await desktop.reload();
       assert.equal(await desktop.evaluate(() => document.documentElement.dataset.theme), "dark");
       await desktop.evaluate(() => localStorage.removeItem("design-kit-demo-theme"));
+    });
+
+    await check("required marker shows on wrapped fields too (password, captcha)", async () => {
+      await desktop.goto(BASE + "/login");
+      const marks = await desktop.evaluate(() => [...document.querySelectorAll(".login-form label")].map((label) => [label.querySelector(":scope > span").textContent.trim(), getComputedStyle(label.querySelector(":scope > span"), "::after").content]));
+      assert.deepEqual(marks, [["用户名", '" *"'], ["密码", '" *"'], ["验证码", '" *"']]);
     });
 
     await check("captcha refresh reloads the image, clears and focuses the input", async () => {
@@ -467,6 +485,16 @@ async function waitForServer() {
       });
       assert.equal(widths.three, 0, "a 3-column table has no inner scroll");
       assert.ok(widths.six > 0, "a 6-column table keeps its 680px floor and scrolls");
+      // The pinned last column casts a shadow while columns are hidden under it, and drops it at the end.
+      const six = phone.locator(".page-content > .table-wrap").last();
+      await phone.waitForFunction(() => { const wraps = document.querySelectorAll(".page-content > .table-wrap"); return wraps[wraps.length - 1].classList.contains("ui-table-overflow"); });
+      const shadowAt = () => six.evaluate((wrap) => getComputedStyle(wrap.querySelector("th:last-child")).boxShadow);
+      assert.equal(await six.evaluate((wrap) => wrap.classList.contains("is-scroll-end")), false);
+      assert.notEqual(await shadowAt(), "none", "pinned column shows the scroll cue");
+      await six.evaluate((wrap) => { wrap.scrollLeft = wrap.scrollWidth; });
+      await phone.waitForFunction(() => { const wraps = document.querySelectorAll(".page-content > .table-wrap"); return wraps[wraps.length - 1].classList.contains("is-scroll-end"); });
+      assert.equal(await shadowAt(), "none", "no cue once the table is scrolled to the end");
+      assert.equal(await phone.locator(".page-content > .table-wrap").first().evaluate((wrap) => wrap.classList.contains("is-scroll-end")), true, "a fitting table counts as at the end");
     });
 
     await check("no horizontal page overflow at 320, 768 and 1024px", async () => {
