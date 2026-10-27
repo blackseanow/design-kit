@@ -17,9 +17,11 @@ design-kit/
     static/                  tokens.css 等 8 个 CSS、11 个 JS、icons.svg、icons/（Lucide，ISC 许可）
     templates/design_kit/    layout.html、auth_layout.html、macros.html、head.html、scripts.html、startup.html
   demo/                      演示应用（虚构数据，只在本机运行）
-  tests/                     test_design_kit.py、js/kit.test.js、browser_check.js
+  tests/                     test_design_kit.py、js/kit.test.js、browser_check.js、compat_check.mjs
+  scripts/check.mjs          npm run check：本机一次跑完全部检查
+  .githooks/pre-push         可选的推送前检查钩子
   docs/                      规范文档（见下方“文档”）
-  pyproject.toml
+  pyproject.toml             Python 包；package.json 只装开发工具
 ```
 
 ## 接入新项目

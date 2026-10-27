@@ -30,7 +30,7 @@ from pathlib import Path
 from flask import Blueprint, Flask, url_for
 
 __all__ = ["DesignKit", "STYLESHEETS", "SCRIPTS"]
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 
