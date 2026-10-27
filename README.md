@@ -133,6 +133,7 @@ def shell():
 | `Kit.tableSettings.enhance(scope)` | 给新插入的 `[data-table-settings]` 表格加显示列 / 行密度设置 |
 | `Kit.shell.setNavGroupOpen(button, open)` | 展开或收起两级菜单的一个分组 |
 | `Kit.ui.Selection(container)` | 手动绑定批量选择（页面加载时 `[data-selection-bar]` 已自动绑定） |
+| `Kit.mutations.subscribe(fn)` | 全站只有这一个 `MutationObserver`；`fn({added, records})` 每批拿到去重后的最外层新增元素，页面脚本要增强动态内容时用它，不要再自己 observe body |
 | `Kit.ui.runButtonAction(button, "保存中", asyncFn)` | 按钮加载态：禁用、转圈、结束后恢复原内容 |
 | `Kit.ui.renderEmpty(host, {title, description})` / `renderError(...)` | 用 JS 渲染空状态和错误状态 |
 | `Kit.ui.LoadingState({label})` | 生成加载占位 |

@@ -188,9 +188,41 @@
   // Floating menus are portaled into the open modal (siblings are inert) or body.
   const portalHost = (node) => node.closest?.(".modal-backdrop") || root.document.body;
 
+  // One MutationObserver on <body> for every module. Subscribers get each batch
+  // once, with the added elements reduced to the top-most ones (a row inserted
+  // with 40 cells is one node to scan, not 41) and the raw records for modules
+  // that watch attributes or text.
+  const subscribers = new Set();
+  let bodyObserver = null;
+  const OBSERVE_OPTIONS = { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["class", "hidden", "inert"] };
+  function topLevelAdded(records) {
+    const added = new Set();
+    records.forEach((record) => record.addedNodes?.forEach((node) => { if (node.nodeType === 1 && node.isConnected) added.add(node); }));
+    return [...added].filter((node) => {
+      for (let parent = node.parentElement; parent; parent = parent.parentElement) if (added.has(parent)) return false;
+      return true;
+    });
+  }
+  function dispatch(records) {
+    const batch = { records, added: topLevelAdded(records) };
+    subscribers.forEach((handler) => {
+      try { handler(batch); } catch (error) { if (typeof console !== "undefined") console.error("Mutation subscriber failed", error); }
+    });
+  }
+  function subscribe(handler) {
+    subscribers.add(handler);
+    const body = root.document?.body;
+    if (!bodyObserver && body && typeof MutationObserver === "function") {
+      bodyObserver = new MutationObserver(dispatch);
+      bodyObserver.observe(body, OBSERVE_OPTIONS);
+    }
+    return () => subscribers.delete(handler);
+  }
+  const mutations = { subscribe, topLevelAdded, count: () => subscribers.size };
+
   return {
     a11y: { FOCUSABLE_SELECTOR, elementIsFocusable, focusableElements, focusElement, trapTabKey, menuNavigationTarget, syncManagedInert },
     escapeHtml, iconUrl, iconMarkup, isTouchLayout, isDrawerLayout,
-    popups, viewport, selectMenuBounds, positionMenu, popoverBounds, portalHost,
+    popups, viewport, selectMenuBounds, positionMenu, popoverBounds, portalHost, mutations,
   };
 });

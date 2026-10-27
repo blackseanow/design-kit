@@ -294,9 +294,7 @@
         if (picker && !wrapper.contains(event.target) && !picker.menu.contains(event.target)) closeMenu(picker);
       });
     });
-    new MutationObserver((records) => records.forEach((record) => record.addedNodes.forEach((node) => {
-      if (node.nodeType === 1) enhance(node);
-    }))).observe(document.body, { childList: true, subtree: true });
+    Kit.mutations.subscribe(({ added }) => added.forEach(enhance));
   }
 
   Kit.datetime = {

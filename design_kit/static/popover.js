@@ -405,11 +405,11 @@
       if (openMenu && event.target.contains(openMenu.menu)) closeMenu();
     });
     enhanceTableSettings(document);
-    new MutationObserver((records) => {
-      records.forEach((record) => record.addedNodes.forEach((node) => { if (node.nodeType === 1) enhanceTableSettings(node); }));
+    Kit.mutations.subscribe(({ added }) => {
+      added.forEach(enhanceTableSettings);
       if (openPopover && !openPopover.trigger.isConnected) closePopover();
       if (openMenu && !openMenu.trigger.isConnected) closeMenu();
-    }).observe(document.body, { childList: true, subtree: true });
+    });
   }
 
   Kit.popover = { open: openPopoverPanel, close: closePopover, toggle: togglePopover, current: () => openPopover?.panel || null, reposition };

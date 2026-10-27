@@ -338,10 +338,7 @@
   }
   function init() {
     discover(document.body);
-    new MutationObserver((changes) => {
-      changes.forEach((change) => change.addedNodes.forEach(discover));
-      schedule();
-    }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "hidden", "inert"] });
+    Kit.mutations.subscribe(({ added }) => { added.forEach(discover); schedule(); });
     document.addEventListener("scroll", schedule, { capture: true, passive: true });
     root.addEventListener("resize", schedule);
     root.visualViewport?.addEventListener("resize", schedule);

@@ -274,3 +274,19 @@ test("loading placement: centres in the visible part and refuses a sliver", () =
   assert.deepEqual(placement(area, 24), { x: 400, y: 400, width: 776 });
   assert.equal(placement({ left: 0, top: 680, right: 800, bottom: 700 }, 24), null);
 });
+
+test("mutations: a batch reports only the top-most added elements, once each", () => {
+  const element = (parent = null) => ({ nodeType: 1, isConnected: true, parentElement: parent });
+  const row = element();
+  const cell = element(row);
+  const text = { nodeType: 3, isConnected: true, parentElement: cell };
+  const detached = { nodeType: 1, isConnected: false, parentElement: null };
+  const other = element();
+  const records = [
+    { addedNodes: [row, cell, text] },
+    { addedNodes: [cell, detached] },
+    { addedNodes: [other] },
+    { addedNodes: [] },
+  ];
+  assert.deepEqual(core.mutations.topLevelAdded(records), [row, other]);
+});

@@ -603,17 +603,18 @@
     }, true);
     root.addEventListener("resize", () => { if (!rowMenuPointerActive) openRowMenu?.position(); });
     // Enhance added subtrees and re-check tables whose content changed.
-    new MutationObserver((records) => {
+    Kit.mutations.subscribe(({ added, records }) => {
+      added.forEach(enhance);
       const tables = new Set();
       records.forEach((record) => {
-        record.addedNodes.forEach((node) => { if (node.nodeType === 1) enhance(node); });
+        if (record.type === "attributes") return;
         const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
         const host = target?.closest?.('[data-ui-component="DataTable"]');
         if (host) tables.add(host);
       });
       tables.forEach(DataTable);
       if (activeHelp && (!activeHelp.isConnected || !activeHelp.getClientRects().length)) hideHelp();
-    }).observe(document.body, { childList: true, subtree: true, characterData: true });
+    });
   }
 
   Kit.ui = {
