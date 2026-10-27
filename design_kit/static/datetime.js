@@ -157,6 +157,7 @@
   }
   function syncDate(picker) {
     picker.value.textContent = formatDisplayDate(picker.input.value);
+    picker.button.setAttribute("aria-label", `${picker.value.textContent}，${picker.label}`);
     picker.viewDate = parseIsoDate(picker.input.value) || picker.viewDate || new Date();
     if (picker.wrapper.classList.contains("open")) renderCalendar(picker);
   }
@@ -187,7 +188,7 @@
     input.parentNode.insertBefore(wrapper, input);
     wrapper.append(input, button, menu);
     input.type = "hidden";
-    const picker = { kind: "date", input, wrapper, button, menu, value, viewDate: parseIsoDate(input.value) || new Date() };
+    const picker = { kind: "date", input, wrapper, button, menu, value, label, viewDate: parseIsoDate(input.value) || new Date() };
     datePickers.set(input, picker);
     input.addEventListener("change", () => syncDate(picker));
     button.addEventListener("click", (event) => {
@@ -217,6 +218,7 @@
   }
   function syncTime(picker) {
     picker.value.textContent = normalizeTimeValue(picker.input.value) || "请选择时间";
+    picker.button.setAttribute("aria-label", `${picker.value.textContent}，${picker.label}`);
     if (picker.wrapper.classList.contains("open")) renderTimes(picker);
   }
   function enhanceTime(input) {
@@ -244,7 +246,7 @@
     input.parentNode.insertBefore(wrapper, input);
     wrapper.append(input, button, menu);
     input.type = editable ? "text" : "hidden";
-    const picker = { kind: "time", input, wrapper, button, menu, value, anchor: editable ? wrapper : button };
+    const picker = { kind: "time", input, wrapper, button, menu, value, label, anchor: editable ? wrapper : button };
     if (editable) {
       input.placeholder = "HH:mm";
       input.maxLength = 5;
