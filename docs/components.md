@@ -251,7 +251,7 @@ await Kit.loading.run("recordsTable", () => fetch("/api/items").then(render), { 
 - 任务 reject 时遮罩变成错误（`role="alert"`）：标题、错误信息和“重试”按钮，重试会再次运行同一个任务；`run()` 返回的 Promise 也会 reject。选项：`errorTitle`、`errorDescription`、`retryLabel`、`retry: false`。
 - 同一个容器再次 `run()` 会取消上一次；`Kit.loading.clear(host)` 手动清掉。
 - 容器上触发 `kit:loading-start` / `kit:loading-end`（`detail.ok`）。
-- 遮罩里的转圈和文字始终停在容器可见的那一部分（长列表滚动时跟着走）；整个遮罩滚出视口时，在可见区域顶部显示一个固定的小提示条。
+- 遮罩里的转圈和文字始终停在容器可见的那一部分（长列表滚动时跟着走）；看到过的遮罩整个滚出视口时，在可见区域顶部显示一个固定的小提示条。一开始就在视口外的遮罩（首屏下方的面板）和 `loading_state()` 这类行内加载态不会在顶部冒出提示条。
 - 底层控制器可以单独用：`Kit.loading.begin(scope, {onShow, onComplete, onFade, onHide, onError, immediate})` 返回 `{complete, fail, cancel}`。
 
 ### 页面标题的加载位

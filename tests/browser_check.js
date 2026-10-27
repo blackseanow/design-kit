@@ -198,6 +198,18 @@ async function waitForServer() {
       assert.equal(await desktop.locator("#loadingDemoTable").getAttribute("aria-busy"), null);
     });
 
+    await check("loading fallback pill: only for a mask that was in view before it scrolled away", async () => {
+      await desktop.evaluate(() => window.scrollTo(0, 0));
+      await desktop.waitForTimeout(150);
+      assert.equal(await desktop.locator(".loading-viewport-fallback").count(), 0, "the loading panel below the fold adds no pill at the top");
+      await desktop.locator("#loadingRunDemo").click();
+      await desktop.locator("#loadingDemoTable .page-list-loading").waitFor();
+      await desktop.evaluate(() => window.scrollTo(0, 0));
+      const pill = desktop.locator(".loading-viewport-fallback", { hasText: "正在刷新任务" });
+      await pill.waitFor({ timeout: 1500 });
+      await desktop.waitForFunction(() => ![...document.querySelectorAll(".loading-viewport-fallback")].some((node) => node.textContent.includes("正在刷新任务")), null, { timeout: 4000 });
+    });
+
     await check("loading run: a failed task shows an error overlay whose retry runs the task again", async () => {
       await desktop.locator("#loadingFailDemo").click();
       const error = desktop.locator("#loadingDemoTable .page-list-loading.is-error");
