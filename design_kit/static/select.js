@@ -1,5 +1,4 @@
-/* Enhanced single select. Copied from enhanceSingleSelect and helpers in the
-   source project's admin.js. The native <select> stays in the form and owns
+/* Enhanced single select. The native <select> stays in the form and owns
    value, name, validation and change events; this only replaces its picker.
    Every select:not([multiple]):not([data-native]) is enhanced automatically.
    Options: data-searchable="true", data-search-placeholder, data-empty-label,
@@ -242,9 +241,7 @@
       const state = current && enhanced.get(current);
       if (state && !state.wrapper.contains(event.target) && !state.menu.contains(event.target)) close();
     });
-    new MutationObserver((records) => records.forEach((record) => record.addedNodes.forEach((node) => {
-      if (node.nodeType === 1) enhance(node);
-    }))).observe(document.body, { childList: true, subtree: true });
+    Kit.mutations.subscribe(({ added }) => added.forEach(enhance));
   }
 
   Kit.select = { enhance, sync, open, close };

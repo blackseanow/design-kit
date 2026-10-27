@@ -215,7 +215,7 @@ input.enhanced-select-search { flex-shrink: 0; border: 0!important; border-botto
 .row-overflow-menu .row-action-switch { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 32px; padding: 6px 8px; cursor: pointer; }
 .row-overflow-menu .row-action-switch .toggle-switch-input { margin-left: auto; order: 2; }
 .row-action-status { color: var(--muted); font-size: 12px; white-space: nowrap; }
-/* Kit addition: a row switch status stays beside the menu button. */
+/* A row switch status stays beside the menu button. */
 .list-row-actions:has(> .row-action-status) { flex-wrap: nowrap; }
 .page-content .console-data-table td:last-child:has(.row-action-status) { width: auto; }
 .list-row-actions > button { flex: 0 0 auto; }
@@ -283,7 +283,7 @@ input.enhanced-select-search { flex-shrink: 0; border: 0!important; border-botto
    (pickers and icon buttons keep their own). Form submissions stay 40px. */
 .content-page-actions,.panel-head,.toolbar,.filter-actions,.list-row-actions,.selection-bar { --button-height: var(--compact-height); --button-padding: 0 12px; }
 
-/* ---- Components added after the first extraction (see docs/extraction-notes.md) ---- */
+/* ---- Navigation, feedback and list components ---- */
 
 /* Breadcrumb (source: account-detail breadcrumb: 13px muted, 10px gaps) */
 .breadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; color: var(--muted); font-size: 13px; min-width: 0; }

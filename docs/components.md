@@ -26,7 +26,7 @@
 
 ### 两级侧栏菜单
 
-`nav_groups` 里的条目可以带 `children`，父项变成展开/收起按钮，子项是链接（原项目只有一级分组，这是 kit 新增）：
+`nav_groups` 里的条目可以带 `children`，父项变成展开/收起按钮，子项是链接：
 
 ```python
 {"label": "组件", "icon": "sliders-horizontal", "id": "navComponents", "children": [
@@ -90,7 +90,7 @@
 | `.btn-small` | 小号修饰类 |
 | `.text-button` | 纯文字按钮 |
 
-链接也可以用 `.btn-primary` / `.btn-secondary` / `.btn-ghost` / `.btn-danger` 做成按钮外观（kit 新增，原项目只给 `<button>` 写了样式）。
+链接也可以用 `.btn-primary` / `.btn-secondary` / `.btn-ghost` / `.btn-danger` 做成按钮外观。
 
 高度规则：默认 40px；页面标题区、面板标题区、工具栏、行操作、批量选择条里 32px；弹窗底部 40px；≤768px 时默认 44px（紧凑位置 32px，页面标题区和 `.btn-small` 40px）。这些都由两个自定义属性决定：`--button-height` 和 `--button-padding`。上面这些容器在自己身上设置它们，里面的按钮和链接按钮自动跟随；`.btn-small` 在按钮自己身上设置。新位置想要紧凑尺寸，给容器写 `--button-height: var(--compact-height); --button-padding: 0 12px` 即可，不用再写按钮选择器。下拉、日期、时间的触发按钮是字段，始终保持 40px（手机 44px）。
 
@@ -120,7 +120,7 @@ await Kit.ui.runButtonAction(button, "保存中", () => fetch(...));
 
 ### 下拉
 
-所有 `<select>`（不含 `multiple`）都会自动增强。原来的 `<select>` 留在表单里，负责提交和 `change` 事件。
+所有 `<select>`（不含 `multiple`）都会自动增强。原生的 `<select>` 留在表单里，负责提交和 `change` 事件。
 
 ```html
 <select name="city" data-searchable="true" data-search-placeholder="搜索城市" data-empty-label="暂无城市">…</select>
@@ -178,7 +178,7 @@ await Kit.ui.runButtonAction(button, "保存中", () => fetch(...));
 <div id="panelDone" role="tabpanel" aria-labelledby="tabDone" hidden>…</div>
 ```
 
-选中项下面的 2px 底线会滑动到新位置（原项目的 `motion-tabs`），面板切换时淡入 160ms；`prefers-reduced-motion` 时不动画。
+选中项下面的 2px 底线会滑动到新位置，面板切换时淡入 160ms；`prefers-reduced-motion` 时不动画。
 
 服务端子页面（每个选项是一个链接）：
 
@@ -241,7 +241,7 @@ JS 版本：`Kit.ui.renderEmpty(host, {...})`、`Kit.ui.renderError(host, {...})
 
 ### 加载生命周期
 
-原项目的加载规则（`loading_controller.js`）：150ms 内完成的请求什么都不显示，避免闪烁；一旦显示至少停留 450ms；结束后先走满、再淡出 100ms；失败时显示原因和重试，不显示假数据。`Kit.loading.run()` 把这套规则接到一个容器上：
+加载规则：150ms 内完成的请求什么都不显示，避免闪烁；一旦显示至少停留 450ms；结束后先走满、再淡出 100ms；失败时显示原因和重试，不显示假数据。`Kit.loading.run()` 把这套规则接到一个容器上：
 
 ```js
 await Kit.loading.run("recordsTable", () => fetch("/api/items").then(render), { label: "正在刷新任务" });
@@ -251,7 +251,7 @@ await Kit.loading.run("recordsTable", () => fetch("/api/items").then(render), { 
 - 任务 reject 时遮罩变成错误（`role="alert"`）：标题、错误信息和“重试”按钮，重试会再次运行同一个任务；`run()` 返回的 Promise 也会 reject。选项：`errorTitle`、`errorDescription`、`retryLabel`、`retry: false`。
 - 同一个容器再次 `run()` 会取消上一次；`Kit.loading.clear(host)` 手动清掉。
 - 容器上触发 `kit:loading-start` / `kit:loading-end`（`detail.ok`）。
-- 遮罩里的转圈和文字始终停在容器可见的那一部分（长列表滚动时跟着走）；整个遮罩滚出视口时，在可见区域顶部显示一个固定的小提示条（原项目 `loading-viewport.js` 的行为）。
+- 遮罩里的转圈和文字始终停在容器可见的那一部分（长列表滚动时跟着走）；整个遮罩滚出视口时，在可见区域顶部显示一个固定的小提示条。
 - 底层控制器可以单独用：`Kit.loading.begin(scope, {onShow, onComplete, onFade, onHide, onError, immediate})` 返回 `{complete, fail, cancel}`。
 
 ### 页面标题的加载位
@@ -264,7 +264,7 @@ await Kit.loading.run("recordsTable", () => fetch("/api/items").then(render), { 
 
 ### 三个点
 
-`{{ loading_dots("正在生成") }}` 渲染三个跳动的圆点（原项目启动画面的样式），用于行内的短等待，例如“正在生成回复…”。`muted=true` 用辅助文字色。
+`{{ loading_dots("正在生成") }}` 渲染三个跳动的圆点（和启动画面同一个样式），用于行内的短等待，例如“正在生成回复…”。`muted=true` 用辅助文字色。
 
 ### 启动画面
 
@@ -274,7 +274,6 @@ await Kit.loading.run("recordsTable", () => fetch("/api/items").then(render), { 
 - 4 秒后显示“网络较慢，请稍候”；15 秒超时、某个样式表加载失败、从前进后退缓存恢复都会释放画面，失败时在页面顶部显示“部分页面资源仍未就绪”。
 - 需要在样式就绪后再测量布局的脚本用 `Kit.loading.whenReady(fn)`（没开启启动画面时立即执行）。
 - `<link onload>` 是内联事件处理器，用 nonce 型 CSP 时需要另外放行。
-- 原项目还有“从登录页跳转过来不再显示启动画面”的逻辑，kit 没有带。
 
 ## 指标卡
 
@@ -366,7 +365,7 @@ await Kit.loading.run("recordsTable", () => fetch("/api/items").then(render), { 
 <button type="button" data-modal-open="detailDrawer">{{ icon('panel-right') }}打开</button>
 ```
 
-`size`：`sm` 400、`md` 480、`lg` 640、`xl` 1040px（原项目下线前的回复调试抽屉宽度）；≤768px 时铺满。抽屉里的下拉、日期菜单和弹窗一样留在抽屉内。
+`size`：`sm` 400、`md` 480、`lg` 640、`xl` 1040px；≤768px 时铺满。抽屉里的下拉、日期菜单和弹窗一样留在抽屉内。
 
 ## 弹出层
 

@@ -149,9 +149,8 @@ button.is-loading:has(.loading-inline-spinner)::after { display: none; }
   .modal-panel :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),textarea,select) { font-size:max(16px,1rem)!important; }
 }
 
-/* Side drawer (kit addition, values from the source project's retired reply-test drawer:
-   max 1040px on desktop, full width on phones, 180ms ease slide). It reuses the modal
-   stack: .modal-backdrop.drawer-backdrop > .modal-panel.drawer-panel, so modal.js owns
+/* Side drawer: up to 1040px on desktop, full width on phones, 180ms ease slide.
+   It reuses the modal stack: .modal-backdrop.drawer-backdrop > .modal-panel.drawer-panel, so modal.js owns
    focus, Escape, scroll lock and stacking. Markup: macros.drawer(). */
 .drawer-backdrop { align-items: stretch; justify-content: flex-end; padding: 0; }
 .drawer-backdrop.drawer-left { justify-content: flex-start; }
@@ -173,8 +172,8 @@ button.is-loading:has(.loading-inline-spinner)::after { display: none; }
   .drawer-panel .modal-close-button { top: 10px; }
 }
 
-/* Anchored popover (popover.js, Kit.popover). Values from the source project's
-   list-filter popover: 8px radius, 12px padding, popover shadow, width 360 max.
+/* Anchored popover (popover.js, Kit.popover): 8px radius, 12px padding, popover
+   shadow, width 360 max.
    The element stays where it is written, so form fields inside still submit;
    the Popover API lifts it to the top layer when available. */
 .popover-panel { position: fixed; inset: auto; margin: 0; z-index: 5000; width: min(360px,calc(100vw - 24px)); padding: 12px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--panel-radius); box-shadow: var(--popover-shadow); overflow: auto; overscroll-behavior: contain; scrollbar-width: var(--scrollbar-width); }

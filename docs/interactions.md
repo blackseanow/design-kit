@@ -1,6 +1,6 @@
 # 交互规则
 
-来自原项目 `docs/ui-consistency/component-interactions.md` 的通用部分，按 kit 的实现整理。“已测”表示 `tests/browser_check.js` 在 Chromium 里自动检查过。
+按 kit 的实现整理。“已测”表示 `tests/browser_check.js` 在 Chromium 里自动检查过。
 
 | 组件 | 打开和反馈 | 关闭、取消和焦点 | 已测 |
 | --- | --- | --- | --- |

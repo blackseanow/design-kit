@@ -1,7 +1,6 @@
 /* Design tokens. The only file in the kit that may contain literal colours.
-   Extracted from the source project's static/ui/tokens.css; values are unchanged
-   except where noted. Override brand tokens in your own stylesheet loaded after
-   the kit (see README "改品牌色"), not by editing component files. */
+   Override brand tokens in your own stylesheet loaded after the kit (see README
+   "改品牌色"), not by editing component files. */
 :root {
   color-scheme: light;
   --search-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2303080a' stroke-opacity='.69' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");

@@ -1,5 +1,4 @@
-/* ModalShell. Behaviour follows showModal/hideModal in the source project's
-   admin.js and ModalShell in static/ui-system.js, without business hooks:
+/* ModalShell:
    - stacked dialogs, only the top one is interactive (siblings inert);
    - focus moves in on open (touch layouts focus the close button so the
      keyboard does not pop up), stays trapped, and returns to the opener;

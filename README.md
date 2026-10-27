@@ -133,6 +133,7 @@ def shell():
 | `Kit.tableSettings.enhance(scope)` | 给新插入的 `[data-table-settings]` 表格加显示列 / 行密度设置 |
 | `Kit.shell.setNavGroupOpen(button, open)` | 展开或收起两级菜单的一个分组 |
 | `Kit.ui.Selection(container)` | 手动绑定批量选择（页面加载时 `[data-selection-bar]` 已自动绑定） |
+| `Kit.mutations.subscribe(fn)` | 全站只有这一个 `MutationObserver`；`fn({added, records})` 每批拿到去重后的最外层新增元素，页面脚本要增强动态内容时用它，不要再自己 observe body |
 | `Kit.ui.runButtonAction(button, "保存中", asyncFn)` | 按钮加载态：禁用、转圈、结束后恢复原内容 |
 | `Kit.ui.renderEmpty(host, {title, description})` / `renderError(...)` | 用 JS 渲染空状态和错误状态 |
 | `Kit.ui.LoadingState({label})` | 生成加载占位 |
@@ -160,7 +161,7 @@ def shell():
 | `data-time-editable="true"` | 时间可手动输入，同时保留快捷菜单 |
 | `class="title-help-button" data-help="…"` | 帮助图标：悬停或聚焦显示，点击固定 |
 | `class="list-row-actions"` | 表格行操作统一收进“更多操作”菜单 |
-| `data-primary-visible="true"` | 行操作有 3 个及以上时，第一个保留在行内（kit 新增） |
+| `data-primary-visible="true"` | 行操作有 3 个及以上时，第一个保留在行内 |
 | `data-icon="copy"` | 指定行操作菜单里的图标 |
 | `data-no-progress` | 下载链接不启动顶部进度条 |
 
@@ -180,7 +181,7 @@ PYTHON=python3 node tests/browser_check.js            # 34 项浏览器交互，
 ## 验证情况
 
 **已验证（本次实际运行）：**
-- Python 测试 24 项、Node 测试 22 项全部通过（Python 3.13.17、Flask 3.1.2、Node 22.22.0；2026-10-27 在加入第二批组件后运行）。
+- Python 测试 24 项、Node 测试 22 项全部通过（Python 3.13.17、Flask 3.1.2、Node 22.22.0；2026-10-27）。
 - 浏览器检查 34 项全部通过（Playwright + Chromium；2026-10-27）：原有 20 项，加上区块加载（快任务不显示、慢任务遮罩和 `aria-busy`、失败后重试）、标题加载位占位、顶栏刷新图标转圈、启动画面释放和 `whenReady`、两级菜单展开收起、角标 `99+` 和 `aria-label`、抽屉贴边 480px 和焦点返回、弹出层里的下拉先关再关弹出层、点击外部关闭、下拉菜单键盘操作和单选项、选项卡滑动底线、分段按钮、表格设置隐藏列并在刷新后保持、批量选择计数、筛选弹出层提交 GET 表单、每页条数跳转、手机上父项展开不关闭侧栏、手机抽屉铺满、`/overlays` 在 320px 无横向滚动。
 - 截图人工查看：1440px 和 390px、320px，日间和夜间，6 个页面（含抽屉、弹出层、下拉菜单、表格设置、消息中心弹出层、加载遮罩、错误遮罩、启动画面）。
 - `pip install` 后静态文件、图标、许可证和模板都在包里。
@@ -201,4 +202,3 @@ PYTHON=python3 node tests/browser_check.js            # 34 项浏览器交互，
 | `docs/interactions.md` | 键盘、焦点、关闭规则 |
 | `docs/responsive-accessibility.md` | 断点和无障碍规则 |
 | `docs/qa-checklist.md` | 改动后的检查清单 |
-| `docs/extraction-notes.md` | 每个文件的来历和改动记录（内部参考） |

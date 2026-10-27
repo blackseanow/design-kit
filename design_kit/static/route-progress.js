@@ -1,7 +1,7 @@
-/* Top progress bar. createRouteProgress / createPageProgress are copied from the
-   source project's static/ui/route-progress.js (2px bar, 200ms linear steps,
-   never claims completion while pending, then fills and fades).
-   The DOM wiring below is a kit addition for multi-page Flask apps:
+/* Top progress bar. createRouteProgress / createPageProgress drive a 2px bar
+   in 200ms linear steps; it never claims completion while a request is pending,
+   then fills and fades.
+   The DOM wiring below is for multi-page Flask apps:
    - the bar starts on same-origin link clicks and form submits;
    - the first page load is a shared "bootstrap" ticket that ends on window load;
    - Kit.pageProgress.track(fn) wraps fetch() calls made by page scripts.

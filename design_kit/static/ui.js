@@ -1,9 +1,7 @@
 /* Shared DOM components. They only own presentation and accessibility; page
-   code keeps its own data, requests and IDs. Sources in the source project:
-   static/ui-system.js (states, DataTable, Tabs, RowActions) and admin.js
-   (help tooltips, setButtonLoading). Kit changes: business-specific hooks were
-   removed, row-action icons use the sprite and can be set with data-icon,
-   tabs with aria-controls switch their panels, password toggles were added. */
+   code keeps its own data, requests and IDs: empty / error / loading states,
+   DataTable, Tabs, RowActions, help tooltips, button loading, password
+   toggles, captcha refresh, selection bars and the small controls. */
 (function (root, document) {
   "use strict";
   if (!document) return;
@@ -136,8 +134,7 @@
   }
 
   /* Tabs: roving tabindex, arrow/Home/End keys, optional panel switching.
-     .tabs hosts also get the sliding underline from the source project's
-     page-structure.js (motion-tabs) and a 160ms panel fade. */
+     .tabs hosts also get a sliding underline (motion-tabs) and a 160ms panel fade. */
   const tabBindings = new WeakSet();
   const reducedMotion = () => Boolean(root.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
   function TabMotion(host) {
@@ -203,9 +200,8 @@
   }
 
   /* RowActions: every button (and row switch label) in .list-row-actions moves
-     into one overflow menu, as in the source project. Kit opt-in:
-     data-primary-visible="true" keeps the first button visible when there are
-     3+ buttons. data-icon on a button sets its menu icon. */
+     into one overflow menu. data-primary-visible="true" keeps the first button
+     visible when there are 3+ buttons. data-icon on a button sets its menu icon. */
   let openRowMenu = null, rowMenuPointerActive = false, rowMenuSequence = 0;
   const iconFor = (button) => {
     if (button.dataset.icon) return button.dataset.icon;
@@ -607,17 +603,18 @@
     }, true);
     root.addEventListener("resize", () => { if (!rowMenuPointerActive) openRowMenu?.position(); });
     // Enhance added subtrees and re-check tables whose content changed.
-    new MutationObserver((records) => {
+    Kit.mutations.subscribe(({ added, records }) => {
+      added.forEach(enhance);
       const tables = new Set();
       records.forEach((record) => {
-        record.addedNodes.forEach((node) => { if (node.nodeType === 1) enhance(node); });
+        if (record.type === "attributes") return;
         const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
         const host = target?.closest?.('[data-ui-component="DataTable"]');
         if (host) tables.add(host);
       });
       tables.forEach(DataTable);
       if (activeHelp && (!activeHelp.isConnected || !activeHelp.getClientRects().length)) hideHelp();
-    }).observe(document.body, { childList: true, subtree: true, characterData: true });
+    });
   }
 
   Kit.ui = {

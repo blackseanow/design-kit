@@ -1,5 +1,4 @@
-/* Page composition: a title/action row, then bordered result surfaces.
-   Extracted from the generic part of the source project's pages.css. */
+/* Page composition: a title/action row, then bordered result surfaces. */
 .content-page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; width: 100%; }
 .content-page-title { min-width: 0; display: grid; gap: 4px; }
 .content-page-title h1 .title-help-button { margin-left: 8px; }

@@ -6,7 +6,7 @@
 
 - 安静的控制台风格：浅色画布、白色面板、1px 极淡分隔线，品牌色只用在主操作、选中态、焦点和进度条。
 - 颜色全部是语义 Token。页面写 `var(--danger-text)`，不写 `#c9362b`。
-- 夜间不是日间反色：夜间有独立的一组值（原项目按 OpenRouter 控制台夜间实测值映射）。
+- 夜间不是日间反色：夜间有独立的一组值。
 - 系统字体，不下载网络字体；中文回退 PingFang SC / Microsoft YaHei。
 
 ## 字号
@@ -48,7 +48,7 @@
 | `--touch-height` | 44px | ≤768px 时按钮和输入框的最小高度 |
 | `--header-height` | 56px | 顶栏 |
 | `--sidebar-width` | 224px | 桌面侧栏；手机抽屉宽 `min(288px, 100vw - 32px)` |
-| `--content-max-width` | 1232px | 内容区最大宽度（kit 把原来的写死值提成了 Token） |
+| `--content-max-width` | 1232px | 内容区最大宽度 |
 | 图标 | 16px，描边 1.75 | 导航图标描边 1.5 |
 
 ## 动效

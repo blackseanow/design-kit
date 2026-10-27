@@ -1,5 +1,5 @@
-/* Application shell behaviour. Sources in the source project: setMobileSidebarOpen
-   in admin.js (drawer) and static/workspace-header.js (user menu).
+/* Application shell behaviour: the mobile navigation drawer, the user menu,
+   the two-level navigation and the header badge.
    Drawer (<=1023px): menu button, backdrop, Escape and navigation all close it;
    while open the page behind is inert and scroll-locked; focus returns to the
    menu button after the 350ms slide-out. */
@@ -142,7 +142,7 @@
     drawerQuery?.addEventListener?.("change", () => close());
   }
 
-  /* Nested navigation (kit addition): button.nav-item-parent[aria-expanded]
+  /* Nested navigation: button.nav-item-parent[aria-expanded]
      toggles its .nav-subitems; a group with the current page inside starts open. */
   function setNavGroupOpen(button, open) {
     const list = document.getElementById(button.getAttribute("aria-controls") || "");

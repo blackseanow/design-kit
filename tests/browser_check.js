@@ -354,6 +354,35 @@ async function waitForServer() {
       assert.equal(await desktop.locator("#selectableTable [data-select-row]:checked").count(), 0);
     });
 
+    await check("controls added later are enhanced through the one shared body observer", async () => {
+      await desktop.goto(BASE + "/overlays");
+      const result = await desktop.evaluate(async () => {
+        const host = document.createElement("section");
+        host.className = "panel";
+        host.innerHTML = `<label><span>动态下拉</span><select name="dyn"><option>甲</option><option>乙</option></select></label>
+          <label><span>动态日期</span><input type="date" name="dynDate" value="2026-10-27"></label>
+          <span class="field-label">动态说明<button class="title-help-button" type="button" aria-label="说明" data-help="动态加入的帮助"></button></span>
+          <div class="table-wrap" id="dynTable" data-table-settings><table class="console-data-table"><thead><tr><th>名称</th><th>状态</th><th>负责人</th><th>时间</th><th class="table-actions-heading" aria-label="更多操作"></th></tr></thead>
+          <tbody><tr><td>行</td><td>运行中</td><td>甲</td><td>09:00</td><td><div class="list-row-actions"><button type="button">查看</button><button type="button">编辑</button></div></td></tr></tbody></table></div>`;
+        document.querySelector(".page-content").append(host);
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        return {
+          select: Boolean(host.querySelector(".enhanced-select .enhanced-select-button")),
+          date: Boolean(host.querySelector(".custom-date-picker .custom-date-button")),
+          help: host.querySelector(".title-help-button").getAttribute("aria-controls"),
+          rowMenu: Boolean(host.querySelector(".row-overflow-trigger")),
+          settings: Boolean(host.querySelector(".table-settings-trigger")),
+          subscribers: Kit.mutations.count(),
+        };
+      });
+      assert.equal(result.select, true, "select enhanced");
+      assert.equal(result.date, true, "date input enhanced");
+      assert.equal(result.help, "helpTooltipLayer", "help button normalised");
+      assert.equal(result.rowMenu, true, "row actions collapsed into a menu");
+      assert.equal(result.settings, true, "table settings attached");
+      assert.equal(result.subscribers, 5, "select, datetime, ui, loading and popover share one observer");
+    });
+
     await check("filter popover submits its fields with the toolbar form", async () => {
       await desktop.goto(BASE + "/records");
       await desktop.locator(".list-filter-trigger").click();
