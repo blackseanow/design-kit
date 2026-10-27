@@ -395,6 +395,22 @@ async function waitForServer() {
       await phone.keyboard.press("Escape");
     });
 
+    await check("phone: a 3-column table fits its wrapper, a 6-column table scrolls inside it", async () => {
+      await phone.goto(BASE + "/");
+      const widths = await phone.evaluate(() => {
+        const make = (columns) => {
+          const wrap = document.createElement("div");
+          wrap.className = "table-wrap";
+          wrap.innerHTML = `<table class="console-data-table"><thead><tr>${"<th>列</th>".repeat(columns)}</tr></thead><tbody><tr>${"<td>值</td>".repeat(columns)}</tr></tbody></table>`;
+          document.querySelector(".page-content").append(wrap);
+          return wrap.scrollWidth - wrap.clientWidth;
+        };
+        return { three: make(3), six: make(6) };
+      });
+      assert.equal(widths.three, 0, "a 3-column table has no inner scroll");
+      assert.ok(widths.six > 0, "a 6-column table keeps its 680px floor and scrolls");
+    });
+
     await check("no horizontal page overflow at 320px", async () => {
       for (const route of ["/", "/records", "/components", "/overlays", "/settings", "/login"]) {
         await phone.setViewportSize({ width: 320, height: 640 });

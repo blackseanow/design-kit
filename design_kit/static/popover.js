@@ -227,12 +227,13 @@
     if (identity) identity.locked = true;
     const key = `kit:table:${host.id || table.id || `${root.location?.pathname || ""}#${index}`}:${columns.map((column) => column.name).join("|")}`;
     let prefs = readPrefs(key);
-    const originalMinWidth = parseFloat(getComputedStyle(table).minWidth) || 680;
+    // 0 means the stylesheet lets this table fit its wrapper; keep it that way.
+    const originalMinWidth = parseFloat(getComputedStyle(table).minWidth) || 0;
 
     function apply() {
       table.dataset.density = prefs.density;
       const hidden = new Set(columns.filter((column) => !column.locked && prefs.hidden.includes(column.name)).map((column) => column.index));
-      table.style.minWidth = `${Math.max(320, Math.round(originalMinWidth * (headers.length - hidden.size) / headers.length))}px`;
+      if (originalMinWidth) table.style.minWidth = `${Math.max(320, Math.round(originalMinWidth * (headers.length - hidden.size) / headers.length))}px`;
       table.querySelectorAll("tr").forEach((row) => [...row.children].forEach((cell, i) => {
         if (cell.colSpan > 1) { cell.colSpan = headers.length - hidden.size; return; }
         cell.classList.toggle("table-column-hidden", hidden.has(i));

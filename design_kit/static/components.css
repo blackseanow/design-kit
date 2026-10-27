@@ -42,14 +42,14 @@
 .metric-card > small { color: var(--muted); font-size: 12px; }
 
 /* Tabs: client-side (role="tablist" + button[role="tab"]) or links (a[aria-current="page"]) */
-.tabs,.segmented-control { display: flex; flex-wrap: nowrap; gap: 4px; border-bottom: 1px solid var(--line); max-width: 100%; overflow-x: auto; scrollbar-width: var(--scrollbar-width); margin: 0 0 20px; }
-.tabs > :is(button,a),.segmented-control > button { position: relative; display: inline-flex; align-items: center; flex: 0 0 auto; border: 0; border-radius: 0; background: transparent; color: var(--muted); min-height: 40px; padding: 8px 12px; font-weight: 500; white-space: nowrap; text-decoration: none; }
-.tabs > :is(button,a):hover:not(:disabled),.segmented-control > button:hover:not(:disabled) { background: var(--hover); color: var(--ink); }
-.tabs > .active,.segmented-control > [aria-selected="true"],.tabs > [aria-selected="true"],.tabs > [aria-current="page"] { color: var(--brand); box-shadow: inset 0 -2px var(--brand); }
-:is(.tabs > :is(button,a),.segmented-control > button):is(.active,[aria-selected="true"],[aria-current="page"]):hover:not(:disabled) { color: var(--brand); }
+.tabs { display: flex; flex-wrap: nowrap; gap: 4px; border-bottom: 1px solid var(--line); max-width: 100%; overflow-x: auto; scrollbar-width: var(--scrollbar-width); margin: 0 0 20px; }
+.tabs > :is(button,a) { position: relative; display: inline-flex; align-items: center; flex: 0 0 auto; border: 0; border-radius: 0; background: transparent; color: var(--muted); min-height: 40px; padding: 8px 12px; font-weight: 500; white-space: nowrap; text-decoration: none; }
+.tabs > :is(button,a):hover:not(:disabled) { background: var(--hover); color: var(--ink); }
+.tabs > .active,.tabs > [aria-selected="true"],.tabs > [aria-current="page"] { color: var(--brand); box-shadow: inset 0 -2px var(--brand); }
+.tabs > :is(button,a):is(.active,[aria-selected="true"],[aria-current="page"]):hover:not(:disabled) { color: var(--brand); }
 /* Touch browsers keep :hover on the last tapped control; don't leave a sticky surface. */
 @media (hover: none), (pointer: coarse) {
-  .tabs > :is(button,a):hover:not(:disabled),.segmented-control > button:hover:not(:disabled) { background: transparent; }
+  .tabs > :is(button,a):hover:not(:disabled) { background: transparent; }
 }
 
 /* Tables */
@@ -65,7 +65,11 @@ td small { display: block; }
 td .button-group,td.list-row-actions { flex-wrap: nowrap; }
 .ui-table-overflow { outline-offset: 2px; }
 .ui-table-overflow:focus-visible { outline: 2px solid var(--focus-border); }
-.table-wrap table { min-width: 680px; }
+/* Wide tables scroll inside the wrapper instead of squeezing: 680px for 4+ columns.
+   Narrow tables (1-3 columns) fit the wrapper; .table-fit forces that for any table;
+   --table-min-width on the wrapper sets another floor. */
+.table-wrap table { min-width: var(--table-min-width, 680px); }
+.table-wrap:not(:has(thead th:nth-child(4))) table,.table-wrap.table-fit table { min-width: 0; }
 .table-wrap td:last-child { white-space: nowrap; }
 
 /* Activity / Logs table rhythm, shared by every data list. */
@@ -214,7 +218,7 @@ input.enhanced-select-search { flex-shrink: 0; border: 0!important; border-botto
 /* Kit addition: a row switch status stays beside the menu button. */
 .list-row-actions:has(> .row-action-status) { flex-wrap: nowrap; }
 .page-content .console-data-table td:last-child:has(.row-action-status) { width: auto; }
-.list-row-actions > button { flex: 0 0 auto; min-height: 32px; height: 32px; padding: 0 12px; }
+.list-row-actions > button { flex: 0 0 auto; }
 .list-row-actions > .row-overflow-trigger { flex: 0 0 32px; min-width: 32px; width: 32px; max-width: 32px; padding: 0; }
 
 /* List filter toolbar and active filter chips */
@@ -258,7 +262,7 @@ input.enhanced-select-search { flex-shrink: 0; border: 0!important; border-botto
   .wide-label { grid-column: auto; }
   .metric-card { padding: 14px; }
   .metric-card > strong { font-size: 24px; }
-  .tabs > :is(button,a),.segmented-control > button { min-height: 44px; padding-inline: 12px; }
+  .tabs > :is(button,a) { min-height: 44px; padding-inline: 12px; }
   .ui-state { min-height: 200px; padding: 28px 16px; }
   .ui-state-compact { min-height: 80px; padding: 16px; }
   .table-wrap td:last-child,.table-wrap th:last-child { position: sticky; right: 0; background: var(--surface); box-shadow: none; }
@@ -275,10 +279,9 @@ input.enhanced-select-search { flex-shrink: 0; border: 0!important; border-botto
   .list-pagination :is(a,button)[data-page-prev],.list-pagination :is(a,button)[data-page-next] { width: 40px; height:40px; min-height:40px; }
 }
 
-/* Content actions use the compact 32px size; form submissions remain 40px. */
-.content-page-actions > button,.panel-head > button,.toolbar > button,.filter-actions > button { min-height: 32px; height: 32px; padding: 0 12px; font-size: 14px; font-weight: 500; }
-/* Kit addition: the same compact size for link buttons and panel_head() action groups. */
-:is(.content-page-actions,.panel-head,.panel-head > .button-group) > a[class*="btn-"],.panel-head > .button-group > button { min-height: 32px; height: 32px; padding: 0 12px; font-size: 14px; font-weight: 500; }
+/* Compact contexts: every button and link button inside reads the 32px size
+   (pickers and icon buttons keep their own). Form submissions stay 40px. */
+.content-page-actions,.panel-head,.toolbar,.filter-actions,.list-row-actions,.selection-bar { --button-height: var(--compact-height); --button-padding: 0 12px; }
 
 /* ---- Components added after the first extraction (see docs/extraction-notes.md) ---- */
 
@@ -395,7 +398,6 @@ input.enhanced-select-search { flex-shrink: 0; border: 0!important; border-botto
 .selection-bar > .selection-bar-summary { font-weight: 500; white-space: nowrap; }
 .selection-bar > .selection-bar-summary > strong { color: var(--brand); font-variant-numeric: tabular-nums; }
 .selection-bar > .button-group { margin-left: auto; }
-.selection-bar :is(button,a)[class*="btn-"] { min-height: 32px; height: 32px; padding: 0 12px; }
 
 /* Disclosure with a chevron (source: overview detail disclosure) */
 .disclosure-panel > summary { display: flex; align-items: center; gap: 12px; padding: 12px 14px; list-style: none; color: var(--ink); font-weight: 550; }
@@ -468,7 +470,7 @@ th.table-actions-heading > .table-settings-trigger { margin-left: 0; }
   .step-mark { flex-basis: 24px; width: 24px; height: 24px; font-size: 11px; }
   .steps-vertical > li:not(:last-child)::after { left: 12px; top: 28px; height: calc(100% - 32px); }
   .selection-bar > .button-group { margin-left: 0; width: 100%; }
-  .selection-bar :is(button,a)[class*="btn-"] { min-height: 40px; height: 40px; }
+  .selection-bar { --button-height: 40px; }
   .table-settings-trigger { width: 40px; height: 40px; min-height: 40px; }
   .table-settings-panel [role="tabpanel"] > label { min-height: 44px; }
   .list-pagination .list-pagination-jump input[type="text"] { width: 44px; min-height: 40px; height: 40px; font-size: 16px; }

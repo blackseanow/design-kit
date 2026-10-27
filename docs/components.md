@@ -92,7 +92,7 @@
 
 链接也可以用 `.btn-primary` / `.btn-secondary` / `.btn-ghost` / `.btn-danger` 做成按钮外观（kit 新增，原项目只给 `<button>` 写了样式）。
 
-高度规则：默认 40px；页面标题区、面板标题区、工具栏里 32px；≤768px 时 44px。
+高度规则：默认 40px；页面标题区、面板标题区、工具栏、行操作、批量选择条里 32px；弹窗底部 40px；≤768px 时默认 44px（紧凑位置 32px，页面标题区和 `.btn-small` 40px）。这些都由两个自定义属性决定：`--button-height` 和 `--button-padding`。上面这些容器在自己身上设置它们，里面的按钮和链接按钮自动跟随；`.btn-small` 在按钮自己身上设置。新位置想要紧凑尺寸，给容器写 `--button-height: var(--compact-height); --button-padding: 0 12px` 即可，不用再写按钮选择器。下拉、日期、时间的触发按钮是字段，始终保持 40px（手机 44px）。
 
 加载态：
 
@@ -208,7 +208,7 @@ await Kit.ui.runButtonAction(button, "保存中", () => fetch(...));
 {{ pagination(page, pages, total, "records", {"q": q}, start, end) }}
 ```
 
-- 宽表在 `.table-wrap` 里横向滚动，超宽时容器可以用键盘聚焦和滚动。
+- 宽表在 `.table-wrap` 里横向滚动，超宽时容器可以用键盘聚焦和滚动。4 列及以上的表格最小 680px；1–3 列的表格直接适应容器宽度，手机上不用滑。任何表格加 `.table-fit` 都按容器宽度排；在容器上设 `--table-min-width` 可以换一个下限。
 - 最后一列在 `.page-content` 里固定在右侧。
 - `.list-row-actions` 里的按钮全部收进“更多操作”菜单；菜单图标根据按钮文字自动选择，也可以用 `data-icon` 指定。
 - 行里的开关 `<label><input class="toggle-switch-input" type="checkbox"></label>` 也会收进菜单，行内留一个“已启用/已暂停”状态。

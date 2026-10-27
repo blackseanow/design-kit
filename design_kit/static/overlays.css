@@ -8,7 +8,7 @@
 
 /* Modal: .modal-backdrop > .modal-panel > (.modal-head, .modal-body, .modal-actions).
    An optional <form> may wrap body and actions. */
-.modal-backdrop { position: fixed; inset: 0; top:var(--ui-viewport-top,0px); bottom:auto; height:var(--ui-viewport-height,100dvh); z-index: 1000; display: flex; align-items: center; justify-content: center; padding:var(--overlay-space-top) var(--overlay-gutter) var(--overlay-space-bottom); background: var(--modal-scrim); overscroll-behavior: contain; }
+.modal-backdrop { position: fixed; inset: 0; top:var(--ui-viewport-top,0px); bottom:auto; height:var(--ui-viewport-height,100dvh); z-index: 1000; display: flex; align-items: center; justify-content: center; padding:var(--overlay-space-top) var(--overlay-gutter) var(--overlay-space-bottom); background: var(--scrim); overscroll-behavior: contain; }
 .modal-panel { position: relative; display: flex; flex-direction: column; min-width: 0; width: min(512px,100%); max-height:var(--dialog-available-height); background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: var(--dialog-radius); box-shadow: var(--dialog-shadow); overflow: hidden; }
 .modal-size-sm { width: min(512px,100%); }
 .modal-size-md { width: min(512px,100%); }
@@ -37,7 +37,8 @@
 .modal-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 24px; scroll-padding-block: 16px; }
 .modal-body > label + label,.modal-body > label + .form-grid,.modal-body > .form-grid + label { margin-top: 16px; }
 .modal-actions { flex-shrink: 0; display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 8px; padding: 16px 24px; border-top: 1px solid var(--line); background: var(--surface); }
-.modal-actions button:not(.btn-icon):not(.title-help-button):not(:where(.list-pagination button)) { min-width:0; min-height:40px; padding:9px 16px; border-radius:var(--radius); font-size:14px; line-height:20px; font-weight:500; }
+.modal-actions { --button-height: 40px; --button-padding: 9px 16px; }
+.modal-actions button:not(.btn-icon):not(.title-help-button):not(:where(.list-pagination button)) { min-width:0; border-radius:var(--radius); font-size:14px; line-height:20px; font-weight:500; }
 .modal-actions .modal-action-group { display:flex; align-items:center; flex-wrap:wrap; justify-content:flex-end; gap:8px; }
 .modal-actions button.btn-danger-text { padding-inline:8px; }
 .modal-actions .btn-icon { padding:0; display:inline-grid; place-items:center; }
@@ -136,7 +137,8 @@ button.is-loading:has(.loading-inline-spinner)::after { display: none; }
   .modal-close-button { top: 12px; right: 12px; flex-basis: 40px; width: 40px; height: 40px; min-height: 40px; }
   .modal-body { padding: 24px; }
   .modal-actions { padding: 16px 24px max(16px,env(safe-area-inset-bottom)); gap: 8px; }
-  .modal-actions button { flex: 0 1 auto; min-height: 44px; }
+  .modal-actions { --button-height: var(--touch-height); }
+  .modal-actions button { flex: 0 1 auto; }
   .modal-action-group { margin-left: auto; }
   .global-feedback { top:calc(var(--ui-viewport-top,0px) + max(68px,env(safe-area-inset-top))); right:max(12px,env(safe-area-inset-right)); left:max(12px,env(safe-area-inset-left)); bottom:auto; width:auto; grid-template-columns:20px minmax(0,1fr) 44px; padding:12px 8px 12px 14px; max-height:calc(var(--ui-viewport-height,100dvh) - 84px); gap:8px; }
   .global-feedback .global-feedback-close { width:44px; min-width:44px; height:44px; min-height:44px; margin-top:-8px; }

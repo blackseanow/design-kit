@@ -13,8 +13,7 @@
 
 | 用途 | 桌面 | 手机（≤768px） |
 | --- | --- | --- |
-| 页面标题（`.content-page-title h1`） | 22px / 30px，字重 650 | 20px / 28px |
-| `h1`（元素默认） | 20px / 36px，字重 600 | 同左 |
+| 页面标题（`h1`，`page_header()` 用的也是它） | 22px / 30px，字重 650 | 20px / 28px |
 | 面板标题（`h2`） | 16px / 24px，字重 600 | 同左 |
 | 弹窗标题（`.modal-head h2`） | 18px / 24px | 16px |
 | 正文 | 14px / 22.75px | 输入框 16px（防止 iOS 聚焦放大） |
@@ -44,7 +43,8 @@
 | Token | 值 | 说明 |
 | --- | --- | --- |
 | `--control-height` | 40px | 输入框、下拉、默认按钮 |
-| `--compact-height` | 32px | 页面标题区、面板标题区、工具栏里的按钮 |
+| `--compact-height` | 32px | 页面标题区、面板标题区、工具栏、行操作、批量选择条里的按钮，以及 `.btn-small` |
+| `--button-height` / `--button-padding` | 40px / 8px 16px（手机 44px） | 按钮和链接按钮的尺寸来源；容器覆盖这两个值就能改里面所有按钮 |
 | `--touch-height` | 44px | ≤768px 时按钮和输入框的最小高度 |
 | `--header-height` | 56px | 顶栏 |
 | `--sidebar-width` | 224px | 桌面侧栏；手机抽屉宽 `min(288px, 100vw - 32px)` |
@@ -120,8 +120,6 @@ kit 不带任何 Logo。配置 `DESIGN_KIT_LOGO_LIGHT` / `DESIGN_KIT_LOGO_DARK` 
 | `--on-danger` | `#fff` | `#fff` |
 | `--danger-hover` | `color-mix(in srgb,var(--danger) 88%,#000)` | 同日间 |
 | `--scrim` | `rgba(3,8,10,.32)` | `rgba(0,0,0,.55)` |
-| `--drawer-scrim` | `rgba(3,8,10,.32)` | `rgba(3,8,10,.6)` |
-| `--modal-scrim` | `rgba(252,252,254,.8)` | `rgba(3,8,10,.8)` |
 | `--focus-border` | `rgba(3,8,10,.3)` | `rgba(252,252,254,.3)` |
 | `--focus-shadow` | `rgba(3,8,10,.06)` | `rgba(252,252,254,.06)` |
 | `--font` | `system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif` | 同日间 |
@@ -142,6 +140,8 @@ kit 不带任何 Logo。配置 `DESIGN_KIT_LOGO_LIGHT` / `DESIGN_KIT_LOGO_DARK` 
 | `--control-height` | `40px` | 同日间 |
 | `--compact-height` | `32px` | 同日间 |
 | `--touch-height` | `44px` | 同日间 |
+| `--button-height` | `var(--control-height)`（≤768px 为 `var(--touch-height)`） | 同日间 |
+| `--button-padding` | `8px 16px` | 同日间 |
 | `--sidebar-width` | `224px` | 同日间 |
 | `--header-height` | `56px` | 同日间 |
 | `--content-max-width` | `1232px` | 同日间 |

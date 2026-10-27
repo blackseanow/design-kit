@@ -9,7 +9,7 @@ a { color: var(--brand); text-underline-offset: 3px; }
 button, a, input, textarea, select, summary { -webkit-tap-highlight-color: transparent; }
 
 /* A bare <button> is the primary action. Variants live in buttons.css. */
-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: var(--control-height); padding: 8px 16px; border: 1px solid transparent; border-radius: var(--radius); background: var(--brand); color: var(--on-brand); font-weight: 500; line-height: 22.75px; cursor: pointer; transition: background-color var(--motion),border-color var(--motion),color var(--motion); }
+button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: var(--button-height); padding: var(--button-padding); border: 1px solid transparent; border-radius: var(--radius); background: var(--brand); color: var(--on-brand); font-weight: 500; line-height: 22.75px; cursor: pointer; transition: background-color var(--motion),border-color var(--motion),color var(--motion); }
 button:hover:not(:disabled) { background: var(--brand-hover); }
 button:active:not(:disabled) { filter: brightness(.96); }
 button:disabled, [aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
@@ -38,9 +38,10 @@ label:has(> input[type="checkbox"]), label:has(> input[type="radio"]) { display:
 fieldset { min-width: 0; padding: 0; margin: 0; border: 0; }
 fieldset:disabled { opacity: .65; }
 
-/* Type scale: page 20px, panel 16px, body 14px, helper 12-13px */
+/* Type scale: page title 22px (20px on phones), panel 16px, body 14px, helper 12-13px.
+   The bare h1 and the page_header() title are the same size. */
 h1,h2,h3,h4,p { margin: 0; }
-h1 { font-size: 20px; line-height: 36px; font-weight: 600; letter-spacing: -.02em; }
+h1 { font-size: 22px; line-height: 30px; font-weight: 650; letter-spacing: -.02em; }
 h2 { font-size: 16px; line-height: 24px; font-weight: 600; }
 h3 { font-size: 14px; line-height: 24px; font-weight: 600; }
 h4 { font-size: 13px; }
@@ -55,12 +56,11 @@ img,svg { max-width: 100%; vertical-align: middle; }
 
 /* Kit addition: links styled as buttons, for navigation actions in multi-page
    apps. Kept before the class-level colours so .btn-small still applies. */
-:where(a).btn-primary,:where(a).btn-secondary,:where(a).btn-ghost,:where(a).btn-danger,:where(a).btn-danger-outline { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: var(--control-height); padding: 8px 16px; border: 1px solid transparent; border-radius: var(--radius); font-weight: 500; line-height: 22.75px; text-decoration: none; cursor: pointer; transition: background-color var(--motion),border-color var(--motion),color var(--motion); }
+:where(a).btn-primary,:where(a).btn-secondary,:where(a).btn-ghost,:where(a).btn-danger,:where(a).btn-danger-outline { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: var(--button-height); padding: var(--button-padding); border: 1px solid transparent; border-radius: var(--radius); font-weight: 500; line-height: 22.75px; text-decoration: none; cursor: pointer; transition: background-color var(--motion),border-color var(--motion),color var(--motion); }
 :where(a).btn-primary { background: var(--brand); color: var(--on-brand); }
 :where(a).btn-primary:hover { background: var(--brand-hover); }
 :where(a).btn-ghost { background: transparent; color: var(--brand); }
 :where(a).btn-ghost:hover { background: var(--brand-tint); color: var(--brand-hover); }
-@media(max-width:768px) { :where(a):is(.btn-primary,.btn-secondary,.btn-ghost,.btn-danger,.btn-danger-outline) { min-height: var(--touch-height); } }
 
 /* Class-level button colours. buttons.css adds the zero-specificity size/shape
    contract; these rules intentionally win over it, as in the source project. */
@@ -74,8 +74,9 @@ img,svg { max-width: 100%; vertical-align: middle; }
 .btn-danger:hover:not(:disabled) { background: var(--danger); filter: brightness(.94); }
 .btn-danger-outline,.danger-text { color: var(--danger-text); }
 .btn-danger-outline:hover:not(:disabled) { background: var(--danger-tint); }
-.btn-small { min-height: var(--compact-height); padding: 5px 10px; font-size: 13px; }
-@media(max-width:768px) { .btn-small { min-height: 40px; } }
+/* .btn-small really is 32px: 4px + 22px line + 4px + 2px border (the old 5px/22.75px rendered 35px). */
+.btn-small { --button-height: var(--compact-height); --button-padding: 4px 10px; font-size: 13px; line-height: 22px; }
+@media(max-width:768px) { .btn-small { --button-height: 40px; } }
 
 /* Icons: 16px, 1.75 stroke, from the local Lucide sprite */
 svg:has(> use),.ui-icon,.nav-icon { display: inline-flex; width: 16px; height: 16px; flex: 0 0 16px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
@@ -120,7 +121,7 @@ input.toggle-switch-input:disabled { opacity: .4; cursor: not-allowed; }
 .form-error { background: var(--danger-tint); padding: 12px; border-radius: var(--radius); border: 1px solid color-mix(in srgb,var(--danger) 24%,var(--line)); }
 
 @media(max-width:768px) {
-  button { min-height: var(--touch-height); }
+  h1 { font-size: 20px; line-height: 28px; }
   /* 16px inputs stop mobile Safari from zooming on focus. */
   input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),select,textarea { font-size: 16px; min-height: var(--touch-height); }
   .title-help-button { min-height: 16px; width: 16px; height: 16px; flex-basis: 16px; }

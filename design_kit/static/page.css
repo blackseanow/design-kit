@@ -2,7 +2,6 @@
    Extracted from the generic part of the source project's pages.css. */
 .content-page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; width: 100%; }
 .content-page-title { min-width: 0; display: grid; gap: 4px; }
-.content-page-title h1 { font-size: 22px; font-weight: 650; line-height: 30px; letter-spacing: -.02em; }
 .content-page-title h1 .title-help-button { margin-left: 8px; }
 .content-page-title p { color: var(--muted); font-size: 14px; line-height: 23px; }
 .content-page-count { justify-self: start; padding: 0; border: 0; background: transparent; color: var(--muted); font-size: 12px; line-height: 20px; }
@@ -24,7 +23,7 @@
 @media(max-width:768px) {
   .content-page-header { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 4px 12px; align-items: start; }
   .content-page-title { display: contents; }
-  .content-page-title h1 { grid-column: 1; grid-row: 1; min-height: 32px; font-size: 20px; line-height: 28px; }
+  .content-page-title h1 { grid-column: 1; grid-row: 1; min-height: 32px; }
   .content-page-title p { grid-column: 1 / -1; grid-row: 2; }
   .content-page-title .content-page-count { grid-column: 1 / -1; grid-row: 3; }
   .content-page-actions { grid-column: 2; grid-row: 1; align-self: start; margin-left: auto; flex-wrap: wrap; }
@@ -32,5 +31,5 @@
   .content-page-header:has(.content-page-actions > :nth-child(2)) { grid-template-columns: minmax(0,1fr); }
   .content-page-header:has(.content-page-actions > :nth-child(2)) > .content-page-actions { grid-column: 1; grid-row: 4; justify-self: start; margin-left: 0; margin-top: 8px; max-width: 100%; }
   /* Text actions use the 40px mobile button height; refresh and icon tools stay 32px. */
-  .content-page-actions > :is(button,a[class*="btn-"]):not(.content-tool-button):not(.page-refresh-button) { min-height: 40px; height: 40px; }
+  .content-page-actions { --button-height: 40px; }
 }
