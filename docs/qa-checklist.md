@@ -73,3 +73,11 @@ PYTHON=python3 node tests/browser_check.js    # 浏览器交互（需要 playwri
 - [ ] 没有在页面 CSS 里重新定义公共组件或 Token
 - [ ] 图标用 `icon()` 宏或 `Kit.iconMarkup()`，新图标已加入 `icons.svg`
 - [ ] 新的交互写进 `docs/interactions.md`
+
+
+## 完整品牌槽（可选配置）
+
+- [ ] 未配置 LOGO_FULL 时原有头像加文字保持不变
+- [ ] 日夜完整图正确切换，夜间未配置时回退日间图
+- [ ] 1440px 使用完整图，390/320px 使用头像，图片不拉伸
+- [ ] 品牌链接有完整可访问名称，Tab 焦点可见

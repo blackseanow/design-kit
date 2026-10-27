@@ -104,12 +104,17 @@
   function open(id) {
     const modal = $(id);
     if (!modal) return;
+    // Closing an originating menu hides its focused item. Remember its visible
+    // trigger so closing the dialog can restore focus to an operable control.
+    const source = document.activeElement;
+    const sourcePopup = source?.closest('[role="menu"], [role="listbox"], [popover]');
+    const sourceTrigger = sourcePopup?.id ? document.querySelector(`[aria-controls="${CSS.escape(sourcePopup.id)}"]`) : null;
     Kit.ui?.hideHelp?.();
     Kit.popups?.closeAll();
     describe(modal);
     const wasHidden = modal.classList.contains("hidden");
     if (wasHidden) {
-      const active = document.activeElement;
+      const active = source?.getClientRects().length ? source : (sourceTrigger?.getClientRects().length ? sourceTrigger : document.activeElement);
       if (active && active !== document.body && !modal.contains(active)) returnFocus.set(modal, active);
       modal.querySelectorAll(".modal-body").forEach((body) => { body.scrollTop = 0; body.scrollLeft = 0; });
     }

@@ -444,3 +444,12 @@ const data = await Kit.pageProgress.track(() => fetch("/api/items").then((r) => 
 ## 外观切换
 
 有 `user_menu` 时，日间/夜间/跟随系统在个人菜单底部；没有时，顶栏右侧显示一个切换按钮。登录页底部也有。
+
+
+## 可选完整品牌槽
+
+`DESIGN_KIT_LOGO_FULL_LIGHT` / `_DARK` 配置完整横版品牌图，`DESIGN_KIT_LOGO_LIGHT` / `_DARK` 继续提供紧凑头像。两套布局共用 `brand_identity()`；未配置完整图时保留原有头像加文字布局。夜间完整图默认回退到日间完整图。
+
+默认桌面完整图高 44px、最大宽 192px，登录完整图高 56px；767px 以下使用头像，导航 32px、登录 56px。可在品牌 Token 文件覆盖 `--brand-logo-height`、`--brand-logo-max-width`、`--brand-avatar-size`、`--auth-brand-logo-height`、`--auth-brand-avatar-size`。图片保持自然比例，产品名称由品牌链接/登录品牌区域的无障碍名称提供。
+
+组件不携带具体产品 Logo、品牌名称或业务字段。

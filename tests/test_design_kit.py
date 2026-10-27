@@ -412,5 +412,27 @@ class BlueprintTests(unittest.TestCase):
         self.assertIn('data-empty="true"', html)
 
 
+class FullBrandIdentityTests(unittest.TestCase):
+    def test_optional_full_brand_and_compact_assets(self):
+        app = Flask(__name__)
+        DesignKit(app)
+        with app.test_request_context('/'):
+            default = render_template_string('{% extends "design_kit/layout.html" %}')
+            self.assertNotIn('class="brand-identity"', default)
+        app.config.update(DESIGN_KIT_BRAND_NAME='Example', DESIGN_KIT_LOGO_LIGHT='mark.svg', DESIGN_KIT_LOGO_DARK='mark-dark.svg', DESIGN_KIT_LOGO_FULL_LIGHT='full.svg')
+        with app.test_request_context('/'):
+            page = render_template_string('{% extends "design_kit/layout.html" %}')
+            auth = render_template_string('{% extends "design_kit/auth_layout.html" %}')
+            self.assertIn('class="brand-identity"', page)
+            self.assertIn('/static/full.svg', page)
+            self.assertIn('/static/mark-dark.svg', page)
+            self.assertIn('aria-label="Example，返回首页"', page)
+            self.assertIn('login-brand-full', auth)
+            self.assertIn('role="img" aria-label="Example"', auth)
+            app.config['DESIGN_KIT_LOGO_FULL_DARK'] = 'full-dark.svg'
+            page = render_template_string('{% extends "design_kit/layout.html" %}')
+            self.assertIn('/static/full-dark.svg', page)
+
+
 if __name__ == "__main__":
     unittest.main()

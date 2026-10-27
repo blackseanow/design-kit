@@ -14,6 +14,18 @@
 {%- endif %}
 {%- endmacro %}
 
+{#- Optional complete brand artwork, with the existing mark as compact fallback. -#}
+{% macro brand_identity() -%}
+{% if kit.logo_full_light -%}
+<span class="brand-identity" aria-hidden="true">
+  <span class="brand-full"><img class="brand-logo-light" src="{{ kit.logo_full_light }}" alt=""><img class="brand-logo-dark" src="{{ kit.logo_full_dark }}" alt=""></span>
+  <span class="brand-compact">{{ brand_mark() }}</span>
+</span>
+{%- else -%}
+{{ brand_mark() }}<span class="brand-copy"><strong>{{ kit.brand_name }}</strong></span>
+{%- endif %}
+{%- endmacro %}
+
 {#- Page title row. Optional call block = right-hand actions. -#}
 {% macro page_header(title, description='', help='', count='', loading=false) -%}
 <div class="content-page-header" data-ui-component="PageHeader">

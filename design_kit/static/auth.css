@@ -53,3 +53,10 @@
 @media(max-width:768px) { .captcha-image { height: var(--touch-height); } }
 /* On narrow screens the input takes the first row, image and button the second. */
 @media(max-width:480px) { .captcha-field { flex-wrap: wrap; } .captcha-field input { flex-basis: 100%; } }
+
+.login-brand-full { flex-direction: column; align-items: flex-start; gap: var(--space-3); }
+.login-brand-full .brand-full img { height: var(--auth-brand-logo-height); max-width: 100%; }
+.login-brand-tagline { display: block; color: var(--muted); font-size: 12px; line-height: 1.6; }
+@media (max-width:767px) {
+  .login-brand-full .brand-compact .brand-mark { width: var(--auth-brand-avatar-size); height: var(--auth-brand-avatar-size); flex-basis: var(--auth-brand-avatar-size); }
+}

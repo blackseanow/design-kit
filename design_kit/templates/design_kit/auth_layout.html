@@ -1,6 +1,6 @@
 {#- Sign-in / registration / set-password layout: one centred 400px panel.
     Blocks: title, head, content, scripts -#}
-{% from "design_kit/macros.html" import brand_mark, flash_messages, theme_options %}
+{% from "design_kit/macros.html" import brand_mark, brand_identity, flash_messages, theme_options %}
 <!doctype html>
 <html lang="{{ kit.lang }}" data-theme-key="{{ kit.theme_key }}">
   <head>
@@ -16,12 +16,17 @@
     <main class="login-shell">
       <div class="login-layout">
         <div class="login-panel">
-          <div class="login-brand brand">
+          <div class="login-brand brand{% if kit.logo_full_light %} login-brand-full{% endif %}">
+            {% if kit.logo_full_light %}
+            <div role="img" aria-label="{{ kit.brand_name }}">{{ brand_identity() }}</div>
+            {% if kit.brand_tagline %}<span class="login-brand-tagline">{{ kit.brand_tagline }}</span>{% endif %}
+            {% else %}
             {{ brand_mark() }}
             <div>
               <strong>{{ kit.brand_name }}</strong>
               {% if kit.brand_tagline %}<span>{{ kit.brand_tagline }}</span>{% endif %}
             </div>
+            {% endif %}
           </div>
           {% block content %}{% endblock %}
         </div>

@@ -27,7 +27,7 @@
 
   function focusableElements(container) {
     if (!container?.querySelectorAll) return [];
-    return Array.from(container.querySelectorAll(FOCUSABLE_SELECTOR)).filter(elementIsFocusable);
+    return Array.from(container.querySelectorAll(FOCUSABLE_SELECTOR)).filter((element) => elementIsFocusable(element) && !(typeof element.tabIndex === "number" && element.tabIndex < 0));
   }
 
   function focusElement(element) {

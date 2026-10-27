@@ -3,7 +3,7 @@
       nav_groups  [{title, items: [{label, href, icon, endpoint | active}]}]
       user_menu   {name, subtitle, items: [{label, href, icon}], logout_url, csrf_token}
     Blocks: title, head, page_id, header_actions, sidebar, content, modals, scripts -#}
-{% from "design_kit/macros.html" import icon, brand_mark, nav_menu, flash_messages, theme_options %}
+{% from "design_kit/macros.html" import icon, brand_mark, brand_identity, nav_menu, flash_messages, theme_options %}
 <!doctype html>
 <html lang="{{ kit.lang }}" data-theme-key="{{ kit.theme_key }}">
   <head>
@@ -18,15 +18,14 @@
     <div class="route-progress" data-route-progress data-progress-bootstrap data-phase="loading" aria-hidden="true"><div class="route-progress-bar"><span class="route-progress-peg"></span></div></div>
     <div class="app-shell" data-app-shell>
       <header class="workspace-header">
-        <a class="brand desktop-shell-brand" href="{{ kit.home_url }}">
-          {{ brand_mark() }}
-          <span class="brand-copy"><strong>{{ kit.brand_name }}</strong></span>
+        <a class="brand desktop-shell-brand" href="{{ kit.home_url }}" aria-label="{{ kit.brand_name }}，返回首页">
+          {{ brand_identity() }}
         </a>
         <button id="mobileMenuToggle" class="mobile-menu-toggle header-icon-button" type="button" aria-controls="appSidebar" aria-expanded="false" aria-label="打开菜单">
           <span class="nav-icon" aria-hidden="true"><svg><use href="{{ kit.icon_href('menu') }}"></use></svg></span>
         </button>
         <a class="mobile-shell-brand" href="{{ kit.home_url }}" aria-label="{{ kit.brand_name }}，返回首页">
-          {{ brand_mark() }}<strong>{{ kit.brand_name }}</strong>
+          {% if kit.logo_full_light %}{{ brand_identity() }}{% else %}{{ brand_mark() }}<strong>{{ kit.brand_name }}</strong>{% endif %}
         </a>
         <div class="header-spacer"></div>
         <div class="header-actions">
@@ -40,7 +39,7 @@
         {% if user_menu %}
         <div class="header-user-area">
           <div class="user-menu" data-user-menu>
-            <button id="userMenuTrigger" class="user-menu-trigger" type="button" aria-label="个人菜单，{{ user_menu.name }}" aria-expanded="false" aria-controls="userMenuPopover">
+            <button id="userMenuTrigger" class="user-menu-trigger" type="button" aria-label="{{ user_menu.name[:1]|upper }} {{ user_menu.name }}，个人菜单" aria-expanded="false" aria-controls="userMenuPopover">
               <span class="user-avatar" aria-hidden="true">{{ user_menu.name[:1]|upper }}</span>
               <span class="user-menu-name">{{ user_menu.name }}</span>
               <svg class="user-menu-chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>

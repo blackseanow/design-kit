@@ -130,3 +130,14 @@
   .header-actions .header-badge-host .header-badge { top: 3px; right: 0; }
   .nav-subitem { min-height: 36px; }
 }
+
+/* Optional full brand artwork. Product-specific artwork stays in the consumer. */
+.brand-identity { display: inline-flex; align-items: center; min-width: 0; }
+.brand-full { display: block; min-width: 0; line-height: 0; }
+.brand-full img { width: auto; height: var(--brand-logo-height); max-width: var(--brand-logo-max-width); object-fit: contain; }
+.brand-compact { display: none; }
+@media (max-width:767px) {
+  .brand-identity .brand-full { display: none; }
+  .brand-identity .brand-compact { display: block; }
+  .brand-compact .brand-mark { width: var(--brand-avatar-size); height: var(--brand-avatar-size); flex-basis: var(--brand-avatar-size); }
+}

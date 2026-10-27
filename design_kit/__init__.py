@@ -98,6 +98,8 @@ class DesignKit:
         config.setdefault("DESIGN_KIT_BRAND_MARK", None)
         config.setdefault("DESIGN_KIT_LOGO_LIGHT", None)
         config.setdefault("DESIGN_KIT_LOGO_DARK", None)
+        config.setdefault("DESIGN_KIT_LOGO_FULL_LIGHT", None)
+        config.setdefault("DESIGN_KIT_LOGO_FULL_DARK", None)
         config.setdefault("DESIGN_KIT_THEME_KEY", "app-theme")
         config.setdefault("DESIGN_KIT_LANG", "zh-CN")
         config.setdefault("DESIGN_KIT_HOME_URL", "/")
@@ -152,6 +154,14 @@ class _KitContext:
     @property
     def logo_dark(self):
         return _app_url(self._config.get("DESIGN_KIT_LOGO_DARK")) or self.logo_light
+
+    @property
+    def logo_full_light(self):
+        return _app_url(self._config.get("DESIGN_KIT_LOGO_FULL_LIGHT"))
+
+    @property
+    def logo_full_dark(self):
+        return _app_url(self._config.get("DESIGN_KIT_LOGO_FULL_DARK")) or self.logo_full_light
 
     @property
     def extra_css(self):
