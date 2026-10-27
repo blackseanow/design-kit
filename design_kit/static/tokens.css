@@ -45,6 +45,10 @@
 
   /* Sizes */
   --control-height: 40px; --compact-height: 32px; --touch-height: 44px;
+  /* Button size. Every button and link button reads these two; contexts (page header,
+     panel head, toolbar, row actions, selection bar, modal footer) set them on the
+     container, .btn-small sets them on the button. Phones raise the default to 44px. */
+  --button-height: var(--control-height); --button-padding: 8px 16px;
   --sidebar-width: 224px; --header-height: 56px; --content-max-width: 1232px;
   --dialog-max-height: 760px; --overlay-gutter: 24px;
   --switch-width: 44px; --switch-height: 24px; --switch-thumb: 20px; --switch-off: rgba(3,8,10,.30);
@@ -79,3 +83,4 @@
 
 /* One spacing contract for all touch/narrow overlays, including landscape. */
 @media(max-width:768px), (pointer:coarse) { :root { --overlay-gutter: 12px; } }
+@media(max-width:768px) { :root { --button-height: var(--touch-height); } }

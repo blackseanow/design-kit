@@ -92,7 +92,7 @@
 
 链接也可以用 `.btn-primary` / `.btn-secondary` / `.btn-ghost` / `.btn-danger` 做成按钮外观（kit 新增，原项目只给 `<button>` 写了样式）。
 
-高度规则：默认 40px；页面标题区、面板标题区、工具栏里 32px；≤768px 时 44px。
+高度规则：默认 40px；页面标题区、面板标题区、工具栏、行操作、批量选择条里 32px；弹窗底部 40px；≤768px 时默认 44px（紧凑位置 32px，页面标题区和 `.btn-small` 40px）。这些都由两个自定义属性决定：`--button-height` 和 `--button-padding`。上面这些容器在自己身上设置它们，里面的按钮和链接按钮自动跟随；`.btn-small` 在按钮自己身上设置。新位置想要紧凑尺寸，给容器写 `--button-height: var(--compact-height); --button-padding: 0 12px` 即可，不用再写按钮选择器。下拉、日期、时间的触发按钮是字段，始终保持 40px（手机 44px）。
 
 加载态：
 

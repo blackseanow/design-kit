@@ -218,7 +218,7 @@ input.enhanced-select-search { flex-shrink: 0; border: 0!important; border-botto
 /* Kit addition: a row switch status stays beside the menu button. */
 .list-row-actions:has(> .row-action-status) { flex-wrap: nowrap; }
 .page-content .console-data-table td:last-child:has(.row-action-status) { width: auto; }
-.list-row-actions > button { flex: 0 0 auto; min-height: 32px; height: 32px; padding: 0 12px; }
+.list-row-actions > button { flex: 0 0 auto; }
 .list-row-actions > .row-overflow-trigger { flex: 0 0 32px; min-width: 32px; width: 32px; max-width: 32px; padding: 0; }
 
 /* List filter toolbar and active filter chips */
@@ -279,10 +279,9 @@ input.enhanced-select-search { flex-shrink: 0; border: 0!important; border-botto
   .list-pagination :is(a,button)[data-page-prev],.list-pagination :is(a,button)[data-page-next] { width: 40px; height:40px; min-height:40px; }
 }
 
-/* Content actions use the compact 32px size; form submissions remain 40px. */
-.content-page-actions > button,.panel-head > button,.toolbar > button,.filter-actions > button { min-height: 32px; height: 32px; padding: 0 12px; font-size: 14px; font-weight: 500; }
-/* Kit addition: the same compact size for link buttons and panel_head() action groups. */
-:is(.content-page-actions,.panel-head,.panel-head > .button-group) > a[class*="btn-"],.panel-head > .button-group > button { min-height: 32px; height: 32px; padding: 0 12px; font-size: 14px; font-weight: 500; }
+/* Compact contexts: every button and link button inside reads the 32px size
+   (pickers and icon buttons keep their own). Form submissions stay 40px. */
+.content-page-actions,.panel-head,.toolbar,.filter-actions,.list-row-actions,.selection-bar { --button-height: var(--compact-height); --button-padding: 0 12px; }
 
 /* ---- Components added after the first extraction (see docs/extraction-notes.md) ---- */
 
@@ -399,7 +398,6 @@ input.enhanced-select-search { flex-shrink: 0; border: 0!important; border-botto
 .selection-bar > .selection-bar-summary { font-weight: 500; white-space: nowrap; }
 .selection-bar > .selection-bar-summary > strong { color: var(--brand); font-variant-numeric: tabular-nums; }
 .selection-bar > .button-group { margin-left: auto; }
-.selection-bar :is(button,a)[class*="btn-"] { min-height: 32px; height: 32px; padding: 0 12px; }
 
 /* Disclosure with a chevron (source: overview detail disclosure) */
 .disclosure-panel > summary { display: flex; align-items: center; gap: 12px; padding: 12px 14px; list-style: none; color: var(--ink); font-weight: 550; }
@@ -472,7 +470,7 @@ th.table-actions-heading > .table-settings-trigger { margin-left: 0; }
   .step-mark { flex-basis: 24px; width: 24px; height: 24px; font-size: 11px; }
   .steps-vertical > li:not(:last-child)::after { left: 12px; top: 28px; height: calc(100% - 32px); }
   .selection-bar > .button-group { margin-left: 0; width: 100%; }
-  .selection-bar :is(button,a)[class*="btn-"] { min-height: 40px; height: 40px; }
+  .selection-bar { --button-height: 40px; }
   .table-settings-trigger { width: 40px; height: 40px; min-height: 40px; }
   .table-settings-panel [role="tabpanel"] > label { min-height: 44px; }
   .list-pagination .list-pagination-jump input[type="text"] { width: 44px; min-height: 40px; height: 40px; font-size: 16px; }

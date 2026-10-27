@@ -43,7 +43,8 @@
 | Token | 值 | 说明 |
 | --- | --- | --- |
 | `--control-height` | 40px | 输入框、下拉、默认按钮 |
-| `--compact-height` | 32px | 页面标题区、面板标题区、工具栏里的按钮 |
+| `--compact-height` | 32px | 页面标题区、面板标题区、工具栏、行操作、批量选择条里的按钮，以及 `.btn-small` |
+| `--button-height` / `--button-padding` | 40px / 8px 16px（手机 44px） | 按钮和链接按钮的尺寸来源；容器覆盖这两个值就能改里面所有按钮 |
 | `--touch-height` | 44px | ≤768px 时按钮和输入框的最小高度 |
 | `--header-height` | 56px | 顶栏 |
 | `--sidebar-width` | 224px | 桌面侧栏；手机抽屉宽 `min(288px, 100vw - 32px)` |
@@ -139,6 +140,8 @@ kit 不带任何 Logo。配置 `DESIGN_KIT_LOGO_LIGHT` / `DESIGN_KIT_LOGO_DARK` 
 | `--control-height` | `40px` | 同日间 |
 | `--compact-height` | `32px` | 同日间 |
 | `--touch-height` | `44px` | 同日间 |
+| `--button-height` | `var(--control-height)`（≤768px 为 `var(--touch-height)`） | 同日间 |
+| `--button-padding` | `8px 16px` | 同日间 |
 | `--sidebar-width` | `224px` | 同日间 |
 | `--header-height` | `56px` | 同日间 |
 | `--content-max-width` | `1232px` | 同日间 |

@@ -31,5 +31,5 @@
   .content-page-header:has(.content-page-actions > :nth-child(2)) { grid-template-columns: minmax(0,1fr); }
   .content-page-header:has(.content-page-actions > :nth-child(2)) > .content-page-actions { grid-column: 1; grid-row: 4; justify-self: start; margin-left: 0; margin-top: 8px; max-width: 100%; }
   /* Text actions use the 40px mobile button height; refresh and icon tools stay 32px. */
-  .content-page-actions > :is(button,a[class*="btn-"]):not(.content-tool-button):not(.page-refresh-button) { min-height: 40px; height: 40px; }
+  .content-page-actions { --button-height: 40px; }
 }
