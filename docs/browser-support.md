@@ -37,11 +37,13 @@
 
 | 层 | 做法 | 频率 |
 | --- | --- | --- |
-| 三个引擎 | `BROWSER=chromium`、`webkit`、`firefox` 各跑一遍 `tests/browser_check.js`（CI 自动跑） | 每次推送 |
-| 基线外特性 | `npm run lint:compat`：`doiuse` 按 `.browserslistrc` 扫 CSS，`eslint-plugin-compat` 扫 JS | 每次推送 |
-| 无障碍 | `tests/browser_check.js` 里的 axe 扫描（对比度、ARIA） | 每次推送 |
+| 三个引擎 | `BROWSER=chromium`、`webkit`、`firefox` 各跑一遍 `tests/browser_check.js`；`npm run check` 对已安装的引擎自动各跑一遍 | 每次推送前，本机 |
+| 基线外特性 | `npm run lint:compat`：`doiuse` 按 `.browserslistrc` 扫 CSS，`eslint-plugin-compat` 扫 JS（`npm run check` 包含） | 每次推送前，本机 |
+| 无障碍 | `tests/browser_check.js` 里的 axe 扫描（对比度、ARIA） | 每次推送前，本机 |
 | 真机 | iOS Safari、Android Chrome 按 `qa-checklist.md` 的“真机和读屏”一节走一遍 | 改公共组件后 |
 | 读屏 | VoiceOver、NVDA 按同一节走一遍 | 改公共组件后 |
+
+没有托管 CI。引擎用 `npm run browsers` 下载一次；Linux 上 WebKit 还需要 `npx playwright install-deps webkit` 装系统库。`git config core.hooksPath .githooks` 后，每次 `git push` 前会自动跑 `npm run check`。
 
 Playwright 的 WebKit 和 Safari 共用引擎，但不等于 Safari：软键盘、地址栏收起、`100dvh` 的行为只能在真机确认。
 

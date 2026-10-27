@@ -4,6 +4,8 @@
   "private": true,
   "description": "Dev tooling for the design kit: browser checks, compatibility lint and accessibility scan. The kit itself has no build step.",
   "scripts": {
+    "check": "node scripts/check.mjs",
+    "browsers": "playwright install chromium webkit firefox",
     "test:js": "node --test tests/js/kit.test.js",
     "test:browser": "node tests/browser_check.js",
     "lint:compat": "node tests/compat_check.mjs && eslint design_kit/static",
