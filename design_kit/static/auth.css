@@ -43,7 +43,9 @@
 /* Image captcha field (input + challenge image + link button). ui.js reloads the image. */
 .captcha-field { display: flex; align-items: center; gap: 12px; }
 .captcha-field input { flex: 1 1 auto; }
-.captcha-image { flex: 0 0 120px; width: 120px; height: var(--control-height); border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-subtle); object-fit: cover; }
+/* The image keeps a light, opaque backdrop in both themes (--captcha-surface): captcha
+   glyphs are drawn for a light background, and a transparent image must stay readable at night. */
+.captcha-image { flex: 0 0 120px; width: 120px; height: var(--control-height); border: 1px solid var(--line); border-radius: var(--radius); background: var(--captcha-surface); object-fit: cover; }
 .captcha-refresh { flex: 0 0 auto; white-space: nowrap; }
 
 @media(max-width:480px) { .login-shell { padding: 24px 16px; } .login-panel { padding: 24px; } .login-brand { margin-bottom: 24px; } }

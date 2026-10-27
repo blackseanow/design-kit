@@ -174,11 +174,13 @@ def create_app(config: dict | None = None) -> Flask:
             for i, ch in enumerate(text))
         lines = "".join(
             f'<line x1="{random.randint(0, 40)}" y1="{random.randint(4, 36)}" x2="{random.randint(80, 120)}" y2="{random.randint(4, 36)}"/>'
-            for _ in range(3))
+            for _ in range(2))
+        # Opaque light background and dark glyphs, like most server-generated captchas;
+        # the noise lines stay faint so the characters are readable in both themes.
         svg = ('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="40" viewBox="0 0 120 40">'
                '<rect width="120" height="40" fill="#f2f2f5"/>'
-               f'<g stroke="#9a9aa6" stroke-width="1">{lines}</g>'
-               f'<g font-family="monospace" font-size="22" font-weight="700" fill="#3c3c46">{glyphs}</g></svg>')
+               f'<g stroke="#c4c4cf" stroke-width="1">{lines}</g>'
+               f'<g font-family="monospace" font-size="24" font-weight="700" fill="#1f1f2b">{glyphs}</g></svg>')
         return svg, 200, {"Content-Type": "image/svg+xml", "Cache-Control": "no-store"}
 
     @app.post("/logout")

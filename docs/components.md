@@ -153,6 +153,7 @@ await Kit.ui.runButtonAction(button, "保存中", () => fetch(...));
 ```
 
 - 输入框在左，验证码图片（120×40，移动端随输入框变为 44px 高）和"换一张"在右。
+- 图片后面垫的是浅色底（`--captcha-surface`，日间和夜间都是浅色）：验证码图通常是浅底深字，透明背景的图在夜间也能看清。项目要用深色验证码图时在 `brand.css` 里改这个 Token。
 - `image_url` 每次请求都要返回新图片，并带 `Cache-Control: no-store`。点"换一张"时，ui.js 在地址后加 `_cb=时间戳` 重新加载，清空输入框并聚焦。
 - 换图后在按钮上触发 `kit:captcha-refresh`（冒泡，`detail` 含 `input`、`image`），需要同时刷新其他状态时监听它。
 - 可选参数：`id`、`refresh_label`、`image_alt`（默认"图形验证码"）、`maxlength`（默认 8）、`required`。

@@ -255,6 +255,14 @@ async function waitForServer() {
       assert.deepEqual(marks, [["用户名", '" *"'], ["密码", '" *"'], ["验证码", '" *"']]);
     });
 
+    await check("captcha image keeps a light backdrop in the dark theme", async () => {
+      await desktop.goto(BASE + "/login");
+      await desktop.evaluate(() => document.documentElement.setAttribute("data-theme", "dark"));
+      const backdrop = await desktop.evaluate(() => getComputedStyle(document.querySelector(".captcha-image")).backgroundColor);
+      assert.equal(backdrop, "rgb(242, 242, 245)");
+      await desktop.evaluate(() => document.documentElement.removeAttribute("data-theme"));
+    });
+
     await check("captcha refresh reloads the image, clears and focuses the input", async () => {
       await desktop.goto(BASE + "/login");
       const image = desktop.locator("img[data-captcha-image='captcha']");
