@@ -24,6 +24,8 @@
 .modal-head > div { min-width: 0; }
 .modal-head h2 { padding-right: 30px; font-size: 18px; line-height: 24px; font-weight: 600; letter-spacing: -.01em; }
 .modal-head p { color: var(--muted); margin-top: 8px; font-size: 14px; }
+/* Anything else placed under the title (a step label, a status line) keeps the same 8px. */
+.modal-head > div > h2 ~ :not(p) { margin-top: 8px; }
 .modal-body > .modal-form-section { padding-block: 0; }
 .modal-body > .modal-form-section + .modal-form-section { margin-top: 24px; }
 .modal-body .modal-section-head { margin-bottom: 12px; }
